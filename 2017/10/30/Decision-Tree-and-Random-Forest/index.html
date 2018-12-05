@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习,Batman,分类器,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。">
+<meta name="keywords" content="机器学习,Batman,分类器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="决策树与随机森林简介">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171030/example-for-desition-tree.png">
+<meta property="og:updated_time" content="2018-12-05T01:52:01.093Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="决策树与随机森林简介">
+<meta name="twitter:description" content="在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171030/example-for-desition-tree.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/">
+
+
+
+
+
+  <title>决策树与随机森林简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-107994630-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cuiyn's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Cuiyn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">决策树与随机森林简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-30T02:09:00+00:00">
+                2017-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/10/30/Decision-Tree-and-Random-Forest/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/10/30/Decision-Tree-and-Random-Forest/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。</p>
+<a id="more"></a>
+<h1 id="决策树"><a href="#决策树" class="headerlink" title="决策树"></a>决策树</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>决策树是一种常用的分类方法。每个决策或事件都可能引出两个或多个事件，导致不同的结果（即分成不同的类别），把这种决策分支画成图形很像一棵树的枝干，故称决策树。当希望针对给定训练数据集进行学习（即<strong>监督学习</strong>），以对其它数据进行分类时，可以使用决策树。</p>
+<p>一个决策树包含一个根节点、若干内部节点与若干叶节点。根节点是分类的起点，叶节点对应具体的决策结果，从根节点到叶节点的路径对应了一个判断序列。下图给出了一个决策树及其对应的数据集。</p>
+<p><img src="/statics/images/20171030/example-for-desition-tree.png" alt="决策树示意图" title="决策树示意图"></p>
+<p>数据集给出了某个信用评价机构对用户是否欺骗的调查，其中涉及还贷情况、婚姻情况、税后收入等，其中税后收入为连续变量，其它为离散变量。根据这些数据集进行训练，可得右侧的决策树。</p>
+<h2 id="建立方法"><a href="#建立方法" class="headerlink" title="建立方法"></a>建立方法</h2><p>根据上图可以发现，决策树的所有非叶节点相当于判断属性。如图中的决策树首先判断用户的婚姻状况，若用户已婚，则判断其不会进行欺骗行为，否则进行下一步，判断用户是否能按时还贷，等等。建立决策树的过程，即为选择<strong>最佳判断属性</strong>的过程。我们希望决策树的分支节点进行划分后，各类样本尽可能属于同一类别，即使分类之后的“纯度”最大化。</p>
+<h3 id="ID3算法"><a href="#ID3算法" class="headerlink" title="ID3算法"></a>ID3算法</h3><p>香农的信息论告诉我们，<strong>信息熵</strong>（information entropy）可以用来描述信源的不确定度。在ID3决策树学习算法中，就使用了这个概念。设当前样本集$D$共有$n$个属性，第$k$个分类属性中，样本所占比例为$p_k$（可看作属性$k$出现的概率），则信息熵可以表示为：</p>
+<script type="math/tex; mode=display">Ent(D)=-\sum_{k=1}^{n} p_k \log_{2}p_k</script><p>假设某属性$s$有$V$个可能的取值，则针对属性$s$对样本进行分类时，会产生$V$个分支节点，其中第$v$个分支表示样本集$D$中所有取值为$s^v$的样本，记作$D^v$。根据上式可以计算出$D^v$的信息熵$Ent(D^v)$。再根据不同分支点所含有的样本数量不同，对分支节点加权$\frac{|D^v|}{|D|}$，于是可得针对属性$s$对样本集$D$进行分类的<strong>信息增益</strong>（information gain）：</p>
+<script type="math/tex; mode=display">Gain(D, s)=Ent(D)-\sum_{v=1}^{V} \frac{\|D^v\|}{\|D\|} Ent(D^v)</script><p>信息增益越大，则说明分类后的信息量越大，划分后各类别的“纯度”越大。因此可以使用信息增益作为确定最佳判断属性的依据。</p>
+<h3 id="C4-5算法"><a href="#C4-5算法" class="headerlink" title="C4.5算法"></a>C4.5算法</h3><p>ID3算法采用的信息增益看上去十分完美，但其中也存在一个问题。我们再来考虑文章开始介绍的信用评价例子。若使用ID3算法对其构建决策树，则针对用户的税后收入进行分类，各类别的纯度最大。这是因为，此时ID3算法将10个样本数据划分为10类，得到的是一个深度浅、庞大而不够客观的决策树。ID3算法天然地偏向分支多的属性，而这往往不是我们想要的。C4.5算法针对这个问题，提出了<strong>信息增益率</strong>的概念。</p>
+<p>信息增益率是用前面的信息增益$Gain(D, s)$和分裂度$Split(D, s)$来共同定义的。其中分裂度用来衡量属性分裂数据的广度和均匀，且有</p>
+<script type="math/tex; mode=display">Split(D, s)=-\sum_v \frac{\|D^v\|}{\|D\|} \log_{2} \frac{\|D^v\|}{\|D\|}</script><p>信息增益率为：</p>
+<script type="math/tex; mode=display">GainRadio(D, s)=\frac{Gain(D, s)}{Split(D, s)}</script><p>信息增益率实际上对增益进行了归一化，这样就避免了指标偏向分支多的属性的倾向。同理，增益率也可以用来克服连续值属性倾向。</p>
+<h3 id="纯度计算方法"><a href="#纯度计算方法" class="headerlink" title="纯度计算方法"></a>纯度计算方法</h3><p>其它计算纯度的方法还有：</p>
+<ul>
+<li><p>Gini系数。假设某属性$s$有$0,1,\ldots v$共$V$个可能的取值，则有$Gini(v)=1-\sum_v [p(\frac{v}{V})]^2$。反映了随机抽取两个样本，其类别标记不一样的概率。Gini系数越小，则纯度越高。在CART算法中应用。</p>
+</li>
+<li><p>错误率。假设某属性$s$有$0,1,\ldots v$共$V$个可能的取值，则有$Error(v)=1-max_v p(\frac{v}{V})$。错误率越小，则纯度越高。</p>
+</li>
+</ul>
+<h2 id="剪枝处理"><a href="#剪枝处理" class="headerlink" title="剪枝处理"></a>剪枝处理</h2><p>训练出来的决策树，往往会存在过度拟合现象：决策树过于针对训练的数据，专门针对训练集创建出来的分支，其熵值可能会比真实情况有所降低。因此需要对决策树进行剪枝。</p>
+<p>剪枝包括预先剪枝和后剪枝两种。</p>
+<ul>
+<li><p>预先剪枝是在树的生长过程中设定一个指标，当达到该指标时就停止生长，这样做容易产生“视界局限”，一旦停止分支，使得节点N成为叶节点，就断绝了其后继节点进行“好”的分支操作的任何可能性。</p>
+</li>
+<li><p>后剪枝中树首先要充分生长，直到叶节点都有最小的不纯度值为止，因而可以克服“视界局限”。然后对所有相邻的成对叶节点考虑是否消去它们，如果消去能引起令人满意的不纯度增长，那么执行消去，并令它们的公共父节点成为新的叶节点。</p>
+</li>
+</ul>
+<h1 id="随机森林"><a href="#随机森林" class="headerlink" title="随机森林"></a>随机森林</h1><p>随机森林，就是通过集成学习的思想将多棵决策树树集成的一种算法，它的基本单元是决策树，本质是属于机器学习的分支-集成学习方法。</p>
+<h2 id="Bagging"><a href="#Bagging" class="headerlink" title="Bagging"></a>Bagging</h2><p>随机森林是Bagging的一个扩展变体，这里首先介绍一下Bagging方法。</p>
+<p>Bagging（Bootstrap AGGregatING）是并行式集成学习方法最著名的代表。给定包含$m$个样本的数据集，我们先随机取出一个样本放入采样集中，再把该样本放回初始数据集，使得下次采样时该样本仍有可能被选中，这样，经过$m$次随机采样操作，我们得到含$m$个样本的采样集，初始训练集中有的样本在采样集里多次出现，有的则从未出现。</p>
+<p>样本在$m$次采样中始终不被采到的概率为$(1-\frac{1}{m})^m$，取极限有：</p>
+<script type="math/tex; mode=display">{\lim_{m \to +\infty}(1-\frac{1}{m})^m}=e \approx 0.368</script><p>由上式可知，初始训练集中约有63.2%的样本出现在采样集中。照这样，我们可采样出$T$个含$m$个训练样本的采样集，然后基于每个采样集训练出一个基学习器，再将这些基学习器进行结合。这就是Bagging的基本流程。</p>
+<p>进行分类任务时，Bagging通常对各基学习器的结果使用简单投票法，当票数相同时，可以随机选择一个，也可以进一步考察学习器投票的置信度来确定最终分类结果。</p>
+<h2 id="随机森林简介"><a href="#随机森林简介" class="headerlink" title="随机森林简介"></a>随机森林简介</h2><p>一个随机森林由N棵决策树组成，每棵决策树都是一个基学习器，那么对于一个输入样本，N棵树会有N个分类结果。而随机森林集成了所有的分类投票结果，将投票次数最多的类别指定为最终的输出，这就是一种最简单的Bagging思想。</p>
+<p>与Bagging不同的是，随机森林在决策树的训练过程中，引入了随机属性选择：对每个节点，先从该节点的属性集合中随机选择一个包含$k$个属性的子集，然后再从子集中选择一个最优属性进行划分。这里若$k=d$，则与传统决策树构建思路相同，一般推荐取$k=\log_2 d$。</p>
+<p>随机森林简单、容易实现、计算开销小。令人惊奇的是，它在很多现实任务中展现出强大的性能，被誉为“代表集成学习技术水平的方法”。可以看出，随机森林对Bagging只做了小改动，但是与Bagging中基学习器的“多样性”仅通过样本扰动（通过对初始训练集采样）而来不同，随机森林中基学习器的多样性不仅来自样本扰动，还来自属性扰动，这就使得最终集成的泛化性能可通过个体学习器之间差异度的增加而进一步提升。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li>机器学习. 周志华. 北京: 清华大学出版社</li>
+<li><a href="https://zh.wikipedia.org/wiki/%E5%86%B3%E7%AD%96%E6%A0%91" target="_blank" rel="noopener">决策树 - 维基百科</a>.</li>
+<li><a href="https://wizardforcel.gitbooks.io/dm-algo-top10/" target="_blank" rel="noopener">数据挖掘十大算法详解</a>.</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+            <a href="/tags/Batman/" rel="tag"># Batman</a>
+          
+            <a href="/tags/分类器/" rel="tag"># 分类器</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/24/Simulated-annealing/" rel="next" title="模拟退火算法简介">
+                <i class="fa fa-chevron-left"></i> 模拟退火算法简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/31/Bayes-Classifier/" rel="prev" title="贝叶斯分类器简介">
+                贝叶斯分类器简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Cuiyn</p>
+              <p class="site-description motion-element" itemprop="description">关注计算机安全文献与计算机领域热门话题</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#决策树"><span class="nav-number">1.</span> <span class="nav-text">决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念"><span class="nav-number">1.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立方法"><span class="nav-number">1.2.</span> <span class="nav-text">建立方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ID3算法"><span class="nav-number">1.2.1.</span> <span class="nav-text">ID3算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C4-5算法"><span class="nav-number">1.2.2.</span> <span class="nav-text">C4.5算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#纯度计算方法"><span class="nav-number">1.2.3.</span> <span class="nav-text">纯度计算方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#剪枝处理"><span class="nav-number">1.3.</span> <span class="nav-text">剪枝处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#随机森林"><span class="nav-number">2.</span> <span class="nav-text">随机森林</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bagging"><span class="nav-number">2.1.</span> <span class="nav-text">Bagging</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#随机森林简介"><span class="nav-number">2.2.</span> <span class="nav-text">随机森林简介</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文献"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://cuiyns-blog.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/';
+          this.page.identifier = '2017/10/30/Decision-Tree-and-Random-Forest/';
+          this.page.title = '决策树与随机森林简介';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://cuiyns-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

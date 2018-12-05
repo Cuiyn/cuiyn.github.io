@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Batman,算法,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="背包问题（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论动态规划(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂">
+<meta name="keywords" content="Batman,算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="背包问题概述">
+<meta property="og:url" content="http://cuiyn.github.io/2017/11/12/Knapsack-Problem/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="背包问题（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论动态规划(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171113/01kp-table.png">
+<meta property="og:updated_time" content="2018-12-05T01:52:01.089Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="背包问题概述">
+<meta name="twitter:description" content="背包问题（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论动态规划(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171113/01kp-table.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://cuiyn.github.io/2017/11/12/Knapsack-Problem/">
+
+
+
+
+
+  <title>背包问题概述 | Cuiyn's Blog</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-107994630-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cuiyn's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/11/12/Knapsack-Problem/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Cuiyn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">背包问题概述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-12T18:18:00+00:00">
+                2017-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/12/Knapsack-Problem/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/11/12/Knapsack-Problem/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>背包问题</strong>（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论<strong>动态规划</strong>(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂时不存在多项式时间算法，动态规划属于背包问题求解最优解的可行方法之一。</p>
+<a id="more"></a>
+<h1 id="0-1背包问题"><a href="#0-1背包问题" class="headerlink" title="0-1背包问题"></a>0-1背包问题</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在0-1背包问题中，给定每种物品仅有一个，对于每个物品，都有“选择”与“不选择”两个状态。</p>
+<p>下面给出一个具体的问题：有编号分别为$a,b,c,d,e$的五件物品，它们的重量分别是$2,2,6,5,4$，它们的价值分别是$6,3,5,4,6$，现在给你个承重为10的背包，如何让背包里装入的物品具有最大的价值总和？</p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>在动态规划中，<strong>状态转移方程</strong>是一个重要概念，它用来确定如何从一个状态转移到下一个状态。对上面的例子，状态转移方程可以表示为：</p>
+<script type="math/tex; mode=display">F[i, v] = max{F [i − 1, v], F [i − 1, v − C_i ] + W_i }</script><p>这个方程非常重要，基本上所有跟背包相关的问题的方程都是由它衍生出来的，所以有必要将它详细解释一下：“将前$i$件物品放入容量为$v$的背包中”这个子问题，若只考虑第$i$件物品的策略(放或不放)，那么就可以转化为一个只和前$i − 1$件物品相关的问题：如果不放第$i$件物品，那么问题就转化为“前$i − 1$件物品放入容量为$v$的背包中”，价值为$F[i − 1, v]$；如果放第$i$件物品，那么问题就转化为“前$i − 1$件物品放入剩下的容量为$v − C_i$的背包中”，此时能获得的最大价值就是$F[i − 1, v − C_i]$再加上通过放入第$i$件物品获得的价值$W_i$。</p>
+<p>我们用下面的表格来描述这个问题。为了叙述方便，用$e2$单元格表示$e$行2列的单元格，这个单元格的意义是用来表示只有物品$e$时，有个承重为2的背包，那么这个背包的最大价值是0，因为$$物品的重量是4，背包装不了。对于d2单元格，表示只有物品$e,d$时，承重为2的背包，所能装入的最大价值，仍然是0，因为物品$e,d$都不是这个背包能装的。同理，$c2=0，b2=3，a2=6$。</p>
+<p><img src="/statics/images/20171113/01kp-table.png" alt="0-1背包问题分析表" title="0-1背包问题分析表"></p>
+<p>对于承重为8的背包，$a8=15$，是怎么得出的呢？根据0-1背包的状态转换方程，需要考察两个值，一个是$F[i-1,v]$，对于这个例子来说就是$b8$的值9，另一个是$F[i-1,v−C_i]+W_i$；在这里，$F[i-1,v]$表示我有一个承重为8的背包，当只有物品$b,c,d,e$四件可选时，这个背包能装入的最大价值。$F[i-1,v−C_i]$表示我有一个承重为6的背包（等于当前背包承重减去物品$a$的重量），当只有物品$b,c,d,e$四件可选时，这个背包能装入的最大价值。$F[i - 1, v − C_i]$就是指单元格$b6$,值为9，$P_i$指的是a物品的价值，即6。由于$F[i-1, v − C_i]+W_i = 9 + 6 = 15$大于$F[i-1,v]$，所以物品a应该放入承重为8的背包。</p>
+<h2 id="空间优化"><a href="#空间优化" class="headerlink" title="空间优化"></a>空间优化</h2><p>对于上面的算法，时间复杂度应该是不能再进行优化了，但是我们还可以对空间进行优化。注意到状态转移方程中$F[i, v]$的值只与$F[i-1, x], x=1,2,3,\ldots, v$有关，因此可以缩减成一维数组，状态转移方程转换为:</p>
+<script type="math/tex; mode=display">F[v]=max(F[v], F[v - c[i]] + W_i)</script><h1 id="其它背包问题"><a href="#其它背包问题" class="headerlink" title="其它背包问题"></a>其它背包问题</h1><h2 id="完全背包问题"><a href="#完全背包问题" class="headerlink" title="完全背包问题"></a>完全背包问题</h2><p>与0-1背包问题的区别是：在0-1背包问题中，每个物品仅有一件；在完全背包问题中，每个物品有无限件。</p>
+<p>完全背包问题有一个很简单有效的优化：若两件物品$i,j$满足$C_i \leq C_j$且$W_i \geq W_j$，则可以将物品$j$去掉，因为物品$j$占空间大、价值低，不予考虑至少不会吃亏。</p>
+<p>我们可以将完全背包问题转化为0-1背包问题求解。最简单的想法是，考虑到第$i$件物品最多选$\lfloor V /C_i \rfloor$件，于是可以把第$i$种物品转化为$\lfloor V /C_i \rfloor$件费用及价值均不变的物品，然后求解这个0-1背包问题。例如背包大小为20，某物品$i$占体积费用$C_i=3$，则该物品最多装6个，这时可以假设有6个同样的物品$i$（而不是无限个）。</p>
+<p>更为高效的做法是利用二进制的思想：把第$i$件物品拆成费用为$C_i2^k$、价值为$W_i2^k$的若干件物品，其中$k$是使得$C_i2^k\leq V$的自然数。参考上例，我们可以把第$i$件物品拆成费用为$3$、价值为$W_i$，费用为$6$、价值为$2W_i$与费用为$12$、价值为$4W_i$的3件物品。这里相当于把十进制数字6用3位二进制数字表示。</p>
+<h2 id="多重背包问题"><a href="#多重背包问题" class="headerlink" title="多重背包问题"></a>多重背包问题</h2><p>与完全背包问题的区别是：在完全背包问题中，每个物品有无限件；在多重背包问题中，每个物品有$M_i$件。</p>
+<p>一种容易想到的方法是，与完全背包问题同理，将多重背包问题转化为0-1背包问题求解。同时，我们仍然可以利用二进制的思想，但此时要注意物品是有限的，放入背包的物品数量不能超过其件数$M_i$。解决方法是：将第$i$种物品分成若干件0-1背包中的物品，其中每件物品有一个系数。这件物品的费用和价值均是原来的费用和价值乘以这个系数。系数的范围是：$1,2,2^2, \ldots, 2^{k-1},M_i-2^k+1$，$k$是满足$M_i-2^k+1 &gt; 0$的最大整数。例如，如果$M_i=14$，则$k=3$，这个最多取14件的物品应被分成系数为$1,2,4,7$的四件物品。</p>
+<h2 id="混合背包问题"><a href="#混合背包问题" class="headerlink" title="混合背包问题"></a>混合背包问题</h2><p>混合背包问题相当于上面提到所有背包问题的混合：有的物品仅有1件，有的物品有无限件，有的物品有$M_i$件（有限件）。与上面的理论相同，分类进行转化即可，不再赘述。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>背包问题九讲. 崔添翼.</li>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">背包问题 - 维基百科</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Batman/" rel="tag"># Batman</a>
+          
+            <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/06/Multiple-Host-Ambiguities-in-HTTP-Implementations/" rel="next" title="HTTP实现导致的多重Host歧义">
+                <i class="fa fa-chevron-left"></i> HTTP实现导致的多重Host歧义
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/" rel="prev" title="通过域名服务器攻击域名">
+                通过域名服务器攻击域名 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Cuiyn</p>
+              <p class="site-description motion-element" itemprop="description">关注计算机安全文献与计算机领域热门话题</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0-1背包问题"><span class="nav-number">1.</span> <span class="nav-text">0-1背包问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方法"><span class="nav-number">1.2.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#空间优化"><span class="nav-number">1.3.</span> <span class="nav-text">空间优化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其它背包问题"><span class="nav-number">2.</span> <span class="nav-text">其它背包问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#完全背包问题"><span class="nav-number">2.1.</span> <span class="nav-text">完全背包问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多重背包问题"><span class="nav-number">2.2.</span> <span class="nav-text">多重背包问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#混合背包问题"><span class="nav-number">2.3.</span> <span class="nav-text">混合背包问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文献"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://cuiyns-blog.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://cuiyn.github.io/2017/11/12/Knapsack-Problem/';
+          this.page.identifier = '2017/11/12/Knapsack-Problem/';
+          this.page.title = '背包问题概述';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://cuiyns-blog.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
