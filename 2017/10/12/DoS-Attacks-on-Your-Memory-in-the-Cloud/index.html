@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in the Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
+<meta name="description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
 <meta name="keywords" content="论文,CCS,网络安全,云计算,DoS">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于DoS对云虚拟机内存的攻击方法">
 <meta property="og:url" content="http://cuiyn.github.io/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/index.html">
 <meta property="og:site_name" content="Cuiyn&#39;s Blog">
-<meta property="og:description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in the Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
+<meta property="og:description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-12-05T01:52:01.093Z">
+<meta property="og:updated_time" content="2019-06-10T01:54:03.074Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于DoS对云虚拟机内存的攻击方法">
-<meta name="twitter:description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in the Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
+<meta name="twitter:description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
 
 
 
@@ -329,7 +329,7 @@
       
 
       
-        <p>今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in the Cloud》，其DOI信息在<a href="http://doi.acm.org/10.1145/3052973.3052978" target="_blank" rel="noopener">这里</a>。</p>
+        <p>今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在<a href="http://doi.acm.org/10.1145/3052973.3052978" target="_blank" rel="noopener">这里</a>。</p>
 <p>这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。</p>
 <a id="more"></a>
 <h1 id="内容简介"><a href="#内容简介" class="headerlink" title="内容简介"></a>内容简介</h1><p>在云计算中，基于网络的DoS攻击已经进行了广泛地分析，并提出了许多防御措施。但是，攻击者使用虚拟机（Virtual Machine，下文简称VM）进行对受害者的严重内存攻击则没有完全理解。虽然在云服务器中，内存被软件虚拟层严格地隔离开，但底层硬件的内存仍然被所有VM共享。这个性质可以被聪明的攻击者利用（只要他也在服务器上拥有一台VM），使服务器拒绝为受害者分配内存。</p>
@@ -496,7 +496,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-count">28</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
