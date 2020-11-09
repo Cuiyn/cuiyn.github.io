@@ -87,18 +87,18 @@
 <meta property="og:site_name" content="Cuiyn&#39;s Blog">
 <meta property="og:description" content="本文介绍2019年 Computers &amp;amp; Security 期刊的一篇文章，题目是《Espydroid+: Precise reflection analysis of android apps》，DOI信息在这里。 文章以恶意程序用于逃逸检测的反射 API 入手，提出一种叫做 Espydroid+ 的混合分析方法。其中，静态分析主要用来分析调用反射 API 的程序路径，动态分析主要负责">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/example.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/Espydroid+.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/step1.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/algorithm1.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/step3.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/algorithm2.png">
-<meta property="og:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/step4.png">
-<meta property="og:updated_time" content="2020-09-11T08:54:20.310Z">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/example.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/Espydroid+.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step1.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/algorithm1.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step3.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/algorithm2.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step4.png">
+<meta property="og:updated_time" content="2020-09-11T08:57:42.732Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Espydroid+： 对 Android App 进行精准的反射分析">
 <meta name="twitter:description" content="本文介绍2019年 Computers &amp;amp; Security 期刊的一篇文章，题目是《Espydroid+: Precise reflection analysis of android apps》，DOI信息在这里。 文章以恶意程序用于逃逸检测的反射 API 入手，提出一种叫做 Espydroid+ 的混合分析方法。其中，静态分析主要用来分析调用反射 API 的程序路径，动态分析主要负责">
-<meta name="twitter:image" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/images/example.png">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20200622/example.png">
 
 
 
@@ -361,7 +361,7 @@
 <li>文章对 <code>Espydroid+</code> 使用由 660 个 app 组成的数据集进行测试。 RGSS 移除了总路径的 59.91% 。 <code>Espydroid+</code> 在精度与找回率两方面均体现出优于其它方案的效果。</li>
 </ul>
 <h2 id="代表案例"><a href="#代表案例" class="headerlink" title="代表案例"></a>代表案例</h2><p>文章通过下面的例子说明了反射 API 的运行时绑定如何限制了最先进的静态分析方法。</p>
-<p><img src="images/example.png" alt="通过反射 API 逃避静态分析检测代码结构图"></p>
+<p><img src="/statics/images/20200622/example.png" alt="通过反射 API 逃避静态分析检测代码结构图"></p>
 <p>如图，这个 app 共有 6 个 <code>Activity</code> 组件、 1 个 <code>Service</code> 组件、 1 个 <code>Receiver</code> 组件和 2 个 Java 类。 <code>A.3</code> 引发了 <code>B</code> 组件的 <code>onCreate()</code> 方法被调用，之后根据 <code>B.4-B.6</code> 又调用了 <code>clz</code> 类的 <code>meth</code> 变量中存储的方法。但是由于变量做了编码，其值需要在运行时中获取。这使得基于字符串和类型推理的静态分析方法都被欺骗了。该方法实际调用了 <code>J</code> 类的 <code>write_sf()</code> 方法。</p>
 <p>上例显示了目前最先进的方法在分析中存在的问题：</p>
 <ul>
@@ -373,7 +373,7 @@
 <p>上述讨论强调了开发能够克服这些复杂问题的方法的必要性，以确保 Android app 的隐私。</p>
 <h2 id="Espydroid"><a href="#Espydroid" class="headerlink" title="Espydroid+"></a>Espydroid+</h2><p><code>Espydroid+</code> 的主要贡献是提出了一种更好的剪枝算法，通过剪去没有反射调用的组件，使得更多的反射调用被执行，同时不影响精确度。此外， <code>Espydroid+</code> 添加了用于处理逃避分析（ anti-analyse ）的解决方法。</p>
 <p>下图展示了 <code>Espydroid+</code> 的结构，主要包括3个阶段。最重要的是 RGSS 阶段，将重点说明。</p>
-<p><img src="images/Espydroid+.png" alt=" `Espydroid+` 结构图"></p>
+<p><img src="/statics/images/20200622/Espydroid+.png" alt=" `Espydroid+` 结构图"></p>
 <h3 id="RGSS"><a href="#RGSS" class="headerlink" title="RGSS"></a>RGSS</h3><p>剪枝过程主要针对 GUI 组件（即 <code>Activity</code> ）进行。这一阶段生成一个切片后的 app，间接提高目标 API 的可达性。文章描述了一种粗粒度的组件级切片方法，除了对不包含任何相关 API 的组件进行断链外，不会从任何组件中删除任何代码。</p>
 <p>文章将 app 表示为 5 元组状态图 $(Q, \sum, \delta, q_0, F)$ ，其中</p>
 <ul>
@@ -385,18 +385,18 @@
 </ul>
 <p>文章通过消除不相关的转移来生成一个缩小的状态图，并将其称为反射引导状态图( Reflection Guided State Diagram ， RGSD )。文章首先描述了一种从 Android app 中建模标准状态图的方法，然后设计了一种从原始状态图生成 RGSD 的算法，共分5个步骤。</p>
 <p><strong>步骤 1 ：组件转移分析</strong> 此步骤从 app 的字节码中构建状态图。在 Android 系统中，两个组件之间的通信是通过 ICC 方法进行的，这些方法是标准的、预定义的。文章使用 <code>DialDroid</code> 作为工具，生成状态转移图。下图是以“代表案例”中的 app 为例的生成结果。</p>
-<p><img src="images/step1.png" alt="步骤 1 结果示意图"></p>
+<p><img src="/statics/images/20200622/step1.png" alt="步骤 1 结果示意图"></p>
 <p><strong>步骤 2 ：提取终状态</strong> 在处理类是否存在来自其中间代码的 RPC 调用的同时，文章也会对反射API进行解析，并将结果以 “CN-MN” 的形式存储，其中 MN 是包含反射 API 的 CN 类的一个方法。在解析反射 API 时， Android 的所有框架类都被排除在外。这些类是状态图的终状态( $F$ )，并作为下一步的输入。对于上例， $F = \{ A, B, C, D \}$ 。</p>
 <p><strong>步骤 3 ：状态图转化为 RGSD</strong> 删除不能到达终状态的所有转移。</p>
-<p><img src="images/algorithm1.png" alt="算法 1 ：状态图转化为 RGSD"></p>
+<p><img src="/statics/images/20200622/algorithm1.png" alt="算法 1 ：状态图转化为 RGSD"></p>
 <p>上述算法描述了这一步骤。上一步骤的结果，即状态转移图与 $F$ 作为本步骤的输入。 <code>processQueue</code> 队列用于维护即将处理的状态。初始状态下，将 $F$ 添加到 <code>processQueue</code> 中，因为后向分析是从终状态开始的。 <code>RQ</code> 用于存储相关状态， <code>Rδ</code> 用于存储相关转移。遍历从处理初始化的 <code>processQueue</code> 开始，一直持续到队列变空。空队列表示处理已经结束。该算法每次从 <code>processQueue</code> 中取出（ deque ）一个元素，存储在 <code>CQ</code> 中，并找到它的前级元素（第 6 行）。如果节点有前级元素，那么所有还没有出现在队列中的前级元素，都会被排到 <code>processQueue</code> 。这个检查是为了确保在遍历过程中不会产生循环。这些前级元素被添加到 <code>RQ</code> 列表中。每一个前级元素和 <code>CQ</code> 之间的所有转移都是相关的，所以它们也被添加到 <code>Rδ</code> 中（第 9-15 行）。</p>
 <p>在路径计算过程中，会遇到一些既不是初始状态( $q_0$ )，也不是没有被调用的状态。这意味着从启动 <code>Activity</code> 中没有通往这些状态的路径。目标是在动态分析过程中不遗漏任何这样的路径。因此，文章准备了一个单独的列表， <code>UnlinkedStates</code> ，包含了所有这样的状态，这些状态没有任何从初始状态的路径，但它们或者是终状态，或者是通往终状态的路径（第 18-20 行）。</p>
 <p>最后，移除所有不在 <code>Rδ</code> 中且具有 activity 目标的转移（第 23-27 行）。下图给出了步骤 1 结果经步骤 3 处理后的结果。</p>
-<p><img src="images/step3.png" alt="步骤 3 结果示意图"></p>
+<p><img src="/statics/images/20200622/step3.png" alt="步骤 3 结果示意图"></p>
 <p><strong>步骤 4 ：约束处理</strong> 主要针对一些恶意软件家族的反分析约束，例如示例代码的 <code>A.6</code> 检测了 <code>Build Brand</code>。</p>
-<p><img src="images/algorithm2.png" alt="算法 2 ：约束重写"></p>
+<p><img src="/statics/images/20200622/algorithm2.png" alt="算法 2 ：约束重写"></p>
 <p>上述算法解释了处理约束的方法。首先找出每个转移的根方法（ root method ），这里根方法指的是包含过渡方法的最上层的调用者。之后，使用控制流图计算从根方法的第一条语句到当前转移的控制流路径，判断其中的程序分支（主要是 <code>If</code> 、 <code>For</code> 与 <code>While</code> 语句）应该如何选择。重写 <code>For</code> 与 <code>While</code> 语句时可能导致程序无限循环，文章采用 <code>Soot</code> 工具的 <code>LoopFinder</code> 解决此问题。输出示例如下图。</p>
-<p><img src="images/step4.png" alt="步骤 4 结果示意图"></p>
+<p><img src="/statics/images/20200622/step4.png" alt="步骤 4 结果示意图"></p>
 <p><strong>步骤 5 ：明确无关联组件的意图</strong> 本步骤主要处理步骤 3 生成的 <code>UnlinkedStates</code> 中的状态。它们主要由 <code>receiver</code> 与 <code>service</code> 这些非 GUI 组件组成。 Android 的事件驱动机制导致其存在，由于其主要由系统事件驱动执行，在动态分析中，可能由于没有相应事件而导致其逃避检测。文章提供 <code>Dynodroid</code> 工具作为解决方法之一，它通过观察 app 监听的事件，通过在检测时产生同样的事件，使得这些组件得到执行。</p>
 <h3 id="智能-UI-探索"><a href="#智能-UI-探索" class="headerlink" title="智能 UI 探索"></a>智能 UI 探索</h3><p>这部分工作主要是作者基于以前工作的提高。集中在两个方面：</p>
 <ol>
@@ -543,7 +543,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -556,7 +556,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
