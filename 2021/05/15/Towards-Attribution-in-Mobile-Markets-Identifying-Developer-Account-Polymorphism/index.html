@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"cuiyn.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文介绍 2020 年 CCS 会议的一篇文章，题目是《Towards Attribution in Mobile Markets: Identifying Developer Account Polymorphism》，DOI信息在[这里](https:&#x2F;&#x2F;doi.org&#x2F;10.1145&#x2F;3372297.3417281**。 这篇文章使用移动应用市场提供的属性（attribution），识别同一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面向移动市场归因识别开发者账户多态性">
+<meta property="og:url" content="http://cuiyn.github.io/2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍 2020 年 CCS 会议的一篇文章，题目是《Towards Attribution in Mobile Markets: Identifying Developer Account Polymorphism》，DOI信息在[这里](https:&#x2F;&#x2F;doi.org&#x2F;10.1145&#x2F;3372297.3417281**。 这篇文章使用移动应用市场提供的属性（attribution），识别同一">
+<meta property="og:locale">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20210515/attribution_graph.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20210515/schema_expansions.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20210515/discovery_results.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20210515/brand_protection.png">
+<meta property="article:published_time" content="2021-05-15T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-05-17T02:48:35.451Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="应用市场">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20210515/attribution_graph.png">
+
+<link rel="canonical" href="http://cuiyn.github.io/2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-Hans'
+  };
+</script>
+
+  <title>面向移动市场归因识别开发者账户多态性 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Cuiyn's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          面向移动市场归因识别开发者账户多态性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-05-15 12:00:00" itemprop="dateCreated datePublished" datetime="2021-05-15T12:00:00+08:00">2021-05-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-05-17 10:48:35" itemprop="dateModified" datetime="2021-05-17T10:48:35+08:00">2021-05-17</time>
+              </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文介绍 2020 年 <strong>CCS</strong> 会议的一篇文章，题目是《Towards Attribution in Mobile Markets: Identifying Developer Account Polymorphism》，DOI信息在[这里](<a target="_blank" rel="noopener" href="https://doi.org/10.1145/3372297.3417281**。">https://doi.org/10.1145/3372297.3417281**。</a></p>
+<p>这篇文章使用移动应用市场提供的属性（attribution），识别同一开发者的不同账号，以解决恶意开发者利用多个账号逃避应用市场追查的问题。</p>
+<a id="more"></a>
+<p>注：原文中的 attribute 一词，在本文中根据具体情境被同时译为“属性”与“归因”。</p>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>恶意软件开发者可能成功地将其 app 发布至应用市场（包括官方的应用市场）。如果被举报，这些 app 会被下架，开发者账号很有可能被禁止。不幸的是，这样的下架不能防止攻击者使用另一个开发者账号继续发布其恶意 app 的变种。这篇文章提出了一个新型的方法，用于识别应用市场中属于同一业务（operation），即同一所有者的开发者账号与其它<strong>失陷标示</strong>（indicator of compromise，IOC）。给定种子 IOC 集合，文章的方法通过探索 app 与版本的元数据（metadata）识别属于同一业务的新 IOC。它输入一个归因图，其中详述了属性的推断过程，因此它可以被检查。文章将其方法实现为一个叫做 Retriever 的工具，它支持多个移动应用市场，其中包括官方的 Google Play 与 Apple Store。文章使用 17 种流氓软件（rogueware）与广告软件的业务对 Retriever 进行了评估。在 94% 的业务中，Retriever 发现了至少一个之前未知的开发者账号。而且，Retriever 揭示出看上去已经消亡的业务仍然有活越的开发者账号。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>智能手机已经成为最普遍的计算平台，目前世界人口的 45% 使用约 35 亿部智能手机。其中，Android 拥有 86% 市场份额，Apple 约占剩余的 14%。智能手机生态的核心是应用市场，它们是移动 app 的主要分发渠道。Android 与 Apple 均有官方的应用市场（GooglePlay 与 Apple Store），此外还有无数可供选择的 Android 应用市场存在。存在于应用市场中的 app 能够被潜在的用户发现。在官方应用市场中的 app 还使其看上去更加合规。</p>
+<p>恶意软件开发者有意将他们的 APP 在应用市场中发布，尤其是官方市场。应用市场可能会对开发者提交的 app 进行审查，并禁止被识别为恶意的 app。不幸的是，一小部分恶意 app 能够越过审查机制并出现在市场中。一旦应用市场识别出一个恶意 app（例如通过外部对于滥用的举报），它会立刻移除它，并可能禁止这个开发者的账号。但是，这样的下架不能防止攻击者使用另一个开发者账号继续发布其恶意 app 的变种。同一开发者拥有多个开发者账户，无论是个人开发者还是组织，都可能自然地发生，对于良性开发者并不罕见。例如，一个组织的不同部门，或有自己开发者账号的公司被收购。但是，恶意软件的开发者可能会使用多个开发者账号以实现多态性，即在部分 app 被认定为恶意的情况下，在其它 app 之间提供隔离；或者在恶意行为被标记后重新启动它们。</p>
+<p>在这篇文章的工作中，作者提出一个新型的方法，以自动化地识别开发者账号及属于同一业务（即同一所有者）的其它 IOC。作者提出又一概念：活动（campaign），它们的不同之处在于是否具有时间性的组成部分。由同一实体（人或公司）在一段时间内发起的多个活动是同一业务的一部分。这一方法背后的直觉是，所有者可能在出现在不同开发者账户下的app中重复使用相同的app或版本元数据。这些开发者账号可能存在于同一市场，也可能存在于不同市场，甚至跨平台（如GooglePlay与Apple Store）。这里app的元数据是市场向开发者要求的信息，如电子邮件、支持URL、物理地址或版权信息。版本元数据由每个app中提取，包括包名或者证书的哈希值。一些厂家甚至有仓库（repository）来集中管理它们。诸如STIX的标准已被提出，用于标准化IOC格式，实现共享与自动处理。文章通过抓取上述app与版本元数据的IOC来补充这些普通IOC。</p>
+<p>作者将其方法实现为一个叫做Retriever的工具，给定一个种子IOC的集合（例如来自安全厂家报告），它能够识别属于同一业务的新IOC，如新的开发者账号、app与证书。Retriever查询外部数据集，以识别使用查询IOC的应用，或者当查询IOC是一个app标识符时，识别其它app的IOC。由查询返回的IOC被添加到一个工作列表（worklist）中，这个过程不断重复，直到工作列表为空或达到最大的重复次数。此数据收集过程建立了一个归因图，其中节点是IOC，而边则表示一个查询IOC返回另一个IOC的关联关系。属性图刻画了如何从种子IOC到新发现的IOC（如从已知的开发者找到新开发者），为第三方提供了可检验的证据。Retriever同时输出新发现IOC的列表与属性图。</p>
+<p>Retriever 被设计为支持不同的移动应用市场。目前它使用两个数据集：GooglePlay与Tacyt。Tacyt是一项商业服务，定期抓取多个市场，包括GooglePlay、Apple Store和一些第三方的Android市场。它对app和版本元数据进行索引，提供一个API来搜索元数据。Tacyt的一个关键特点是它有关于消亡app（曾经在市场中，但后来被删除的app）的元数据。例如，可以用一个不再存在的开发者账号作为种子运行Retriever，以在这个业务中发现其它开发者账号。</p>
+<p>Retriever需要解决的一个挑战是通用IOC（generic IOC），这些IOC并不特定于某项业务，例如电子邮件地址中的gmail.com域名。文章称通用IOC产生爆炸（explosion），因为它们通常会使得归因图的体积急剧增大。Retriever使用两种方法处理通用IOC。 在数据收集过程中，它可以识别出通用IOC，并避免查询它们，从而防止爆炸。为处理未知的通用IOC，Retriever提供了一种新颖的通用技术来检测归因图上的爆炸。</p>
+<p>被发现的IOC具有多种用途。一旦有一个恶意app被报告，移动市场可以检查由Retriever确定的其它app（可能来自不同的开发者账户）的恶意行为。被识别的域名可以被报告给注册商，以便撤下。诸如版权信息中的公司名称或证书中的人名，此类IOC可以识别业务背后的实体。其它IOC如（非通用的）URL中的域名和电子邮箱地址、物理地址与开发者账号也是有用的属性，因为对这些资源的访问可能需要付费或注册，留下的痕迹可能会指向所有者。这些属性很重要，因为从根本上说，开发者账户多态性是由于恶意app开发者几乎不受市场下架的影响，而且不需要太多努力就能重新开始他们的活动。</p>
+<p>由于攻击者经常向市场提供虚假数据，所收集的IOC可能并不总是能识别出行动背后的实体。<br>不过，攻击者可能会是粗心的，或者不理解他们所提供的数据的含义。归因的过程，就像警察调查一样，需要跟踪所有的线索，因为不清楚哪些（如果有的话）最终会成为证据。目前，这是一个高度手工的、重复的、没有规模的过程。在此背景下，Retriever是在移动市场上扩大恶意app归因的一个重要步骤。它将分析师从重复性的任务中解放出来，如IOC收集和归因图的生成，这不需要人类智力。</p>
+<p>文章对安全厂商报告的17项流氓软件和广告软件业务进行了评估。在94% 的业务中，Retriever能够发现至少一个以前未知的开发者账户。其中包括7项所有种子都已消亡的操作。此外，Retriever能够为那些看起来完全消亡的业务识别活跃的开发者账户，这显示它们仍在运行。文中的结果揭示了开发者账户多态性是如何被用来绕过市场防御的：10个业务来自于一个安全厂家进行的聚类，Retriever识别出由这个安全厂家遗失的一个新的集群，表明一些被认为是个体的app，实际上是其它集群的一部分。最后，Retriever在每个被分析的业务中发现了10到1000多个新的IOC，其中许多具有潜在的归因价值，如域名、公司名称和物理地址。在某些情况下，可以明显得出运行这些业务的实体是谁。</p>
+<p>文章的主要贡献如下。</p>
+<ul>
+<li>提出了一种新的跨平台和跨市场的自动方法，以识别属于一个业务的开发者账户和其他IOC。给定一组种子IOC，此方法查询外部数据集以识别与新IOC的连接，建立一个详细归因推断的归因图。</li>
+<li>提出了一种新的图分析技术，以识别由于通用IOC而导致的归因图的爆炸。</li>
+<li>将此方法实现为一个叫做Retriever的工具，并对安全厂家报告的17项业务进行了评估。在94%的操作中，Retriever能够发现至少一个之前未知的开发者，以及无数其他的IOC，其中一些具有明确的归因价值。Retriever能够确定，那些看起来已经消亡的业务，仍然具有之前未知的活跃开发者账户。</li>
+</ul>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>Retriever的目标是给定一组种子IOC，自动发现与种子IOC属于同一业务的其它IOC。下图提供了该过程的直观印象。它显示了一个由数据收集过程产生的归因图样本，从灰色的App1种子开始，且专注于单一市场。该发现过程产生确定了Cert1与Developer1 作为种子app的IOC。之后，它识别出Developer1有另外两个app，并获得了它们的IOC（Cert1，Cert2，Email1）。查找Cert1未获得使用它的其它新app。之后，查找Cert2，并找到了来自Developer2的App4。最后，查找 Email1，找到来自Developer3的App5。产生的归因图显示，Developer2与Developer3是Developer1同一业务的一部分，并展示了推断的过程。</p>
+<p><img src="/statics/images/20210515/attribution_graph.png" alt="归因图示例" title="归因图示例"></p>
+<h3 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h3><p>Retriever的主要特性有：</p>
+<ul>
+<li><strong>自动化</strong> 归因目前主要是一项人工调查任务，需要重复相同的步骤，跟踪所有可能的线索，因为分析人员无法预测哪些会提供基本证据。因此，归因是缓慢和容易出错的。虽然文章作者期望归因仍然是一项以分析师为中心的任务，但自动化使分析师能够专注于获取数据源，设计新技术，并进行更有创造性的推断。自动化使得可重用性成为可能，因此不同的调查可以重用已经实现的功能。Retriever解决的一个关键挑战是如何限制跟踪虚假线索时可能产生的爆炸，即由非特定于某项业务的通用IOC引入的爆炸。</li>
+<li><strong>可追溯性</strong> Retriever的一个基本设计特性是保留推论链，以便由其他分析员进行审查。为此，Retriever输出了一个归因图，该图记录了如何从种子IOC到达所发现的IOC。归因图是一个无向图，其中节点是IOC，两个IOC之间的边意味着它们可以从对方到达。作为可追溯性的一部分，Retriever也提供<em>数据持久化*</em>，由此所有收集到的用于推理的数据都会被储存起来，以防今后它们变得不可用。</li>
+<li><strong>灵活性</strong> Retriever的设计非常灵活。搜索可以从任何IOC开始，并且在同一调查中可以结合多个数据集和市场。这一点很重要，因为数据集的获取可能会根据可用性和成本而有所不同。Retriever还具有可扩展性，可以方便地添加新的IOC和数据集。</li>
+</ul>
+<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>Retriever可用于三个主要场景：<strong>发现</strong>、<strong>聚类</strong>和<strong>品牌保护</strong>。</p>
+<p>在发现场景中，已知种子属于同一个业务，我们的目标是通过识别该业务所使用的开发者账户、他们的app以及其它资源（如域名、电子邮件地址或物理地址）尽可能完整地映射该业务。一个典型的用法是，给定一小部分已知属于恶意业务的IOC（例如从分析该业务的博客文章中），进一步发现同样属于恶意业务的IOC。被发现的IOC可能被原有分析所遗漏，也可能是在原有分析进行后被添加到业务中。</p>
+<p>在聚类场景中，种子可能属于不同的业务。我们的目标是识别哪些种子属于相同的业务，也就是将种子聚类到业务中。与机器学习聚类方法的一个根本区别是，这里假设无法获得整个数据集。作为替代，Retriever从可能专有的数据集中逐步获得数据，这些数据集可能会收取访问费用。聚类从所有的种子同时进行探索，检查哪些是连接的；此外，也可以从每个种子开始进行单独的探索。然后，如果任何非通用的IOC出现在多个种子的归属图中，表明这些种子属于同一个操作。文章在评估中使用这种方法来验证一个安全厂家提供的流氓软件集群。</p>
+<p>在品牌保护场景中，与发现场景类似，种子属于同一个业务。但是，这里假设该业务是良性的，且分析人员能够接触到一个oracle，以确定新发现的IOC是否属于与种子相同的业务。分析员对新的、且oracle返回提示其不属于该业务的IOC感兴趣。分析员想了解为什么这些IOC会出现在归因图中。典型的用法是给定一个良性组织的一些IOC，以发现所有其它也与该组织有关的IOC。如果oracle指出一些新发现的IOC不属于该行动，这可能表明这些IOC的所有者在冒充该组织。例如，可能会发现一个来自未知开发者的应用，该应用使用该组织的URL作为其包的URL，这可能表明该未知开发者试图让用户相信他的应用与该组织有关。</p>
+<h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><p>Retriever利用外部数据集来获取app信息。目前有两个支持的数据集：GooglePlay与Tacyt。</p>
+<p><strong>GooglePlay</strong>是Android的官方市场。GooglePlay中的每个app都有一个网页，其中包括标题、开发者名称、应用描述、隐私政策网址、软件包网址和下载数量等信息。每个开发者都有一个网页，列出该开发者在市场上的应用。此外，GooglePlay提供了一个搜索API，可以进行自由文本搜索，返回相关的app。Retriever利用app的网页来获取给定软件包名称的IOC，并利用搜索API来发现具有查询IOC的应用程序。在撰写文章时，GooglePlay估计包含280万个应用程序，其中96%是免费的。</p>
+<p><strong>Tacyt</strong>是一项由西班牙电信公司提供的商业服务。Tacyt定期抓取多个移动市场，包括GooglePlay、Apple Store和一些第三方的Android市场。对于每一个从市场中找到的app，它收集app与版本元数据。</p>
+<p>对于GooglePlay，Tacyt有3个主要优势。</p>
+<ol>
+<li>Tacyt提供了一个丰富的API来对收集的元数据进行搜索。</li>
+<li>Tacyt积累了关于app的历史信息，包括不同的app版本和app元数据的变化（例如，政策URL或开发者名称）。</li>
+<li>Tacyt支持多个市场，包括GooglePlay、Apple Store和一些第三方的Android市场。</li>
+</ol>
+<p>Tacyt的缺点是，与其他市场爬虫（如Androzoo、AndroVault）类似，其覆盖范围可能有限。</p>
+<h3 id="IOC"><a href="#IOC" class="headerlink" title="IOC"></a>IOC</h3><p>下表总结了Retriever支持的IOC，其中 F 意为框架支持，m 意为该IOC是由市场设定的参数。有些IOC没有直接从数据集中获取，而是通过Retrieve的框架得到，如电子邮件地址或URL中的域名（domain names in emails or URLs，fqdn）、获取域名所有权的有效二级域名（effective second level domains that capture ownership of the domain name，esld）、出现于电子邮件地址或URL中的IP（IP addresses that appear in emails or URLs，ip）、隐私政策网址（privacy policy webpages，privacyPolicy），与出现在隐私政策中的电子邮箱地址（email addresses that appear in privacy policies，privacyEmail）。文章举例说明什么是 ESLD，如域名 <code>www.amazon.co.uk</code> 的 ESLD是 <code>amazon.co.uk</code>。</p>
+<p>与app或开发者标识符相对应的IOC由市场的名字参数化。这是有必要的，因为app和开发人员的标识符只能保证在一个Android市场内是唯一的。在不同的市场中，可能会出现碰撞。例如，两个独立的实体可能会偶然选择相同的开发者名称，或者一个恶意的开发者可能会通过在另一个市场上以相同的名字创建一个账户来冒充一个存在于官方GooglePlay市场的良性开发者。</p>
+<p>![数据集与市场支持的IOC](/statics/images/20210515/IOC.png “数据集与市场支持的IOC<em>**</em></p>
+<h2 id="数据收集"><a href="#数据收集" class="headerlink" title="数据收集"></a>数据收集</h2><p>给定一个种子IOC的集合，数据收集会自动地发现属于同一业务的其它IOC，并生成归因图以描画如何从种子IOC到达新发现的IOC。下图展示了数据收集的结构。它执行的是一个迭代过程，由框架实施。在每轮迭代中，它从工作列表中选择一个IOC，将其扩展（expand）以获得新IOC的列表，并将新IOC添加到工作列表与归因图中。这个过程从将种子IOC放入工作列表开始，当工作列表为空或达到最大迭代次数时结束。 迭代过程会输出所有IOC的列表和归因图。任何从互联网上下载的人工产物（例如隐私政策）都被储存起来，以保持可追溯性，以防它们之后发生变化或消失。除了种子IOC，数据收集还需要一个配置文件作为输入，该文件定义了Tacyt的使用凭证、最大迭代次数以及要使用的数据集和市场（默认情况下，它使用两个数据集和两个官方市场）。</p>
+<p>数据收集的主要过程是将一个IOC扩展为新IOC的列表。最常见的扩展是用IOC查询一个数据集，通过处理响应来建立一个IOC列表，并返回给框架。每个数据集支持不同的扩展，在输入<strong>模式</strong>（schema）中定义。实际上，GooglePlay只支持Tacyt提供扩展的一个子集。不同数据集实现扩展的方式不同。例如，在GooglePlay中查找<code>packageName</code>，会返回一个包含所有app元数据的网页。但是，在Tacyt中查找<code>packageName</code>，返回的是一个含有其所知的所有app版本元数据的JSON。每个数据集都有自己的组件，它实现了一个扩展的虚拟接口，输入是一个IOC与一个（可选的）市场列表，返回一个IOC的列表。通过这种方式，框架保持了与数据集无关的特点。对于Tacyt，框架告诉数据集应该考虑哪些市场进行扩展，例如，是否在GooglePlay、官方市场或所有市场中寻找应用版本。除了数据集的扩展，一些基本的扩展也由该框架执行，如从URL和电子邮件地址中提取域名，以及下载网页。接下来将详细介绍这些扩展。</p>
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>模式定义了可以使用框架和数据集对每个IOC进行的扩展。它可以被看作是一个类型图（与具体的归因图相反），其中节点是IOC的类型，边刻画从源类型IOC到目标类型IOC列表的扩展。每条边都标有支持该扩展的数据集，也就是说，有些扩展只由一个数据集处理，有些则由两个数据集处理。模式被作为输入提供给Retriever，因此分析者可以通过在模式中简单地注释来禁用任何扩展。每个扩展可以使用通用IOC列表来防止爆炸。Retriever提供3个这样的列表：通用证书、电子邮件服务提供商的域名，与 10万个最受欢迎域名的Tranco列表。此外，分析员也可以提供个人使用的通用IOC列表（可选）。</p>
+<p>之后，文章描述了所支持的扩展，包括在每个扩展中为防止爆炸而采取的步骤。下表简要展示了文章使用的模式。</p>
+<p><img src="/statics/images/20210515/schema_expansions.png" alt="扩展模式简表" title="扩展模式简表"></p>
+<ul>
+<li><strong>App</strong> App标识符（如<code>packageName</code>与<code>appId</code>）上的扩展返回app的元数据：开发者、证书哈希与主题DN（Distinguished Name）、APK文件的哈希、URL、电子邮箱地址、物理地址与版权信息。这个扩展不发现新的app，但是对返回IOC的后续扩展可能会。</li>
+<li><strong>开发者</strong> 开发者名称或者ID上的扩展返回给定市场中该开发者的全部app列表。由于这些app是由开发者上传到市场的，因此它们很可能属于该开发者。</li>
+<li><strong>证书</strong> 每个安卓app都使用私钥进行数字签名。相应公钥的证书链包含在APK中，通常包含一个单一的自签名证书。一般来说，私钥属于app的开发者，他应该对其进行保密。因此，两个使用相同证书的app可以被确定为由同一个开发者拥有。然而，在某些情况下不是这样，例如存在签署来自多个开发者 app的通用证书。为防止爆炸，Retriever根据4类通用证书列表检查证书哈希值：默认AOSP、开发框架、平台与市场。第一类对应的是默认AOSP密钥（平台、测试、共享、媒体）的证书，用于签署Android操作系统的调试构建。这些私钥存在于AOSP仓库中，因此并不是真正的私钥。用AOSP密钥签署app是一个众所周知的安全问题，因为任何其他使用相同AOSP证书的app都可以更新该app。GooglePlay不允许使用默认AOSP的app被上传，但是一些第三方市场允许。文章作者从AOSP库中获取这些证书。第二类对应的是安卓app开发框架使用的证书，代表开发者处理app发布事宜。文章作者通过使用GooglePlay的常用证书列表与手工分析常用框架识别这些证书。第三类对应的是平台私钥，即Android设备生产厂家替代AOSP平台私钥对其Android系统发行版使用的私钥。对一个平台证书进行扩展会发现许多其它app，它们可能属于AOSP、厂家或第三方开发者。文章的通用证书列表包含属于80个设备供应商的200个平台证书的哈希值。最后一类是市场用于签署用户上传的所有 app的证书。这种方法被SlideMe和Apple Store使用。</li>
+<li><strong>域名</strong> 从URL与电子邮箱地址获取的域名（<code>fqdn</code>）可以用于识别其它使用该域名的app。但是，如果域名的所有者允许第三方注册子域名、是一个电子邮箱服务提供商、或托管着第三方网页，这个方法就会失败。为处理这些情况，域名扩展首先使用公共后缀列表（Public Suffix List）获得<code>fqdn</code>的有效二级域名（<code>esld</code>），该列表确定了捕获域名后缀的所有权。之后，对照3.7k长度的电子邮箱提供域名列表和Tranco前 100k最受欢迎域名列表。如果存在于任一列表，该<code>esid</code>被认为是通用的，其扩展会被避免。例外的是，如果通用域名作为种子提供，Retriever允许对其进行扩展。这在有良性业务的品牌保护场景中是有用的。</li>
+<li><strong>IP地址</strong> URL和电子邮箱地址偶尔会包含IP地址而不是域名。这种情况下，Retriever使用IP地址来识别其他使用该IP的URL或电子邮件地址的app。然而，文章并不执行从域名到域名解析的IP地址的扩展。避免这样做是因为考虑到云主机的普遍性，多个域名可能随着时间的推移，甚至同时解析到同一个IP地址（例如CDN）。</li>
+<li><strong>URL</strong> 给定一个app的URL，Retriever识别在<code>packageURL</code>、<code>packagePrivacyURL</code>或<code>supportURL</code>中使用这个URL的其它app，除非该URL包含一个通用域名且不含路径。路径子句用于允许在流行的域名上进行网络托管，例如，facebook.com上的用户页面。此外，还会提取URL中的域名（或IP地址），并对其进行扩展，只要它不是一个通用的域名。</li>
+<li><strong>电子邮箱地址</strong> 给定一个从app元数据或隐私政策中获得的电子邮件地址，Retriever可以识别在<code>packageEmail</code>中使用相同电子邮件的其它app。此外，还会提取电子邮箱地址中的域名（或IP地址），并在其上扩展，只要它不属于某个电子邮件提供商。</li>
+<li><strong>隐私政策</strong> 除上文描述的URL扩展外，<code>packagePrivacyURL</code>还有另一个扩展，其中框架下载并存储隐私政策，并使用正则表达式识别电子邮箱地址。得到的<code>privacyEmail</code>与其它电子邮箱地址进行相同的扩展。</li>
+<li><strong>物理地址</strong> GooglePlay为app提供了一个可选的物理地址。Retriever使用完整的地址字符串来识别GooglePlay中具有相同地址的其它app。为了避免爆炸，这种扩展使用了两条简单的规则，即如果地址不包含至少三个空格分隔的标记，或者不包含数字字符，那么它就是通用的。 第一条规则避免在地址只包含一个城市或一个国家的名称时进行扩展，而第二条规则避免在没有街道号码的地址上进行扩展。由于使用的是等价检查，它可能会遗漏同一地址的语法修改，例如调换城市和邮政编码的顺序。为了尽量减少这个问题，如果提供API使用凭据，Retriever可以选择支持首先使用Google Maps API对地址进行规范化。</li>
+<li><strong>版权</strong> Apple Store为app提供版权信息，其格式通常为版权符号、年份和公司名称。Retriever提取版权中的公司名称。如果公司名称不是空的，它就使用完整的版权信息来识别Apple Store中具有相同版权的其它app。</li>
+</ul>
+<p>虽然上述扩展试图防止通用IOC的爆炸，但它们可能会遗漏一些通用IOC。例如，作者观察到一些app复制流行app的隐私政策URL，这很难在不遗漏有效扩展的情况下防止。<br>文章以两种方式处理这些情况。在数据收集过程中，分析员可以提供一个不应该被扩展的通用IOC的黑名单。此外，图分析模块提供了一种通用技术，可以在归因图上识别导致爆炸的通用IOC。</p>
+<h2 id="图分析"><a href="#图分析" class="headerlink" title="图分析"></a>图分析</h2><p>图分析组件将归因图作为输入，这是一个无向图，其中节点是IOC，两个IOC之间的边表示数据收集能够从一个IOC到另一个IOC（但是由于是无向图，另一个方向也是成立的）。每个节点有三个属性：类型、第一次观察到的时间戳与最后一次观察到的时间戳。节点的类型可以是：种子；种子开发者，即与种子app直接关联的<code>developerName</code>或<code>developerId</code>，例如图1中的Developer1；通用，即因为不明确而没有被扩展；待定，即因为数据收集在处理该节点之前达到了迭代的最大值；正常，即不属于上述类型的其余节点。</p>
+<p>图分析组件提供了基本的图分析，这些分析在归因方面很重要，如寻找节点之间的路径和提取图的组成部分。它也提供了一个先进的技术用于检测导致爆炸的IOC。</p>
+<h3 id="基本图分析"><a href="#基本图分析" class="headerlink" title="基本图分析"></a>基本图分析</h3><p>作为任何图分析的先决条件，通用节点被从归因图中移出。这是有必要的，因为数据收集可以选择性地包括归因图中的通用节点，以使分析员更容易理解扩展在某一节点停止的原因。但是，通用IOC可能会引入虚假路径，如两个 Gmail的<code>packageEmail</code>可能被它们的通用<code>fqdn</code> gmail.com所连接，尽管它们没有关联。</p>
+<p><strong>路径</strong> 图分析模块可以输出归因图中节点之间的路径集。一个常见的使用场景是，分析员要了解一个被发现的开发者账户是如何从种子开发者到达的。种子开发者和非种子开发者之间的路径提供了如何推断出非种子开发者与种子属于同一业务的证据。由于两个节点之间的路径数量可能很大，分析结果是节点之间的节点不相交路径。如果两条路径不共享任何中间节点，即唯一的共同节点是源头和目的地，那么这两条路径就是节点不相交的。</p>
+<p><strong>组件</strong> 无向图的一个组件（或连接组件）是一个子图，其中存在一条路径连接任意两个节点。归因图可能有多个组成部分。由于它是通过从种子中发现新的IOC而反复建立的，所以归因图中的任何组件都保证至少包含一个种子。归因图中存在多个组件表明，归因过程无法找到一些种子之间的联系。在发现场景中，种子属于同一业务，多个组件表明无法找到证据来连接所有种子。在聚类场景中，种子可能属于不同业务，组件对应于不同的集群。此外，连接组件还可用于爆炸检测中。</p>
+<h3 id="爆炸检测"><a href="#爆炸检测" class="headerlink" title="爆炸检测"></a>爆炸检测</h3><p>图分析组件提供了一个检测导致爆炸IOC的新颖技术。尽管在扩展中，数据收集模块试图避免爆炸，但爆炸仍有可能出现。一个示例是开发者从流行app中复制信息用于自己的app。例如，GooglePlay中许多与Facebook相关的app使用Facebook的隐私政策，作为它们自己的隐私政策。因此，文章用一种新型的通用检测技术来补充数据收集过程中的爆炸预防步骤，该技术可以在事后发现归因图上的爆炸情况。</p>
+<p>爆炸检测背后的直觉是，如果一个IOC导致爆炸，它的扩展将导致不相关的开发者被添加到归因图中。不相关的开发者只能通过爆炸节点到达，也就是说，如果爆炸没有发生，不相关的开发者就不会出现在归因图中。因此，从种子开发者到非相关开发者的所有路径都将通过爆炸节点。基于这个直觉，爆炸检测包括两个步骤：首先，它产生一个可能引起爆炸的节点排名，按照可能性递减的顺序。一个节点的可能性得分是指，如果该节点被从图中移除，与种子断开连接的非种子开发者的数量。之后，它从图中对排名靠前的节点进行剪枝（trim），产生一个更小的、无爆炸的归因图。</p>
+<p><strong>排名</strong> 首先，所有开发者节点与种子开发者节点都是已被识别的。之后，通过创建一个辅助有向图，从归因图中获取连接信息，其中有基于流（flow）的节点连接性。如果种子开发者和非种子开发者之间存在多条不相交的路径，那么这一对节点可以忽略，因为没有一个节点必须存在才能到达非种子开发者，也就是说，存在另一条不包含该节点的路径可以从种子开发者到达非种子开发者。否则，路径中的所有节点，除了前两个和最后两个，都用来更新<strong>目的映射</strong>（destination map）。此映射存储了若一个节点被从图中删除，将被断开的非种子开发者的列表。第一个和最后两个节点被跳过，因为所有从种子出发，或到非种子开发者结束的路径都要经过它们。</p>
+<p>一旦所有的配对都被检查过，最终的排名会通过按目的的递减顺序遍历目的映射而产生。如果出现并列，则按节点的度（degree）排名。对于每个检查后的节点，与先前检查的节点的目的重叠部分被删除。一个节点的最终可能性得分是，如果该节点被移除，被断开的非种子开发者节点的数量，减去那些被更高可能性节点断开的节点。例如，如果目的映射中的顶级节点断开了 10 个非种子开发者的连接，而第二个节点断开了这 10 个节点中的9个，那么第一个节点的得分是10，但第二个节点的得分是 0，因为没有进一步断开非种子开发者的连接。</p>
+<p><strong>剪枝</strong> 这里，最初的归因图可以通过剪枝，移除由爆炸带来的部分，形成一个更小的、更准确的归因图。除导致爆炸的IOC外，剪枝也会移除其它IOC（如不相关的开发者）。首先，移除前 $k$ 个排名最高的节点，产生一个过渡的图。之后，基于过渡图计算连接组件。任何不包含种子的组件都被全部删除，因为它必须通过删除爆炸节点来创建（在原始归因图中，一个组件总是包含一个种子）。 $k$ 这个阈值最好由分析员通过检查排名来手动选择。作者曾试图自动选择阈值，但在极少数情况下，排名第一的IOC发现了非常多的其他开发者，而且它不是一个通用的IOC。这通常发生在开发者多态性较高的操作中。在这种情况下，正确的阈值可能是零。选择合适的$k$值是Retriever唯一的手动步骤。在文章的评估中，有14个业务没有显示出爆炸，所以不需要这个步骤。其他三个操作最多需要7分钟来选择$k$。在选择了$k$之后，该模块输出了缩小的图。</p>
+<h2 id="评估"><a href="#评估" class="headerlink" title="评估"></a>评估</h2><h3 id="发现场景"><a href="#发现场景" class="headerlink" title="发现场景"></a>发现场景</h3><p>文章使用17个流氓软件与广告软件对Retriever进行评估，以发现更多的IOC，其目标是识别之前未知的开发者账号。文章通过安全厂家的报告获取种子。大多数种子是包名，一部分是开发者的名称。文章将Retriever配置为同时使用GooglePlay与Tacyt两个数据库，对于Tacyt，使用Android与Apple的官方市场。文章将迭代最大次数设置为500，以限制运行时间与Tacyt的查找次数。</p>
+<p>下表展示了在这17个业务上的结果。对于每个业务，表中展示了种子与种子开发者的数量（括号中显示的是仍然活跃的种子数量）、进行的迭代次数、过程结束时工作列表中剩余的IOC数量、归因图中是否出现爆炸、归因图中的连接组件数量、业务中IOC的总数、其中通用IOC的数量、与具体的几个IOC类型的数量。</p>
+<p><img src="/statics/images/20210515/discovery_results.png" alt="发现场景的评估结果表" title="发现场景的评估结果表"></p>
+<p>Retriever的主要目标是识别出之前未知的开发者。Retriever在17个业务中的16个达到了这个目标，在这些业务中，识别出的开发者数量大于种子开发者的数量（注：未达目标的业务为Joker）。其中6个业务看上去已经消亡（即所有的种子都不再活跃），但通过使用Tacyt有关消亡app的记录，Retriever能够从其中5个发现新的开发者。</p>
+<h3 id="爆炸检测-1"><a href="#爆炸检测-1" class="headerlink" title="爆炸检测"></a>爆炸检测</h3><p>Retriever通过在数据收集期间的爆炸预防和在归因图上的爆炸检测来防止不相关的IOC最终出现在归因图中。上表也展示了归因图中通用IOC的数量，在2与39之间。最常见的通用IOC是电子邮箱服务提供商的常用域名（gmail.com、outlook.com、yahoo.com）与允许用户托管网页的网站（facebook.com、sites.google.com、wordpress.com）。这些通用IOC在数据收集时就已经被爆炸防止措施妥当处理，没有对结果产生影响。</p>
+<p>然而，有三个业务的爆炸在数据收集过程中没有处理，而是通过图分析事后发现。在这些业务中，爆炸检测算法输出的排名正确地将爆炸IOC确定为排名靠前的候选者。例如在4shared中，爆炸使得查找在500次迭代后仍有2213个IOC剩余。移除爆炸后，查找仅在48次迭代中结束。对于其余业务，去除爆炸后，500次迭代后工作列表中剩余的IOC数量平均减少2.6倍。</p>
+<h3 id="品牌保护"><a href="#品牌保护" class="headerlink" title="品牌保护"></a>品牌保护</h3><p>文章对品牌保护的情况进行了两个案例研究，其中种子是良性的（Facebook和Instagram的app），使用所有市场的数据库。目标是识别与Facebook和Instagram无关的app和开发者，它们最终会出现在归因图中。使用人工分析作为oracle，以确定所发现的IOC是否属于这些发布者。</p>
+<p>下表展示了评估的结果。其中，<code>Cut</code>一列是属于发行公司、但发现被无关开发者抄袭的IOC数量。文章通过使用爆炸检测算法识别这些IOC。表格的其余部分是发现的软件包和开发者的数量，以及按每个市场分割的数据。括号中是属于发行公司的IOC数量。在官方市场中，Facebook的开发者数量在GooglePlay中为3个，其它情况均为1个。在第三方市场中，没有发现这两个发行公司的有效账户，这表明，一个良性发布者的多个开发者账户并不罕见，但数量低于恶意操作的情况。</p>
+<p><img src="/statics/images/20210515/brand_protection.png" alt="品牌保护的评估结果表" title="品牌保护的评估结果表"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E5%BA%94%E7%94%A8%E5%B8%82%E5%9C%BA/" rel="tag"># 应用市场</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/28/Enhancing-State-of-the-art-Classifiers-with-API-Semantics-to-Detect-Evolved-Android-Malware/" rel="prev" title="使用 API 语义增强先进分类器以检测演化后的 Android 恶意软件">
+      <i class="fa fa-chevron-left"></i> 使用 API 语义增强先进分类器以检测演化后的 Android 恶意软件
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">3.</span> <span class="nav-text">概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%80%A7"><span class="nav-number">3.1.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">3.2.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.3.</span> <span class="nav-text">数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IOC"><span class="nav-number">3.4.</span> <span class="nav-text">IOC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%94%B6%E9%9B%86"><span class="nav-number">4.</span> <span class="nav-text">数据收集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95"><span class="nav-number">4.1.</span> <span class="nav-text">扩展</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">图分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%9B%BE%E5%88%86%E6%9E%90"><span class="nav-number">5.1.</span> <span class="nav-text">基本图分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%88%86%E7%82%B8%E6%A3%80%E6%B5%8B"><span class="nav-number">5.2.</span> <span class="nav-text">爆炸检测</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%84%E4%BC%B0"><span class="nav-number">6.</span> <span class="nav-text">评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E7%8E%B0%E5%9C%BA%E6%99%AF"><span class="nav-number">6.1.</span> <span class="nav-text">发现场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%88%86%E7%82%B8%E6%A3%80%E6%B5%8B-1"><span class="nav-number">6.2.</span> <span class="nav-text">爆炸检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%81%E7%89%8C%E4%BF%9D%E6%8A%A4"><span class="nav-number">6.3.</span> <span class="nav-text">品牌保护</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/cuiyn" title="GitHub → https://github.com/cuiyn" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cuiyns-blog.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://cuiyn.github.io/2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/";
+    this.page.identifier = "2021/05/15/Towards-Attribution-in-Mobile-Markets-Identifying-Developer-Account-Polymorphism/";
+    this.page.title = "面向移动市场归因识别开发者账户多态性";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://cuiyns-blog.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
