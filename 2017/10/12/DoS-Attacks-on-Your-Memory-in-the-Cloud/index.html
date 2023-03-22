@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于DoS对云虚拟机内存的攻击方法">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在这里。 这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-10-12T04:53:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="网络安全">
+<meta property="article:tag" content="云计算">
+<meta property="article:tag" content="DoS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/","path":"2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/","title":"基于DoS对云虚拟机内存的攻击方法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于DoS对云虚拟机内存的攻击方法 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">内容简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%A8%A1%E5%9E%8B%E4%B8%8E%E5%81%87%E8%AE%BE"><span class="nav-number">2.1.</span> <span class="nav-text">攻击模型与假设</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E8%B5%84%E6%BA%90"><span class="nav-number">2.2.</span> <span class="nav-text">物理内存资源</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LLC"><span class="nav-number">2.2.1.</span> <span class="nav-text">LLC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%80%BB%E7%BA%BF"><span class="nav-number">2.2.2.</span> <span class="nav-text">内存总线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DRAM%E4%B8%8EIMC"><span class="nav-number">2.2.3.</span> <span class="nav-text">DRAM与IMC</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98DoS%E6%94%BB%E5%87%BB"><span class="nav-number">3.</span> <span class="nav-text">内存DoS攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LLC%E6%B8%85%E6%B4%97%E6%94%BB%E5%87%BB"><span class="nav-number">3.1.</span> <span class="nav-text">LLC清洗攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%B8%85%E6%B4%97%E6%94%BB%E5%87%BB"><span class="nav-number">3.1.1.</span> <span class="nav-text">缓存清洗攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E9%80%82%E5%BA%94LLC%E6%B8%85%E6%B4%97"><span class="nav-number">3.1.2.</span> <span class="nav-text">自适应LLC清洗</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%96%E9%83%A8%E5%8E%9F%E5%AD%90%E9%94%81%E6%94%BB%E5%87%BB"><span class="nav-number">3.2.</span> <span class="nav-text">外部原子锁攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E9%94%81%E6%94%BB%E5%87%BB"><span class="nav-number">3.2.1.</span> <span class="nav-text">原子锁攻击</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%83%E4%BD%8E%E4%B8%A5%E9%87%8D%E6%80%A7%E7%9A%84%E5%86%85%E5%AD%98%E4%BA%89%E5%A4%BA"><span class="nav-number">3.3.</span> <span class="nav-text">较低严重性的内存争夺</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BB%BA%E8%AE%AE%E7%9A%84%E9%98%B2%E5%BE%A1%E6%8E%AA%E6%96%BD"><span class="nav-number">4.</span> <span class="nav-text">建议的防御措施</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E6%B5%8B%E9%98%B6%E6%AE%B5"><span class="nav-number">4.1.</span> <span class="nav-text">检测阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%AA%E5%AD%A4%E7%AB%8B%E5%8F%82%E8%80%83%E6%8A%BD%E6%A0%B7"><span class="nav-number">4.1.1.</span> <span class="nav-text">伪孤立参考抽样</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E8%A7%A3%E9%98%B6%E6%AE%B5"><span class="nav-number">4.2.</span> <span class="nav-text">缓解阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%86%E5%88%AB%E6%94%BB%E5%87%BB%E8%80%85VM"><span class="nav-number">4.2.1.</span> <span class="nav-text">识别攻击者VM</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">5.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于DoS对云虚拟机内存的攻击方法 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于DoS对云虚拟机内存的攻击方法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-12 12:53:00" itemprop="dateCreated datePublished" datetime="2017-10-12T12:53:00+08:00">2017-10-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>今天分析的这篇论文在2017年于CCS会议发表，题目是《DoS Attacks on Your Memory in Cloud》，其DOI信息在<a target="_blank" rel="noopener" href="http://doi.acm.org/10.1145/3052973.3052978">这里</a>。</p>
+<p>这篇文章涉及了很多计算机组成原理的知识，尤其是CPU与内存的知识。我在阅读这篇文章时感到十分吃力，补上了本科计组知识后才好一些。若读者对下面某些内容感到不知所云，不妨一补。</p>
+<span id="more"></span>
+
+<h1 id="内容简介"><a href="#内容简介" class="headerlink" title="内容简介"></a>内容简介</h1><p>在云计算中，基于网络的DoS攻击已经进行了广泛地分析，并提出了许多防御措施。但是，攻击者使用虚拟机（Virtual Machine，下文简称VM）进行对受害者的严重内存攻击则没有完全理解。虽然在云服务器中，内存被软件虚拟层严格地隔离开，但底层硬件的内存仍然被所有VM共享。这个性质可以被聪明的攻击者利用（只要他也在服务器上拥有一台VM），使服务器拒绝为受害者分配内存。</p>
+<p>论文首先介绍了这一问题的严重性（最严重情况下，在亚马逊EC2上可以对电子商务网站造成38倍的延时），之后提出了一种创新的防御手段，通过数据分析建立标准模型，并将VM运行情况与该模型比对，从而发现攻击行为并确定攻击来自于哪一台VM。</p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h2 id="攻击模型与假设"><a href="#攻击模型与假设" class="headerlink" title="攻击模型与假设"></a>攻击模型与假设</h2><p>文中提出如下几条假设。</p>
+<ul>
+<li>攻击目标VM位于公共的IaaS（Infrastructure as a Service，基础设施即服务）云上，如亚马逊EC2。</li>
+<li>攻击者可以在目标VM的宿主服务器上，运行至少一台VM（相关技术细节已经研究过），且攻击者可以在这台他自己的VM上运行任意程序。</li>
+<li>攻击者不需具备向目标VM发送网络数据包的能力，即基于网络的DoS攻击的不可用的。</li>
+<li>云服务提供商不会进行攻击，且云服务器特权程序不可被控制用来攻击。</li>
+<li>软件和硬件隔离机制的功能是正确运行的。</li>
+<li>云服务器运营商可以把不同VM分配在同一台云服务器上，但很可能不在同一个物理处理器核上。</li>
+</ul>
+<p>这种情况下，云服务器上运行有一个管理程序，负责对硬件资源进行虚拟化和分配管理，因此VM可以认为它控制一台电脑的全部硬件资源。一台云服务器可以有多个处理器，同一个处理器的不同核之间有各自的L1与L2缓存，但它们共享一块<strong>终极缓存</strong>（Last Level Cache，下文简称LLC，也被称为L3缓存）。</p>
+<p>此外，各个处理器共享一个内存控制器（Integrated Memory Controller，下文简称IMC）、一个内部数据总线（inter-package bus）与一块主存（DRAM芯片）。云服务器分配给每个VM一些虚拟CPU，且一个虚拟CPU仅分配给一台VM。运行在虚拟CPU上的程序可以使用任意与这个虚拟CPU关联的资源。因此，不同VM之间共享硬件缓存、总线、内存通道和DRAM缓冲区。<br>以上就是目前的通常情况，软件实现的VM隔离，仅对虚拟和物理的内存页表做了处理，但没有涉及底层各个处理器核共享的内存。</p>
+<h2 id="物理内存资源"><a href="#物理内存资源" class="headerlink" title="物理内存资源"></a>物理内存资源</h2><h3 id="LLC"><a href="#LLC" class="headerlink" title="LLC"></a>LLC</h3><p>如上所述，LLC被同一个处理器的不同核共享。Intel通常将L1与L2中的cache line也在LLC中复制一份（关于CPU cache，推荐阅读<a target="_blank" rel="noopener" href="http://cenalulu.github.io/linux/all-about-cpu-cache/">这篇文章</a>学习）。当LLC中的cache line被清除时，L1与L2缓存中对应的副本也被清除。但是，Intel没有公布具体的对应规则，我们不知道L1中的cache line对应LLC的哪一个地址。这也为攻击者增加了难度。</p>
+<h3 id="内存总线"><a href="#内存总线" class="headerlink" title="内存总线"></a>内存总线</h3><p>Intel使用环形总线拓扑结构连接同一处理器的各个部分，如核、内存控制器与快速通道互联接口（Quick Path Interconnect，QPI）。快速通道互联接口提供了处理器各部分之间、处理器与I&#x2F;O接口之间点对点的连接。内存控制总线连接LLC与IMC的<strong>存储体</strong>（bank）调度器。DRAM总线连接IMC调度器与DRAM存储体。这些高速的设计使攻击者很难渗透。同时，对于普通原子操作的总线锁清除也使得对其的攻击不太有效。但是，一些外部原子的总线锁操作仍然存在。</p>
+<h3 id="DRAM与IMC"><a href="#DRAM与IMC" class="headerlink" title="DRAM与IMC"></a>DRAM与IMC</h3><p>每个DRAM芯片由多个存储体组成。每个存储体有许多行和列，还有存储最近使用行列的<strong>存储体缓存</strong>以加快速度。每个处理器有多个IMC，使用规划算法（如First-Ready-First-Come-First-Serve）控制DRAM的访问。现代DRAM与IMC可以同时处理大量请求，所以针对其的攻击效果一般。</p>
+<h1 id="内存DoS攻击"><a href="#内存DoS攻击" class="headerlink" title="内存DoS攻击"></a>内存DoS攻击</h1><p>硬件存储是分层结构（如L1、L2、LLC到DRAM，速度由快到慢）。这些被许多使用规划算法的资源连接。针对内存的DoS攻击基于存储资源的抢占或规划算法调度的抢占，或者两者兼有。对于抢占存储资源，攻击者可以将受害者的数据由快速存储器向低速存储器驱逐。对于抢占算法调度，攻击者可以降低受害者内存请求的优先级，例如欺骗算法提高攻击者的优先级，或者同时提交大量请求使调度器崩溃。</p>
+<h2 id="LLC清洗攻击"><a href="#LLC清洗攻击" class="headerlink" title="LLC清洗攻击"></a>LLC清洗攻击</h2><p>在基于抢占存储资源的攻击中，论文发现LLC清洗攻击可以导致最为严重的性能下降，主要原因是LLC没有访问控制或配额限制。因此一台VM的程序可以将另一台VM的LLC cache line驱逐出去。同时，被L1、L2包含的LLC（大多数现代Intel的LLC）会将这个驱逐行为传递到L1、L2中，从而使状况恶化。不存在包含关系的LLC（大多数AMD的LLC）略有缓解。但是，如果受害者占用的内存多于私有缓存，那么会频繁访问LLC，承受LLC清洗攻击。</p>
+<h3 id="缓存清洗攻击"><a href="#缓存清洗攻击" class="headerlink" title="缓存清洗攻击"></a>缓存清洗攻击</h3><p>为进行LLC清洗攻击，攻击者可申请一块覆盖整个LLC的内存缓冲区。每个内存块访问一个内存地址，通过这种方式可以清洗整个缓存并把受害者的所有数据由LLC驱逐到DRAM。持续重复该操作即导致缓存清洗攻击。<br>理想情况下，攻击者使用的缓冲区应该恰好与LLC对应，也就是说这块缓冲区可以填满每个LLC slice而没有<strong>自冲突</strong>（self-conflicts，将之前的line从这块缓冲区中驱逐）。达成这个目标有两个难点：第一，宿主机缓存目录的内存缓冲区地址对攻击者不可见；第二，LLC slice到物理内存地址的映射未公开。<br>为克服以上困难，攻击者可以首先分配1GB的<strong>大页内存</strong>（HugePage），以确保对应的宿主机内存地址是连续的，无需担心有未知的虚拟内存转换。之后对于每一个LLC slice的组（set，与组相联中的“组”同义），攻击者选择一组与cache line一样大小、与该组索引的对应关系相同、但slice不一定相同的内存块。之后攻击者访问这些块并计算访问耗时。如果耗时较长，说明在slice内有自冲突。攻击者可以递归地从组中清除一些内存块，直到观察不到自冲突。在对每一个缓存组进行相同操作后，攻击者就拥有了一块理想的缓冲区。<br>攻击者还可以使用多线程技术，加速这一操作过程。</p>
+<h3 id="自适应LLC清洗"><a href="#自适应LLC清洗" class="headerlink" title="自适应LLC清洗"></a>自适应LLC清洗</h3><p>基本的LLC清洗技术在受害程序的内存占用远远小于LLC的时候无效，因为进行一次清洗需要大量时间，期间大数内存访问不影响受害程序内存。为实现更加细粒度的攻击，论文开发了一种缓存探针技术，用来精确查找LLC中与受害程序对应的组，并仅对这个组进行清洗。<br>攻击者首先在自己的VM上分配一个覆盖LLC的内存缓冲区。然后使用下面两个步骤实现缓存探针：发现阶段，在受害程序运行过程中，对每个组的缓存，攻击者访问该组的若干cache line并计算不导致自冲突的最大cache line数量。如果这个数量比组相连的组数小，则说明受害程序频繁使用该组的cache line，这个组可以用来实现清洗攻击。攻击阶段，攻击者持续访问上述组中的缓存，以清洗受害程序数据。</p>
+<h2 id="外部原子锁攻击"><a href="#外部原子锁攻击" class="headerlink" title="外部原子锁攻击"></a>外部原子锁攻击</h2><p>这种攻击是基于调度的最有效方式。Intel与AMD的处理器共同适用这种攻击方式。</p>
+<h3 id="原子锁攻击"><a href="#原子锁攻击" class="headerlink" title="原子锁攻击"></a>原子锁攻击</h3><p>在管理多处理器共享数据时，Intel为提供了一种原子锁操作。在Intel Pentium（P5）处理器之前，这种原子锁操作总是在内部总线上生成锁信号，以保证操作的原子性。所以直到原子锁操作结束，其它处理器均被阻塞。在P6处理器之后，总线锁换成了缓存锁，锁住的是缓存，缓存连接机制保证操作的原子性，这样就减少了调度阻塞的次数。</p>
+<p>但是，论文仍发现了两种攻击者能够使用的锁住总线的操作。其一是针对未对齐内存块访问引起的原子锁。这种情况下，处理器必须访问两个cache line，为保证操作的原子性，处理器要对总线加锁。其二是针对未被缓存内存块的访问引起的原子锁。这时缓存不工作，因此为保证操作的原子性，内存总线要被加锁。</p>
+<h2 id="较低严重性的内存争夺"><a href="#较低严重性的内存争夺" class="headerlink" title="较低严重性的内存争夺"></a>较低严重性的内存争夺</h2><p>对DRAM控制器或者DRAM存储体（bank）的争夺也是可行的。但造成的影响会显著降低。</p>
+<h1 id="建议的防御措施"><a href="#建议的防御措施" class="headerlink" title="建议的防御措施"></a>建议的防御措施</h1><p>文中提出了一种创新性的、多用途的措施，可以检测与缓解云中针对内存的DoS攻击。这种措施不需要提前了解应用使用的内存资源。一种叫做“执行节流”（execution throttling）的操作用于减轻攻击造成的影响。这种措施的创新性在于结合了两种方法：基于性能监测单元（Performance<br>Monitoring Unit，PMU）的事件统计（event counting），与通过调整IA32_CLOCK_MODULATION模型特定寄存器（Model Specific Register，MSR）进行的占空比调整（duty cycle modulation）。关于MSR，请参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Model-specific_register">维基百科</a>的相关内容。</p>
+<h2 id="检测阶段"><a href="#检测阶段" class="headerlink" title="检测阶段"></a>检测阶段</h2><p>检测内存DoS攻击的关键在于，这种攻击是由攻击者VM与被保护VM之间的异常资源抢占引起的。这种资源抢占可以明显地改变被保护VM的内存使用状态，而这个状态又可以被云服务提供商监测到。假设访问内存资源的统计数据符合特定的概率分布，则受攻击时，统计数据会发送变化。</p>
+<h3 id="伪孤立参考抽样"><a href="#伪孤立参考抽样" class="headerlink" title="伪孤立参考抽样"></a>伪孤立参考抽样</h3><p>使用“执行节流”的方法获得样本。其基本思想是降低其它VM的执行速度，但在参考采样阶段保持受保护的VM的速度。这可以减少共存VM的干扰，而无需暂停它们。</p>
+<p>“执行节流”基于Intel处理器中提供的一种称为“占空比调整”的特性。这一设计旨在规范每个核心的执行速度和功耗。处理器允许软件为每个核分配“占空比”（duty<br>cycles），这个核在占空时工作，否则不工作。在执行节流中，其他VM的执行速度将会降低，并且受保护的VM很少受到资源的抢占。因此，在执行节流阶段收集的参考样本是由基本不受抢占状态得出的。</p>
+<h2 id="缓解阶段"><a href="#缓解阶段" class="headerlink" title="缓解阶段"></a>缓解阶段</h2><p>云服务提供商有多种方法缓解攻击。一种是，受到LLC攻击时，可以将受影响的VM迁移到其它CPU上；另一种是，受到内存攻击时，可以将受影响的VM迁移到其它宿主服务器上。但是，VM迁移不能解决攻击者对其它VM的影响。<br>另一种方法是识别攻击者的VM，然后进行强制执行节流以降低恶意VM的执行速度，同时云服务提供商进行进一步的调查或&#x2F;并通知客户，怀疑其VM有资源滥用操作。</p>
+<h3 id="识别攻击者VM"><a href="#识别攻击者VM" class="headerlink" title="识别攻击者VM"></a>识别攻击者VM</h3><p>一旦检测到内存DoS攻击，为了减轻威胁，云服务提供商就需要识别出哪个VM正在进行攻击。在这里，文章提出了一种新的方法，基于选择性执行节流，以一种二分法搜索的方式识别恶意VM。首先，一半VM保持正常的执行速度，而其余VM在参考采样周期内被抑制。如果在这种情况下，参考样本与原有样本变化不大，则说明恶意VM不在这些VM中。然后选择其余一半的VM以正常速度运行，而其他VM都被限制，以收集下一个参考样本并进行分析，直到找出恶意VM。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>本篇论文的技术细节大致如上所述。通过本次学习，可以看出底层知识的重要性。对底层的涉及，有时候可以影响成果的深度。所以在今后的学习中，要适当回顾本科知识，扎得更深，才能站得更稳。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag"># 网络安全</a>
+              <a href="/tags/%E4%BA%91%E8%AE%A1%E7%AE%97/" rel="tag"># 云计算</a>
+              <a href="/tags/DoS/" rel="tag"># DoS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/" rel="next" title="悬空DNS记录带来的安全威胁">
+                  悬空DNS记录带来的安全威胁 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

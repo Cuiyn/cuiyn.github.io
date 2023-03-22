@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2012年MLDM会议论文《A Pattern Recognition System for Malicious PDF Files Detection》，其DOI信息在这里。 这篇论文虽有些老旧，但其语言精练、叙述准确，个人认为可以用于学习论文写作。这篇论文的另一个亮点是实验对比详尽，在形成思路需要实验验证时，不妨先学习一下这篇论文。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用于恶意PDF文件检测的模式识别系统">
+<meta property="og:url" content="http://cuiyn.github.io/2018/08/06/A-Pattern-Recognition-System-for-Malicious-PDF-Files-Detection/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2012年MLDM会议论文《A Pattern Recognition System for Malicious PDF Files Detection》，其DOI信息在这里。 这篇论文虽有些老旧，但其语言精练、叙述准确，个人认为可以用于学习论文写作。这篇论文的另一个亮点是实验对比详尽，在形成思路需要实验验证时，不妨先学习一下这篇论文。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180806/feature_extractor.png">
+<meta property="article:published_time" content="2018-08-05T17:50:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="恶意代码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20180806/feature_extractor.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/08/06/A-Pattern-Recognition-System-for-Malicious-PDF-Files-Detection/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/08/06/A-Pattern-Recognition-System-for-Malicious-PDF-Files-Detection/","path":"2018/08/06/A-Pattern-Recognition-System-for-Malicious-PDF-Files-Detection/","title":"用于恶意PDF文件检测的模式识别系统"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>用于恶意PDF文件检测的模式识别系统 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PDF%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88"><span class="nav-number">3.</span> <span class="nav-text">PDF技术概览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E7%AE%80%E8%BF%B0"><span class="nav-number">3.1.</span> <span class="nav-text">历史简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PDF%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.</span> <span class="nav-text">PDF结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%94%BB%E5%87%BBPDF%E6%96%87%E4%BB%B6%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">攻击PDF文件的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">攻击类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%83%E9%81%BF%E6%8A%80%E6%9C%AF"><span class="nav-number">4.2.</span> <span class="nav-text">逃避技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E6%94%BB%E5%87%BB%E6%B5%81%E7%A8%8B"><span class="nav-number">4.3.</span> <span class="nav-text">典型攻击流程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PDF%E5%AE%89%E5%85%A8%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-number">5.</span> <span class="nav-text">PDF安全相关工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B0%E5%9E%8BPDF%E6%A3%80%E6%B5%8B%E5%99%A8"><span class="nav-number">6.</span> <span class="nav-text">新型PDF检测器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="nav-number">6.1.</span> <span class="nav-text">特征提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%B1%BB"><span class="nav-number">6.2.</span> <span class="nav-text">分类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%AF%84%E4%BC%B0"><span class="nav-number">7.</span> <span class="nav-text">实验评估</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">8.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/08/06/A-Pattern-Recognition-System-for-Malicious-PDF-Files-Detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="用于恶意PDF文件检测的模式识别系统 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用于恶意PDF文件检测的模式识别系统
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-06 01:50:00" itemprop="dateCreated datePublished" datetime="2018-08-06T01:50:00+08:00">2018-08-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2012年MLDM会议论文《A Pattern Recognition System for Malicious PDF Files Detection》，其DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1007/978-3-642-31537-4_40">这里</a>。</p>
+<p>这篇论文虽有些老旧，但其语言精练、叙述准确，个人认为可以用于学习论文写作。这篇论文的另一个亮点是实验对比详尽，在形成思路需要实验验证时，不妨先学习一下这篇论文。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>在过去的2到3年中，恶意PDF文件已经被用来危害计算机安全，而现代的反病毒技术被证明并不能完全有效地对抗这种威胁。该论文提出了一种将与PDF文件结构密切相关的特征提取的模块，与有效分类器相结合的创新技术。这个系统已经被证明比其他最先进的用于恶意PDF检测的研究工具更有效，也比大多数商业中的反病毒工具更有效。此外，它的灵活性允许采用它作为独立工具或插件，以提高已安装的杀毒软件的性能。</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>黑客试图破坏计算机系统安全的方式一直在不断演变。操作系统变得更加安全，因为安全补丁不断被释放，找到零日漏洞的可能性也降低了。因此，第三方应用程序（如Adobe Reader、Microsoft Outlook等）和它们读取的文件格式已经成为攻击者的目标。</p>
+<p>现在，PDF文件格式被广泛地用于阅读文档，并且通常认为它是安全的。然而，它的安全在过去几年中受到了损害。通常用于打开它们的应用程序已经成为网络犯罪分子的目标，他们一直在试图找到能够使他们控制读取PDF文件的计算机系统的缺陷或漏洞。此外，此类应用程序的第三方插件拓宽了攻击的范围，这些应用程序经常出现bug，尽管这些bug已经被发现，但并没有及时修复。一旦这些系统被利用，它们也可能被网络犯罪组织用作僵尸网络的一部分。赛门铁克和IBM在2009年和2010年的安全报告中明确提出了这个问题。</p>
+<p>攻击者也变得更聪明了，Adobe等软件公司建立的许多对策现在都被忽略了。大多数攻击的重点都是绕过最先进的保护措施，因此，针对最广泛的攻击（包括可能的新攻击）的系统的开发将是解决这一威胁的关键。由此，这篇论文提出了一种检测恶意PDF文件的新工具，利用特定于PDF的特性，通过机器学习构建统计分类器。</p>
+<h1 id="PDF技术概览"><a href="#PDF技术概览" class="headerlink" title="PDF技术概览"></a>PDF技术概览</h1><h2 id="历史简述"><a href="#历史简述" class="headerlink" title="历史简述"></a>历史简述</h2><p>PDF是便携式文档格式（Portable Document format）的首字母缩写，是一种广泛使用的交换文档的标准。它首先在1990年开始提出，1993年开始用于公共领域；1994年，用于读取PDF文件的Adobe Reader变为免费。现在，PDF、DOC（DOCument）和ODT（OpenDocumenT）都是最常用的文档阅读和可视化格式之一，后两个分别被Microsoft Word和Open Office使用。PDF格式是灵活的，允许较高的排版质量和相对较小的内存使用，并且它能够在不同的软件平台和应用程序中被识别。</p>
+<h2 id="PDF结构"><a href="#PDF结构" class="headerlink" title="PDF结构"></a>PDF结构</h2><p>PDF文件的结构为一系列逻辑上相互连接的字典对象(标记为“&lt;&lt;”和“&gt;&gt;”)，每个对象后面都有一个压缩的数据流。每个字典对象包含更简单的对象类型（数字、数组、名称），它们提供关于对象本身执行的操作的信息。数据流可以包含文本、图像和使用字典中对象提供的信息进行处理的代码。对象可以是页面、字体、图象、嵌入代码。可以用文本方式（Raw模式）看到文件结构，其中关于对象执行的操作类型的信息由关键字表示，关键字由标记“&#x2F;”标识。</p>
+<h1 id="攻击PDF文件的方式"><a href="#攻击PDF文件的方式" class="headerlink" title="攻击PDF文件的方式"></a>攻击PDF文件的方式</h1><h2 id="攻击类型"><a href="#攻击类型" class="headerlink" title="攻击类型"></a>攻击类型</h2><p>由于其灵活的对象结构，PDF文件格式可以包含Java、Flash代码和其他各种应用程序。然而，这可能会带来很多安全问题，引发多种类型的攻击。下面总结一下主要的安全问题。</p>
+<ul>
+<li>Javascript代码问题：攻击者可以在PDF文件中使用特定的API直接注入一些恶意的Javascript代码，以便利用应用程序的漏洞读取它。CVE-2009-4324对其进行了报告。</li>
+<li>启动操作：攻击者可能会生成一个PDF文件，以在操作系统上启动特殊的命令。这通常发生在用户进行确认之后。CVE-2010-2883对其进行了报告。</li>
+<li>嵌入文件：PDF文件可能包含附加文件，可由阅读器程序提取和打开。这可以用来隐藏恶意的可执行文件。例如CVE-2010-1240。</li>
+<li>嵌入Flash应用程序：PDF文件可能包含Flash应用程序（存储为嵌入的SWF文件）以及恶意的ActionScript代码。例如零日漏洞CVE-2010-3654。</li>
+</ul>
+<h2 id="逃避技术"><a href="#逃避技术" class="headerlink" title="逃避技术"></a>逃避技术</h2><p>攻击者通常使用模糊和加密技术来绕过<strong>IDS</strong>（入侵检测系统）和反病毒。以下是对几个重要技术的描述。</p>
+<ul>
+<li>GoToEmbedded操作；一个PDF文件可以嵌入到另一个PDF文件中，并且可以发布一个特殊的命令，这样Adobe Reader就可以在不通知用户的情况下打开嵌入的PDF文件。这个特性可以用于在一个普通的PDF文件中隐藏恶意的PDF文件。</li>
+<li>加密：可使用密码加密PDF文件。但是，如果使用了一个空的密码，Adobe Reader将直接打开它，而无需询问用户。</li>
+<li>解析器的“灵活性”：可以在PDF文件的头部引入一些细微的变化，以绕过严格的反病毒防护。</li>
+</ul>
+<h2 id="典型攻击流程"><a href="#典型攻击流程" class="headerlink" title="典型攻击流程"></a>典型攻击流程</h2><p>了解攻击通常如何执行，对于分析的目的非常重要。以下将提供攻击发生时所采用的典型流程，但不会详细介绍所采用的漏洞技术，因为这不是文章的目的。</p>
+<ol>
+<li>打开恶意的PDF文件（通常由垃圾邮件发送）。恶意的PDF文件可能包含SWF、HTML和JS文件、Javascript和ActionScript代码，甚至嵌入恶意的PDF文件。为了不被IDS检测到，这些元素通常被混淆。</li>
+<li>根据嵌入代码&#x2F;文件的类型，使用一些漏洞利用技术，如:<ul>
+<li>缓冲区溢出。恶意代码被插入到程序允许范围之外的内存区域。</li>
+<li>面向返回编程（Return Oriented Programming, ROP）。程序流被重定向到包含恶意代码的内存区域，使用特定的内存地址。</li>
+<li>堆喷射（Heap Spraying, HS）。内存的堆区域包含一个包含恶意代码的对象的多个副本，以绕过针对ROP的一些策略。</li>
+<li>JIT喷射（JIT Spraying, JITS）。使用JIT编译器在内存中创建不可写入的区域，然后向该区域注入恶意代码。</li>
+</ul>
+</li>
+<li>由于这个漏洞，嵌入在PDF文件中的shellcode被复制到主内存中并执行。</li>
+<li>shellcode触发了一个“特洛伊木马”程序的下载，并自动执行，破坏整个计算机系统的安全。</li>
+</ol>
+<h1 id="PDF安全相关工作"><a href="#PDF安全相关工作" class="headerlink" title="PDF安全相关工作"></a>PDF安全相关工作</h1><p>PDF安全是一个相当新的研究领域。许多研究人员一直致力于发现新的威胁，并开发一些工具来提高PDF分析的质量。Stevens开发了PDFid，它能够提供包含在PDF文件中的对象的详细列表，以及它们的频率(即它们在文件中出现的次数)。Contagio提供了对PDF文件漏洞的深刻见解，也提供了我们分析中使用的部分数据集。</p>
+<p>与PDF安全相关的学术工具并不多。大多数可用的工具同时检测到多种类型的恶意软件，同时包括PDF。文章提到的有：CWSandbox、Wepawet、Nozzle、MDScan、PJScan等。</p>
+<h1 id="新型PDF检测器"><a href="#新型PDF检测器" class="headerlink" title="新型PDF检测器"></a>新型PDF检测器</h1><p>文章提出了一种新的工具——PDF恶意软件杀手（PDF Malware Slayer, PDFMS）。PDFMS是一种基于机器学习的高级工具，用于检测恶意PDF文件。本工具由以下几部分组成：</p>
+<ul>
+<li>数据检索模块，检索训练&#x2F;测试阶段的文件。</li>
+<li>特征提取模块，确定分类器使用的特征类型。</li>
+<li>分类器本身。</li>
+</ul>
+<p>下面将关注开发特征提取模块所采用的方法，以及选择分类器背后的指导原则。</p>
+<h2 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h2><p>特征提取是本项目最重要的部分，因为不正确地选择特性会影响分类器的工作结果。恶意代码总是包含在被压缩的数据流中。然而，由于存在各种各样的PDF对象，作为一个整体来分析数据流可能非常复杂。此外，过于关注特定类型的对象（例如Javascript或ActionScript）可能导致只允许检测一部分PDF攻击。为了克服这个问题，文章根据嵌入的关键字的集合来描述PDF文件。值得注意的是，PDF阅读器需要识别一些特定的PDF关键字，以便执行操作、打开图象等等。因此，每个关键字的出现对于理解打开PDF文件时PDF阅读器的高级行为以及区分恶意PDF和合法PDF文件是很有用的。</p>
+<p>为了实现这一目标，文章采取了两步:</p>
+<ol>
+<li>考虑两个分别由恶意与合法的PDF文件组成的集合。对于这两组，我们列举了PDF文件的关键字，对于每个关键字，计算它的相对频率（在一个文件中多次出现一个关键字只被考虑一次）。然后，无论是恶意文件还是良性文件，通过K-means聚类（K &#x3D; 2）来识别频率最高的关键字组（即最高质心）。基本特征集由对应两个集群的联合（union）定义。在这个集合中的每个关键字，我们添加它的混淆版本（如果它至少一次出现在良性或恶意的文件中）来构建最终的特性集。例如，如果关键字&#x2F;JS基本特性集内，有一个模糊的版本的这个关键字，即&#x2F;JSoffus，我们将包括&#x2F;JSoffus最后的特性集。</li>
+<li>通过计算特征集合中每个关键字的频率，得到每个PDF文件的特征向量。</li>
+</ol>
+<p>下图示意出特征提取器的结构。</p>
+<p><img src="/statics/images/20180806/feature_extractor.png" alt="特征提取器结构示意图" title="特征提取器结构示意图"></p>
+<h2 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h2><p>上面选择的特征并没有明确提示应该选择哪种分类器。在实验阶段，考虑了朴素贝叶斯、SVM和决策树（特别是使用随机森林）等不同的分类器。在确定了哪种分类器在训练模型上的准确性和稳定性最好之后，文章对此系统在测试集上的准确性和其他系统（商业、学术）的准确性进行了比较。</p>
+<h1 id="实验评估"><a href="#实验评估" class="headerlink" title="实验评估"></a>实验评估</h1><p>精确度测量实验表明，该系统的性能优于绝大多数商业杀毒软件。此外，它的性能比Wepawet好得多，这是一种学术开发的强大工具。事实上，我们的工具专门针对PDF攻击的检测，而Wepawet已经被开发用于检测包括恶意PDF文件在内的许多威胁。因此，专业化对于发现这种威胁显得非常重要。本文提出的工具还可以扫描任何类型的PDF文件，而像PJScan这样的学术工具可以只分析带有Javascript代码的PDF文件。</p>
+<p>尽管这个系统已被证明是非常有效的，但它也存在一些结构性缺陷。首先，在良性文件中找到的相同对象也可以在恶意文件中找到，这意味着同一对象可以带来恶意或良性代码。PDFMS能够正确地确定文件的恶意性的原因是数据流中许多特征对象的单个频率的值。因此，虽然PDFMS能够确定PDF文件是否是恶意的，但它不能给出任何关于漏洞类型的信息，因为它不分析此类流中的代码。更重要的是，如果攻击者了解了文件中某些对象必须出现多少次才能被工具认为是良性的，那么它可以通过在文件中注入这些特定的关键字来绕过PDFMS。为了避免这种攻击，正在对解析器进行改进。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这篇文章通过对比机器学习中几个常用的算法，采用特征提取的方式对PDF文件进行聚类，达到了较好的效果。作为MLDM会议论文，本文语言详略得当，结构清晰，在学习其方法的同时，也应学习其行文思路与结构。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/05/03/Neural-Network-based-Graph-Embedding-for-Cross-Platform-Binary-Code-Similarity-Detection/" rel="prev" title="基于神经网络的跨平台代码相似性检测">
+                  <i class="fa fa-chevron-left"></i> 基于神经网络的跨平台代码相似性检测
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/10/15/Machine-Learning-for-Android-Malware-Detection-Using-Permission-and-API-Calls/" rel="next" title="基于权限和API调用检测Android恶意软件的机器学习方法">
+                  基于权限和API调用检测Android恶意软件的机器学习方法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

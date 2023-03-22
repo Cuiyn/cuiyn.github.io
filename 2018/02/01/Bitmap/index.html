@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文主要介绍Bitmap算法，包括其思路、实现与应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Bitmap算法简介">
+<meta property="og:url" content="http://cuiyn.github.io/2018/02/01/Bitmap/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文主要介绍Bitmap算法，包括其思路、实现与应用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180201/bitmap.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180201/example.png">
+<meta property="article:published_time" content="2018-01-31T22:12:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="Batman">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20180201/bitmap.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/02/01/Bitmap/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/02/01/Bitmap/","path":"2018/02/01/Bitmap/","title":"Bitmap算法简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Bitmap算法简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E5%85%A5"><span class="nav-number">1.</span> <span class="nav-text">引入</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E8%A7%A3%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">传统解法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bitmap%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">Bitmap算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%BA%94%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">算法应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%BA%94%E7%94%A8"><span class="nav-number">5.1.</span> <span class="nav-text">基本应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E8%A1%A8%E6%93%8D%E4%BD%9C"><span class="nav-number">5.2.</span> <span class="nav-text">数据表操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">5.3.</span> <span class="nav-text">布隆过滤器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">6.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/02/01/Bitmap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Bitmap算法简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Bitmap算法简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-01 06:12:00" itemprop="dateCreated datePublished" datetime="2018-02-01T06:12:00+08:00">2018-02-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文主要介绍Bitmap算法，包括其思路、实现与应用。</p>
+<span id="more"></span>
+
+<h1 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>给定一台32位的2GB内存主机与一个含有40亿个整数的文件，整数满足以下三个条件：</p>
+<ul>
+<li>均为unsigned int类型</li>
+<li>不重复</li>
+<li>乱序</li>
+</ul>
+<p>现给出一个整数，如何快速判断此数是否在文件中？</p>
+<h2 id="传统解法"><a href="#传统解法" class="headerlink" title="传统解法"></a>传统解法</h2><p>首先，最容易想到的解法应该是遍历法。理论上它的时间复杂度为$o(N)$，但由于这40亿个整数存在于磁盘中，因此实际上要耗费相当多的时间。</p>
+<p>其次，在算法竞赛中也经常用到一种方法，申请一个大数组char a[]，将文件中出现的数字置为1，没有出现的置为0。这种方法又叫直接寻址表法。但40亿个unsigned int所占空间约为4G，远远超出了机器的内存。</p>
+<p>注意到，在上面的char a[]中，每个整数所占空间为一个字节（即8位），但其实我们用一位二进制数字就可以。也就是说，上述方法还可以进一步压缩空间，压缩后占用空间仅为原来的$\frac{1}{8}$。这就是Bitmap算法的基本思想：使用一个字节表示布尔值，避免空间的浪费。</p>
+<h1 id="Bitmap算法"><a href="#Bitmap算法" class="headerlink" title="Bitmap算法"></a>Bitmap算法</h1><h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>直接寻址表法用一个char类型（8个二进制位）的变量来表示一个布尔值，但其实一个布尔值使用一个二进制位就可以表示。将直接寻址表法的空间进行压缩就得到了BitMap算法。例如要把整数11映射到数组char a[]的某一位置，11&#x2F;8&#x3D;1，11%8&#x3D;3，因此11对应的是a[1]的第三个位，如图。</p>
+<p><img src="/statics/images/20180201/bitmap.png" alt="整数11映射示意图" title="整数11映射示意图"></p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>C++、Java等语言中，有bitset类库可直接实现。在C语言中，没有直接操作位的数据结构，我们只能用位运算来操作位。下面主要针对C语言进行分析。</p>
+<p>首先我们定义一个数组char a[]，用于保存位。设N为需要保存的最大数，因为一个char类型含有8个二进制位，可以表示8个数，所以数组大小为N&#x2F;8。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> N 4000000000</span></span><br><span class="line"><span class="type">char</span> a[<span class="number">1</span> + N/<span class="number">8</span>];</span><br></pre></td></tr></table></figure>
+
+<p>之后我们使用位运算，对位进行增、删、查等常用操作。从BitMap数组里增加一个数，代码如下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">BitMap</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">    <span class="type">int</span> row = n &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="type">int</span> pos = n &amp; <span class="number">0x7</span>;</span><br><span class="line">    a[row] = a[row] | <span class="number">1</span>&lt;&lt;pos;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先，<code>row</code>表示数字n对应数组a的哪一个元素，<code>n &gt;&gt; 3</code>是n右移3位，相当于n&#x2F;8。<code>pos</code>表示数字n对应数组a元素的哪一位，<code>n &amp; 0x7</code>是取n的二进制后三位，相当于n%8。之后将对应的位置1，使用或操作可以只修改<code>pos</code>位，而不影响其它位。</p>
+<p>判断一个数是否存储在BitMap数组中，代码如下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isExist</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">    <span class="type">int</span> row = n &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="type">int</span> posNum = <span class="number">1</span> &lt;&lt; (n &amp; <span class="number">0x7</span>);</span><br><span class="line">    <span class="keyword">return</span> (a[row] &amp; posNum) = <span class="number">0</span> ? <span class="number">0</span> : <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>row</code>表示数字n对应数组a的哪一个元素，<code>a[row] &amp; posNum</code>为0，则说明对应位是0，这个数没有存储在BitMap数组中。否则说明BitMap数组中存有这个数字。</p>
+<p>从一个BitMap数组里删除一个数，代码如下。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DelFromBitMap</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">    <span class="type">int</span> row = n &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="type">int</span> posNum = <span class="number">1</span> &lt;&lt; (n &amp; <span class="number">0x7</span>);</span><br><span class="line">    a[row] = a[row] &amp; ((<span class="number">1</span>&lt;&lt;posNum) ^ <span class="number">0x7</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>与上同理，<code>^</code>是异或运算符，<code>(1&lt;&lt;posNum) ^ 0x7</code>得到的是<code>pos</code>位为0、其它位为1的数，<code>a[row]</code>与它做与运算，相当于将<code>pos</code>位置0，即删除了这个数。</p>
+<h1 id="算法应用"><a href="#算法应用" class="headerlink" title="算法应用"></a>算法应用</h1><h2 id="基本应用"><a href="#基本应用" class="headerlink" title="基本应用"></a>基本应用</h2><p>显然，Bitmap算法非常适合于对大量、不重复、无符号整数进行查找与排序。此外，它还可以用于计算字符串的全组合枚举。例如，找到abcdef的全组合枚举，每个字母均可出现或不出现，就可以构造一个从字符串到二进制的映射关系，通过枚举二进制来进行全排序。</p>
+<p>对于有重复数据的数组，可以进行一些改造。例如，使用两个位存储一个数字，若未出现，记为00；若出现一次，记为01；若出现两次，记为10；11未定义。</p>
+<h2 id="数据表操作"><a href="#数据表操作" class="headerlink" title="数据表操作"></a>数据表操作</h2><p>在一个用户画像系统中，实现用户信息标签化。如小明的用户信息标签可以是：程序员、90后、宅。现需统计所有90后的程序员。传统的实现方法可能为：将这些信息存在一个数据表里，数据表字段是用户标签，每一个记录对应一个用户。使用一条求交集的SQL语句<code>Select count（distinct Name） as 用户数 from table whare age = ’90后’ and Occupation = ‘程序员’;</code>但标签逐渐增多，会使维护越来越困难；且SQL语句过长，运行缓慢，难于阅读。</p>
+<p>这里可以使用BitMap算法实现，思路是将用户对应多个标签转换为标签对应多个用户。首先，建立用户和用户id的映射；之后，每一个标签存储包含此标签的所有用户ID，每一个标签都是一个独立的Bitmap。如图。</p>
+<p><img src="/statics/images/20180201/example.png" alt="用户标签示意图" title="用户标签示意图"></p>
+<p>若要查询使用苹果手机的程序员用户，对Occupation的BitMap表以及和phone的BitMap表进行与运算就可以得出，运算效率很高。</p>
+<p>这种情景下使用BitMap的优是点占用字节数少，大多操作为位运算，效率高；缺点是不适用于数据分散的情况，且进行非运算比较困难。如得到非90后的用户，只能通过计算全部用户的BitMap解决。</p>
+<h2 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h2><p>布隆过滤器（Bloom Filter）是一个判断元素是否存在集合中的快速概率算法。</p>
+<p>如果想判断一个元素是不是在一个集合里，一般想到的是将集合中所有元素保存起来，然后通过比较确定。链表、树、散列表（又叫哈希表，Hash table）等等数据结构都是这种思路。但是随着集合中元素的增加，我们需要的存储空间越来越大。同时检索速度也越来越慢，上述三种结构的检索时间复杂度分别为$O(n),O(\log n),O(n&#x2F;k)$。</p>
+<p>布隆过滤器的原理是，当一个元素被加入集合时，通过K个散列函数将这个元素映射成一个位数组中的K个点，把它们置为1。检索时，我们只要看看这些点是不是都是1就（大约）知道集合中有没有它了：如果这些点有任何一个0，则被检元素一定不在；如果都是1，则被检元素很可能在。这就是布隆过滤器的基本思想。</p>
+<p>相比于其它的数据结构，布隆过滤器在空间和时间方面都有巨大的优势。布隆过滤器存储空间和插入&#x2F;查询时间都是常数（$O(k)$）。另外，散列函数相互之间没有关系，方便由硬件并行实现。布隆过滤器不需要存储元素本身，在某些对保密要求非常严格的场合有优势。</p>
+<p>但是布隆过滤器的缺点和优点一样明显。误算率是其中之一。随着存入的元素数量增加，误算率随之增加。另外，一般情况下不能从布隆过滤器中删除元素。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8">维基百科 - 布隆过滤器</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/01/18/Use-Tensorflow-to-Build-Deep-Learning-Model/" rel="prev" title="利用Tensorflow构建深度学习模型">
+                  <i class="fa fa-chevron-left"></i> 利用Tensorflow构建深度学习模型
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/03/06/Blockchain-Technology/" rel="next" title="区块链技术简介">
+                  区块链技术简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天分享一篇发布在今年CCS会议上的、与域名相关的一篇论文，题目是《The Wolf of Name Street:Hijacking Domains Through Their Nameservers》，DOI信息在这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通过域名服务器攻击域名">
+<meta property="og:url" content="http://cuiyn.github.io/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="今天分享一篇发布在今年CCS会议上的、与域名相关的一篇论文，题目是《The Wolf of Name Street:Hijacking Domains Through Their Nameservers》，DOI信息在这里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-11-30T02:06:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="网络安全">
+<meta property="article:tag" content="域名">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/","path":"2017/11/30/Hijacking-Domains-Through-Their-Nameservers/","title":"通过域名服务器攻击域名"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>通过域名服务器攻击域名 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">背景简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E9%98%90%E8%BF%B0"><span class="nav-number">3.</span> <span class="nav-text">问题阐述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AF%B7%E6%B1%82%E5%8A%AB%E6%8C%81"><span class="nav-number">3.1.</span> <span class="nav-text">域名服务器请求劫持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E9%A2%86%E5%9F%9F"><span class="nav-number">3.2.</span> <span class="nav-text">研究领域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BE%9D%E8%B5%96"><span class="nav-number">3.3.</span> <span class="nav-text">域名服务器依赖</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E8%AF%AF%E6%A4%8D%E5%9F%9F%E5%90%8D"><span class="nav-number">4.</span> <span class="nav-text">域名服务器的误植域名</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">攻击模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E9%87%8F%E5%BD%B1%E5%93%8D"><span class="nav-number">4.2.</span> <span class="nav-text">流量影响</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BD%8D%E9%94%99%E8%AF%AF"><span class="nav-number">5.</span> <span class="nav-text">域名服务器位错误</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%A8%A1%E5%9E%8B-1"><span class="nav-number">5.1.</span> <span class="nav-text">攻击模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E9%87%8F%E5%BD%B1%E5%93%8D-1"><span class="nav-number">5.2.</span> <span class="nav-text">流量影响</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="通过域名服务器攻击域名 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          通过域名服务器攻击域名
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-30 10:06:00" itemprop="dateCreated datePublished" datetime="2017-11-30T10:06:00+08:00">2017-11-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>今天分享一篇发布在今年CCS会议上的、与域名相关的一篇论文，题目是《The Wolf of Name Street:<br>Hijacking Domains Through Their Nameservers》，DOI信息在<a target="_blank" rel="noopener" href="http://doi.acm.org/10.1145/3133956.3133988">这里</a>。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>所有域名的功能实现和安全都依赖于它们的域名服务器。当这些服务器（或仅仅是发至服务器的请求）受到危害时，依赖它们的域名也会受到影响。这篇论文主要研究了存在于配置错误（如误植域名、过期的WHOIS记录）与硬件错误（位错误，bitsquatting）的漏洞，以取得域名服务器的控制权，并劫持域名。文中对10000个受欢迎的域名服务器进行了分析，并确认了这类攻击的可能性。总体上，超过12000个域名易受到立刻产生影响的感染，52.8M的域名返回异常的IP地址，从而易受域名服务器位错误的影响。此外，1.28M的域名易通过过期域名服务器而受到拒绝服务攻击。</p>
+<h1 id="背景简介"><a href="#背景简介" class="headerlink" title="背景简介"></a>背景简介</h1><p>DNS（Domain Name System，域名解析服务）是当今Internet的最重要协议之一，它将人类易于记忆的域名转换为机器可路由查找的IP地址。即使新的顶级域名（Top-Level Domain，TLD）不断加入，传统的短小通用的顶级域名仍被高价出售。从安全的角度考虑，域名及其所有权，被用户以及应用程序明确地、绝对地信赖着。</p>
+<p>近几年，研究者已经发现，攻击者会注册已经过期的域名，以获取用户对这些域名残留的信任。某些情况下，攻击者甚至不需要等到这些域名过期就可以实施攻击。除了偷取域名所有者的账号与密码之外，研究者还发现，在适当的条件下，攻击者能够通过滥用悬空链接劫持存活的域名（本博客介绍过相关研究成果，参考<a href="/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records.html">这里</a>）。</p>
+<p>针对域名服务器进行攻击，可以大幅提高攻击者成功的可能性。进一步说，针对域名服务器的攻击效率非常高，因为一次攻击可以影响以其为基础的多个域名。</p>
+<h1 id="问题阐述"><a href="#问题阐述" class="headerlink" title="问题阐述"></a>问题阐述</h1><h2 id="域名服务器请求劫持"><a href="#域名服务器请求劫持" class="headerlink" title="域名服务器请求劫持"></a>域名服务器请求劫持</h2><p>当客户端想要访问一个确定的域名时，这个域名首先被解析为一个IP地址。这个解析过程，一般被一个递归解释器处理，它会首先确认根域名服务器与顶级域名服务器，最后从二级域名服务器获取到IP地址。在这篇文章的研究工作中，作者发现有多种技术可以令敌手获取二级域名服务器的控制。因为实际上任意一种类型的线上应用程序都在使用DNS，但大多数又没有感觉到，所以这些漏洞大范围存在。</p>
+<p>以下部分介绍攻击方法的梗概。请注意，在下面的概述中，只考虑攻击者对抗常用软件的情况，因此不可能做到全面。</p>
+<ul>
+<li><p>中间人（Man-in-the-Middle，MITM）。当攻击者控制一台域名的人在域名服务器之后，需要连接受害域名的客户端会将A记录的查询请求发至攻击者的域名服务器。通过回复攻击者控制服务器的IP地址，攻击者可以重新设置（并且有可能改变）客户端与其想要连接服务器的通信。这种攻击产生的后果依赖于被影响的服务。</p>
+</li>
+<li><p>域名所有权验证（Domain-ownership verification）。在中间人攻击中，攻击者能够实施破坏的时期取决于他控制域名服务器的时间长度。除了这种攻击之外，攻击者还可以采取一些持续时间更长的攻击行为。一些类似的行为与域名所有权验证有关。更明确地说，一些服务需要（网站）管理员认证他事实上控制这个域名，如在指定位置随机生成一个文件进行确认。对于许多认证机构，包括Let’s Encrypt，这个方法是唯一的验证手段。这意味着只要临时控制一个域名的域名服务器，敌手就可以获得一个有效期长达数年的认证。此外，因为这个认证请求是由攻击者申请的，域名所有者不能获取到私钥，因此不能抵抗这个认证。除了SSL认证以外，还有许多服务提供更为持久的敏感服务。例如谷歌的Webmaster工具，对域名所有者给予额外的功能，如从搜索结果中移除特定页面等。</p>
+</li>
+<li><p>电子邮件。除了上面提到的攻击，攻击者也可以攻击其他类型的DNS记录。例如通过返回虚假的MX记录，敌手可以拦截发至某个域名的电子邮件。通过精心选择TXT记录，他可以模仿该域名发出电子邮件，甚至在SPF、DKIM与DMARC记录都被验证的安全状态下。</p>
+</li>
+</ul>
+<h2 id="研究领域"><a href="#研究领域" class="headerlink" title="研究领域"></a>研究领域</h2><p>为评估通过攻击域名服务器来劫持域名的风险，文中选择了常见的二级域名服务器。确切地说，文中分析了前10000个受欢迎的二级域名服务器，它们承担了最大数量的域名验证服务。为决定出这10000个二级域名服务器，文中分析了前5个通用顶级域名服务器（gTLD）的区域文件（zonefile），它们是com,net,org,xyz和info。在区域文件中的每个域名，文章找出它们的NS记录。总体上，文中的工作分析了164M个域名信息。</p>
+<p>之后，文章获取了每个域名服务器的域名（nameserver domain，下文简称NSDOM）。例如，在NS记录表中的ns2.dnspod.net，得到的域名是dnspod.net。之后确定出有最多NS记录指向的NSDOM。最后，选择了10000个NSDOM作为分析的起点。</p>
+<h2 id="域名服务器依赖"><a href="#域名服务器依赖" class="headerlink" title="域名服务器依赖"></a>域名服务器依赖</h2><p>本研究的一个重要部分是存在于域名服务器之间的依赖。当一个NSDOM自己的NS记录在辖区内（in-bailiwick）时，我们称它是独立的。如hichina.com的NS记录是ns1.hichina.com。这时，顶级域名服务器会直接给出IP地址（叫做glue record）。相反，当NSDOM自己的NS记录在辖区外(out-of-bailiwick)时，称它是不独立的。例如，在查询ns1.hostgator.sg时，发现这个域名服务器的NS记录指向的是dynect.net下的主机。也就是说，ns1.hostgator.sg完全依赖于另一个二级域名服务器，依赖在ns1.hostgator.sg上面的域名也是如此。</p>
+<p>这样的依赖很常见。事实上，在前10000个NSDOM中，有34.4%依赖至少一个辖区外的域名服务器。文中找到了一些辖区外的域名服务器，它们依赖的又是辖区外的域名服务器，紧接也如此。文中将其称为域名服务器依赖链（nameserver dependency chains）。如果在链中的一台域名服务器受到攻击，它之下的其他域名服务器也会受到影响。攻击者因此具有控制依赖于这台服务器的全部域名服务器的可能性。</p>
+<h1 id="域名服务器的误植域名"><a href="#域名服务器的误植域名" class="headerlink" title="域名服务器的误植域名"></a>域名服务器的误植域名</h1><h2 id="攻击模型"><a href="#攻击模型" class="headerlink" title="攻击模型"></a>攻击模型</h2><p>误植域名是对于权威域名的拼写错误。攻击者注册这些域名，企图在用户错误拼写域名时进行攻击。例如，一个误植域名攻击者注册域名twittre.com，企图分享twitter.com的大量流量。</p>
+<p>误植域名已经被大量分析，但仅局限于用户在浏览器中产生的拼写错误。在这篇文章中，作者提出了一种未被大量分析的现象：域名服务器误植域名（nameserver typosquatting）。概述为管理员在进行DNS配置时输错了NS记录，通过Web页面或注册商提供的API进行配置时经常出现此类错误。例如，polishop.com是巴西一家著名的网上商城，它有一个错误配置的NS记录。其记录原本应为ns-566.awsdns-06.net，但配置时错将net输成了ne。虽然这个记录是错误的，但域名仍然是有效域名。因为存在冗余的域名服务器，管理员通常不会注意到这类错误。</p>
+<h2 id="流量影响"><a href="#流量影响" class="headerlink" title="流量影响"></a>流量影响</h2><p>在传统的误植域名中，仅在访问者错误输入域名时产生影响。也就是说，这类错误仅影响访问者一次。相反来说，域名服务器的误植域名造成的影响，能够一直持续到错误被纠正。因此，很难估计攻击者成功利用这个漏洞后产生的流量影响。但可以看出，相比传统误植域名，域名服务器误植域名造成的流量影响要严重得多。</p>
+<h1 id="域名服务器位错误"><a href="#域名服务器位错误" class="headerlink" title="域名服务器位错误"></a>域名服务器位错误</h1><p>文中介绍的第二种攻击叫做域名服务器位错误（nameserver bitsquatting）。它与上面的误植域名类似，但不是人为产生的错误，而是硬件的机能失常。</p>
+<h2 id="攻击模型-1"><a href="#攻击模型-1" class="headerlink" title="攻击模型"></a>攻击模型</h2><p>位错误是由设备或计算机的内存产生的随机位翻转（bit-flip）导致的。位翻转主要由硬件错误导致，例如温度、射线影响，是难以预测的。然而，位翻转是一种有文献证明的现象，许多已出版的研究成果报告了它的影响、原因。在DRAM中，位错误通常可由错误校验码（Error Correcting Codes，ECCs）进行纠正。即使这些技术比较普遍，在消费级产品中（甚至商业级产品，如NIC或硬盘等）中，这些技术仍然经常不被使用。</p>
+<p>如果位翻转影响了内存中存储的域名，那么就很容易导致错误的域名访问。例如，位翻转可能将twitter.com变成twitte2.com，因为字符“2”的二进制ASCII码是00110010，而“r”是01110010，仅需产生一位翻转。VeriSign的研究显示，大约每$10^7$至$10^8$次DNS查询中，就有一次出现这样的位翻转错误。</p>
+<p>文章主要讨论了发至域名服务器的DNS请求出现的位翻转。因为NSDOM在域名解析中相较普通域名出现次数较多，因此在统计上更易出现错误。</p>
+<h2 id="流量影响-1"><a href="#流量影响-1" class="headerlink" title="流量影响"></a>流量影响</h2><p>早期的研究主要针对于Web服务器的域名位翻转，但NSDOM位翻转产生的影响更大，因为其影响的不仅是一个域名。首先来说，NSDOM通常被多个域名共享，因此会产生更多的查询量，由此会加大位翻转出现的可能性；其次，NSDOM的错误会影响该服务器托管的所有域名。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这篇文章着眼点较大，将DNS攻击点放在了服务器上。同时，也引入了位翻转这一有些“异想天开”但又确实存在的攻击方式，值得学习。对于位翻转的研究，也说明了科研过程是需要想象力与证实想象的魄力。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag"># 网络安全</a>
+              <a href="/tags/%E5%9F%9F%E5%90%8D/" rel="tag"># 域名</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/11/13/Knapsack-Problem/" rel="prev" title="背包问题概述">
+                  <i class="fa fa-chevron-left"></i> 背包问题概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/" rel="next" title="使用动态分析和属性图检测CSRF漏洞">
+                  使用动态分析和属性图检测CSRF漏洞 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

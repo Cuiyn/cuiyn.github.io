@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天整理的算法是一种概率算法，它与我们以前提到过的神经网络关系紧密：可以用于解决神经网络求解最值问题；与神经网络类似，灵感来源于自然科学。下面开始介绍这个有趣的算法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模拟退火算法简介">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/25/Simulated-annealing/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="今天整理的算法是一种概率算法，它与我们以前提到过的神经网络关系紧密：可以用于解决神经网络求解最值问题；与神经网络类似，灵感来源于自然科学。下面开始介绍这个有趣的算法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171018/gradient.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171025/gradient-error.png">
+<meta property="article:published_time" content="2017-10-24T17:30:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="Batman">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171018/gradient.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/25/Simulated-annealing/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/25/Simulated-annealing/","path":"2017/10/25/Simulated-annealing/","title":"模拟退火算法简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>模拟退火算法简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%8D%E8%AE%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">再论梯度下降法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">模拟退火算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%AA%E4%BB%A3%E7%A0%81"><span class="nav-number">2.3.</span> <span class="nav-text">伪代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/25/Simulated-annealing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="模拟退火算法简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          模拟退火算法简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-25 01:30:00" itemprop="dateCreated datePublished" datetime="2017-10-25T01:30:00+08:00">2017-10-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>今天整理的算法是一种概率算法，它与我们以前提到过的神经网络关系紧密：可以用于解决神经网络求解最值问题；与神经网络类似，灵感来源于自然科学。下面开始介绍这个有趣的算法。</p>
+<span id="more"></span>
+
+<h1 id="再论梯度下降法"><a href="#再论梯度下降法" class="headerlink" title="再论梯度下降法"></a>再论梯度下降法</h1><p>上一篇有关于神经网络的博文介绍了梯度下降法，它常用来递归性地逼近最小偏差模型，沿梯度的方向逼近极小值。并给了一个这样的函数图象作为示例。</p>
+<p><img src="/statics/images/20171018/gradient.png" alt="梯度下降示意图" title="梯度下降示意图"></p>
+<p>梯度下降法沿右边箭头方向，逐渐逼近函数的极小值。本例中，这个极小值就是函数的最小值。</p>
+<p>在这个例子中，一切都非常简单、完美。但是同时也存在着一些不太“完美”的函数，例如把上面的函数略作修改即有下图。</p>
+<p><img src="/statics/images/20171025/gradient-error.png" alt="梯度下降的局限性示意图" title="梯度下降的局限性示意图"></p>
+<p>若梯度下降法的起点在左侧，则很容易在第一个极值点结束，终止于局部极小而错过了全局最小。遇到更复杂、极值点更多的函数，梯度下降法的结果可能更差。因此，这一方法具有局限性，很多情况下不能得到理想的结果。因此人们提出了模拟退火算法。</p>
+<h1 id="模拟退火算法"><a href="#模拟退火算法" class="headerlink" title="模拟退火算法"></a>模拟退火算法</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>与梯度下降法的目的类似，模拟退火算法用来在固定时间内寻求在一个大的搜寻空间内找到的最优解。模拟退火来自冶金学的专有名词退火。退火是将材料加热后再经特定速率冷却，目的是增大晶粒的体积，并且减少晶格中的缺陷。材料中的原子原来会停留在使内能有局部最小值的位置，加热使能量变大，原子会离开原来位置，而随机在其他位置中移动。退火冷却时速度较慢，使得原子有较多可能可以找到内能比原先更低的位置。</p>
+<p>其原理也和金属退火的原理近似：我们将热力学的理论套用到统计学上，将搜寻空间内每一点想像成空气内的分子；分子的能量，就是它本身的动能；而搜寻空间内的每一点，也像空气分子一样带有“能量”，以表示该点对命题的合适程度。算法先以搜寻空间内一个任意点作起始：每一步先选择一个“邻居”，然后再计算从现有位置到达“邻居”的概率。</p>
+<h2 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h2><p>整个算法核心的思路是：搜索到局部最优解后，会以<strong>一定概率</strong>接受移出局部最优的动作。经过几次类似的移动后，也许会到达一个更优的解。若没有找到更加优秀的解，则次数达到限制后结束算法。</p>
+<p>这个概率最常用的是Metropolis准则：若移动后找到了更加优秀的解，则接受这个解；否则，以概率$e^{-\frac{\Delta E}{t}}$接受移动。这里$\Delta E$表示能量差，$t$表示当前温度。即温度越高，越有可能接受移动；温度降低则趋于稳定。</p>
+<p>算法的结束调件是：尝试次数用尽，或者温度达到了预先规定的最小值。此时算法给出记录下的最优解。</p>
+<h2 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">s := s0; e := E (s)                           // 设定目前状态为s0，其能量E (s0)</span><br><span class="line">k := 0                                            // 评估次数k</span><br><span class="line">while k &lt; kmax and e &gt; emax     // 若还有时间（评估次数k还不到kmax）且结果还不够好（能量e不够低）</span><br><span class="line">  sn := neighbour (s)                    //  随机选择临近状态sn</span><br><span class="line">  en := E (sn)                                 //  sn的能量为E (sn)</span><br><span class="line">  if random() &lt; P(e, en, temp(k/kmax)) then  //   决定是否移至临近状态sn</span><br><span class="line">    s := sn; e := en                         //  移至临近状态sn</span><br><span class="line">  k := k + 1                                   //  评估完成，次数k加1</span><br><span class="line">return s    </span><br></pre></td></tr></table></figure>
+
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB">模拟退火 - 维基百科</a>.</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/23/Automatically-Evading-Classifiers/" rel="prev" title="基于遗传编程的恶意代码自动逃逸分类">
+                  <i class="fa fa-chevron-left"></i> 基于遗传编程的恶意代码自动逃逸分类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/30/Decision-Tree-and-Random-Forest/" rel="next" title="决策树与随机森林简介">
+                  决策树与随机森林简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

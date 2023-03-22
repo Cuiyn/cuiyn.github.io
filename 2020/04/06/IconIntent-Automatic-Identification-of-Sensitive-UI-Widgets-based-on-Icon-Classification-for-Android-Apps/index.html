@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2019年ICSE会议论文的一篇文章，题目是《IconIntent: Automatic Identification of Sensitive UI Widgets based on Icon Classification for Android Apps》，DOI信息在这里。 这篇文章与上次分享的 CCS 会议文章 DeepIntent 为同一团队的成果。文章提出 APP 图标意图这一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别">
+<meta property="og:url" content="http://cuiyn.github.io/2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2019年ICSE会议论文的一篇文章，题目是《IconIntent: Automatic Identification of Sensitive UI Widgets based on Icon Classification for Android Apps》，DOI信息在这里。 这篇文章与上次分享的 CCS 会议文章 DeepIntent 为同一团队的成果。文章提出 APP 图标意图这一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/icon_example.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/iconintent.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/layout_file.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/UI_handler.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/onCreate_handler.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200406/transfer_functions.png">
+<meta property="article:published_time" content="2020-04-05T18:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="恶意代码分析">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20200406/icon_example.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/","path":"2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/","title":"IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E8%A7%88"><span class="nav-number">2.1.</span> <span class="nav-text">总览</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BE%E6%A0%87-Widget%E5%85%B3%E8%81%94"><span class="nav-number">2.1.1.</span> <span class="nav-text">图标-Widget关联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BE%E6%A0%87%E5%8F%98%E6%8D%A2"><span class="nav-number">2.1.2.</span> <span class="nav-text">图标变换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%BE%E6%A0%87%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.3.</span> <span class="nav-text">图标分类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%8F%E6%84%9F%E7%94%A8%E6%88%B7%E8%BE%93%E5%85%A5"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">敏感用户输入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%9B%BE%E6%A0%87%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">对象图标分类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E5%9B%BE%E6%A0%87%E5%88%86%E7%B1%BB"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">文本图标分类</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-06 02:00:00" itemprop="dateCreated datePublished" datetime="2020-04-06T02:00:00+08:00">2020-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2019年ICSE会议论文的一篇文章，题目是《IconIntent: Automatic Identification of Sensitive UI Widgets based on Icon Classification for Android Apps》，DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1109/ICSE.2019.00041">这里</a>。</p>
+<p>这篇文章与上次分享的 CCS 会议文章 DeepIntent 为同一团队的成果。文章提出 APP 图标意图这一入手点，解决了 APP 图标分析的多个细节问题，协同地将程序分析和图标分类结合起来，并将图标与相应的 Widget 部件关联，能够有效地检测敏感的 UI Widget 并减少了分析的工作量。文章使用大量数学定理与推理规则阐释技术问题的方法值得认真学习。</p>
+<span id="more"></span>
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>许多移动APP（即Applications，APP）包含用于使用或收集用户敏感数据的UI Widget（小组件）。因此，为了识别可疑的敏感数据使用（如UI与权限不匹配），理解 UI Widget 的意图是至关重要的。然而，许多 UI Widget 利用特定形状的图标（作为对象的图标）和嵌入文本的图标（以文本形式出现的图标）来表达它们的意图，这对仅分析文本数据来识别敏感 UI Widget 的现有检测技术提出了挑战。在这项工作中，作者提出了一个新的 APP 分析框架，作者认为，可以<strong>协同结合程序分析和图标分类来识别 Android APP 中的敏感 UI Widget</strong>。通过对用户界面布局文件和代码的静态分析，可以自动将UI Widget 和图标关联起来，然后采用计算机视觉技术将关联的图标划分为8类敏感数据。作者对来自Google Play的150个 APP 的测试结果表明，在97个 APP 中，IconIntent可以检测到248个敏感的 UI Widget ，精确度达到了82.4%。</p>
+<p>移动APP在我们的日常生活中扮演着越来越重要的角色。但越来越多地访问用户的敏感数据，如位置和财务信息，引起了人们对隐私的担忧。此前，在智能手机隐私保护方面的工作重点是分析移动APP的代码，以检测由框架 API 管理的敏感数据的泄露，如设备标识符(如IMEI)、位置和联系人。<strong>但这些工作不能处理如下的情况：APP表达了使用或收集敏感数据的意图，并得到了用户输入的敏感数据。</strong>例如，如今许多APP都包含了诸如按钮和文本框之类的UI Widget ，这些 Widget 期望得到用户对于使用敏感数据的同意(例如，按下某个按钮)，或者用户直接输入敏感数据(例如，在文本框中填写财务信息)。通过分析APP的UI来理解UI Widget 的意图是至关重要的，因为APP商店要检查可疑的权限，方便律师或管理人员编写更精确的隐私政策，以及便于开发人员更好地告知用户有关敏感数据的使用情况。</p>
+<p>但是，理解图标的意图是一个具有挑战性的问题。首先，移动APP中有许多类型的图标。代表相同意图的图标可以有不同的风格，可以以不同的比例和角度显示。其次，有些图标嵌入了文本，文中称为称为文本图标。这使得直接应用光学字符识别(即OCR技术)变得很困难，因为它最适合于有黑色文本和白色背景的图标。下面结合具体图标案例说明：</p>
+<ol>
+<li>图标过小，如a、b</li>
+<li>图标文字或对象与背景的对比度低，如c、d</li>
+<li>图标文字浅色，图标背景深色，从而影响OCR识别，如e</li>
+<li>图标f使用透明色，将Photo图案藏到背景中</li>
+<li>图标g的颜色对比度低，使用了透明色</li>
+</ol>
+<p><img src="/statics/images/20200406/icon_example.png" alt="可能带来问题的图标案例示意图"></p>
+<p>为了解决这个问题，本文提出一个新的框架IconIntent，通过协同程序分析和图标分类，关联图标与UI Widget 和分类图标的意图(对象图标和文字图标)，分类为8组预定义的敏感用户输入类别(包括相机、联系人、电子邮件、位置、电话、照片、短信与麦克风)。分类图标可以直接用于检测用户界面意图和权限的不匹配问题。本文的目标平台是Android，因为Android是用户最多、最受欢迎的移动平台，但是一般的研究方法也适用于其他移动平台，比如iOS。</p>
+<p>文中提出的框架基于三个关键的观点：</p>
+<ol>
+<li>虽然UI包含非结构化信息，但图标和UI Widget 之间的关联可以从UI布局文件和APP代码中的结构化信息中推断出来。</li>
+<li>移动app应该有一个直观的用户界面，大多数app的使用场景对普通用户来说应该是显而易见的，因此指示相同类型的敏感用户输入的图标应该具有相似的外观。</li>
+<li>为了便于用户识别图标中的对象或文本，必须对比前景和背景之间的颜色/不透明度。</li>
+</ol>
+<p>文章使用收集敏感数据的150个Android APP的数据集来评估IconIntent的有效性。结果显示IconIntent从97个APP中检测出248个敏感的UI Widget (达到82.4%的准确率)，表明敏感图标和敏感UI Widget 都是常见的。同时，文章也分析了目前基于文本分析的最先进的Widget 检测技术SUPOR，结果显示IconIntent在敏感UI Widget检测上有101.2%的提升。同时，结合SUPOR与IconIntent，可以减少50.7%的可疑权限检查工作。</p>
+<p>本文的主要贡献总结如下：</p>
+<ol>
+<li>本文是第一个调查移动APP UI中图标的意图的研究，并研究了它们在UI Widget 中的使用。</li>
+<li>文章提出了一个新的框架IconIntent，它协同地将程序分析和图标分类结合起来，将图标与相应的 Widget 关联起来，并将图标的意图划分为8个预先定义的敏感类别。</li>
+<li>文章对150个来自应用市场的APP进行评估。结果表明，IconIntent能够有效地检测敏感的UI Widget (准确度为82.4%)，减少了SUPOR检测到的可疑权限的50.7%。</li>
+</ol>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><h3 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h3><p>下图展示了IconIntent的总体结构。IconIntent包含3个模块：图标-Widget关联、图标变换与图标分类。IconIntent接受一个APP的APK文件作为输入，并使用关联的图标输出识别出的敏感UI Widget，其中每个图标都用敏感数据的相应类别进行注释。图标-Widget关联模块对UI布局文件和代码执行静态分析，以识别UI Widget和图标之间的关联。图标变换模块从资源中提取图标，并对提取的图标进行图象变换，生成一组变换的图标。图标分类模块接受变换后的图标作为输入，将图标分为8类敏感数据。</p>
+<p><img src="/statics/images/20200406/iconintent.png" alt="IconIntent结构图"></p>
+<h4 id="图标-Widget关联"><a href="#图标-Widget关联" class="headerlink" title="图标-Widget关联"></a>图标-Widget关联</h4><p>图标-Widget关联是文章叙述的重点部分。IconIntent对UI布局文件与代码文件均进行静态分析。下面是文章对一些术语的定义。</p>
+<p><strong>定义1 UI布局：</strong> UI布局是一棵树$L(W, E)$，其中每个节点$w\in W$代表一个UI元素，每条边$e(a, b) \in E$代表从点$a$到点$b$的父子节点关系。$L$由布局ID $L.id$唯一定义。</p>
+<p><strong>定义2 UI Widget：</strong> 在一个UI布局$L(W, E)$中，一个UI Widget $w\in W$是一种能够与用户交互的元素（如按钮）。$w$被 &lt;L.id, w.id&gt; 唯一定义，其中 $w.id$ 表示 $w$ 的元素ID。</p>
+<p>下图展示了一个从search.xml文件中导入的UI布局，其布局ID可以从代码中的R.layout.search中获取。除LinearLayout的所有UI元素均为UI Widget。ImageView Widget的ID是&lt;R.layout.search, R.id.img&gt;。</p>
+<p><img src="/statics/images/20200406/layout_file.png" alt="搜索UI的布局文件示意图"></p>
+<p>UI布局文件在运行时通过布局加载API调用加载到Activity中，主要API是setContentView和Inflate。布局ID用作参数，以确定将哪个布局文件加载到Activity中。下面是相关的定义。</p>
+<p><strong>定义3 变量-布局绑定：</strong> 变量$v_L$被称作与UI布局$L(W, E)$绑定，表示为$v_L \leadsto L$，如果：</p>
+<ol>
+<li>使用$v_L$作为接收者、$L.id$作为参数调用布局绑定API，或者</li>
+<li>$v_L$是另一个被绑定到$L$的变量$v’_L$的别名。</li>
+</ol>
+<p>一旦将布局与一个Activity绑定，布局中的UI Widget就可以通过调用Widget绑定API（主要是findViewByID），使用UI Widget ID绑定到变量。</p>
+<p><strong>定义4 变量-Widget绑定：</strong> 若$v_L \leadsto L$，变量$v$被称作与UI Widget$w\in W$绑定，如果：</p>
+<ol>
+<li>使用$l$作为接收者、$v$作为返回值、$w.id$作为参数调用Widget绑定API，或者</li>
+<li>$v$是另一个被绑定到$w$的变量$v$的别名。</li>
+</ol>
+<p>这里的API同样可以是findViewByID。如下图，代码第3行将布局文件加载到当前Activity中，第4行将ImageView绑定到一个临时变量。</p>
+<p><img src="/statics/images/20200406/UI_handler.png" alt="UI绑定代码示意图"></p>
+<p><strong>定义5 图标：</strong> 图标$c$是资源的一种，由资源 ID $c.id$唯一定义。</p>
+<p>图标可以通过多种方法与UI Widget关联。作者通过对多个App的研究，总结出下面的定义。</p>
+<p><strong>定义6 图标-Widget关联（通过UI布局）：</strong> 给定布局$L(W, E)$，称图标$c$与UI Widget $w\in W$关联，如果：</p>
+<ol>
+<li>$c.id$在$w.src$中指定，其中$w.src$表示w的android:src的值；</li>
+<li>一个可绘制的对象$d$在$w.src$中指定，$c.id$属于集合$D_d$，其中$D_d$表示对象$d$的资源ID集合。</li>
+</ol>
+<p><strong>定义7 图标-Widget关联（通过API调用）：</strong> 给定$v_L \leadsto L$，$w\in W$且$v \leadsto w$，称图标$c$与UI Widget $w\in W$关联，如果使用$v$作为接收者、$c.id$作为参数调用图象导入API。</p>
+<p>下图是一段onCreate事件处理代码，其中代码第2、3行将ImageView Widget关联至变量g与h，第4行表明h使用R.drawable.icon2定义的图标。</p>
+<p><img src="/statics/images/20200406/onCreate_handler.png" alt="onCreate事件处理代码示意图"></p>
+<p>对于UI布局文件，作者开发了一个静态分析工具，利用XML解析器解析提取的UI布局文件，以构建正式的UI布局，并检查每个布局中的所有UI Widget，以确定图标和UI Widget之间的关联。</p>
+<p>APP的代码分析较为困难。这里IconIntent提出了一种数据流分析技术，该技术采用过度近似的方法，分析变量与Widget ID之间的关联，以及变量与图标ID之间的关联。下图是文中给出的两个绑定API的推理规则转移方程，以第一个方程为例进行解释。使用$\Gamma$表示每个变量到每个UI Widget的数据流。给定$x=findViewByID(w.id)$，其中$x$是变量，则可以推理出$x$绑定到一个ID为$w.id$的UI Widget $w$上，即$x \leadsto w$且$\Gamma (x) = \Gamma (x) \cup { w.id }$。如果另一个变量$y$是变量$x$的别名，则$y$同样绑定到UI Widget $w$上，即$\Gamma (y) = \Gamma (y) \cup { w.id }$。</p>
+<p><img src="/statics/images/20200406/transfer_functions.png" alt="两个绑定API的推理规则转移方程"></p>
+<p>以onCreate事件处理代码图为例，对于一个UI Widget变量$g$，我们有$\Gamma (g) = { R.id.button_esc }$。因为变量$h$是变量$g$的别名，有$\Gamma (h) = { R.id.button_esc }$。因为第4行的setImageResource，有$\Sigma (g) = { R.drawable.icon2 }$与$\Sigma (h) = { R.drawable.icon2 }$，从而得到了图标-Widget关联关系${ R.id.button_esc \mapsto R.drawable.icon2 }$。</p>
+<h4 id="图标变换"><a href="#图标变换" class="headerlink" title="图标变换"></a>图标变换</h4><p>图标变换模块从输入APK文件中提取图标，并执行图标变换，为每个提取的图标生成一组变换的图标。IconIntent采用了5种技术，以不同的方式改变图标的颜色和透明度，并可以组合在一起产生不同的变化的图标（共可产生$2^5 = 32$个变换图象），这些技术是：</p>
+<ol>
+<li>图象比例缩放。通过改变图象的分辨率（每英寸像素）来放大或缩小图象。一种常用的技术是使用附近的像素对缩放后的图象重新采样像素值。</li>
+<li>灰度变换。将一幅图像转换成另一幅图像，其中每个像素的值仅代表其亮度。</li>
+<li>颜色反转。反转每个像素的颜色。</li>
+<li>对比度调整。</li>
+<li>透明度转换。将图案或文字与其背景的透明度进行调整。</li>
+</ol>
+<h4 id="图标分类"><a href="#图标分类" class="headerlink" title="图标分类"></a>图标分类</h4><p>图标分类模块将两类图标（即对象图标和文本图标）分类为八个敏感用户输入类别之一。下面描述敏感用户输入类别与两种图标识别技术。</p>
+<h5 id="敏感用户输入"><a href="#敏感用户输入" class="headerlink" title="敏感用户输入"></a>敏感用户输入</h5><p>下表显示了八个敏感的用户输入类别及其关键字。关键字用于搜索训练图标和识别文本图标。文章选择这八个敏感的用户输入类别，是因为与这些类别相关的应用程序功能很受欢迎，代表用户可以理解的敏感资源，并且具有重要的安全和隐私含义。此外，开发人员经常在接受用户输入的UI Widget中使用这些图标。</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Keywords</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Camera</td>
+<td>camera, retake</td>
+</tr>
+<tr>
+<td>Contacts</td>
+<td>contact, group</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>email, mail</td>
+</tr>
+<tr>
+<td>Location</td>
+<td>location, locate,gps, map, place, address</td>
+</tr>
+<tr>
+<td>Microphone</td>
+<td>microphone, micro,karaoke, interview,voice, audio</td>
+</tr>
+<tr>
+<td>Phone</td>
+<td>phone, call</td>
+</tr>
+<tr>
+<td>Photo</td>
+<td>photo</td>
+</tr>
+<tr>
+<td>SMS</td>
+<td>sms, message</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="对象图标分类"><a href="#对象图标分类" class="headerlink" title="对象图标分类"></a>对象图标分类</h5><p>IconIntent利用对象识别对对象图标进行分类，该分类基于一个训练图标集，该图标集用敏感用户输入类别标记。给定一个图标作为输入，此技术识别是否有经过训练后的图标出现在输入图标中，并将输入图标的标签确定为敏感用户输入类别置信度最高的图标，若没有识别结果则标记为不敏感。</p>
+<p>目前广泛使用的对象识别技术是尺度不变特征转换（Scale-invariant feature transform 或 SIFT），它是当前最先进的方法，但是SIFT在处理本文涉及的图标时效率不高，原因有两点：</p>
+<ol>
+<li>关键点较少。与动物图象、人脸相比，图标主要包含的是平滑的边和曲线，因此SIFT不能从图标上得到较多的关键点，从而影响了识别的准确度。</li>
+<li>对变化的容忍度较低。App图标对旋转和扭曲等变化的容忍度较低。例如，无论图像如何旋转，猫的图片中仍然是猫。但是App图标通常不会旋转，如天气图标。</li>
+</ol>
+<p>针对以上的问题，文章提出两点改进：</p>
+<ol>
+<li>增加关键位置：扩大图片至200*200；选择FAST算法以带来更多的关键点。</li>
+<li>相对的一对一匹配：目标图像左上角的一个关键位置只能与场景图像左上角的一个关键位置匹配，以减少图象变化带来的影响。</li>
+</ol>
+<h5 id="文本图标分类"><a href="#文本图标分类" class="headerlink" title="文本图标分类"></a>文本图标分类</h5><p>IconIntent分析图标的嵌入文本，以确定文本是否与敏感用户输入类别中的关键字相似。根据作者对从 Google Play中收集到的大约300个文本图标的研究，超过95%的文本图标包含1到3个单词，这表明大多数文本图标只包含简短的短语或单词，因此关键字匹配的方法是有效的。</p>
+<p>但是，图标文本的提取不一定是准确的，可能会产生错误的字母（如“lcafiion”）、额外的字母（如“llocation”）或缺失的字母（如“emai”）。为了解决这些问题，文章提出了一个基于编辑距离的算法来计算提取的文本中的单词和关键字之间的相似性，并根据计算出的相似性来识别最相似的关键字。如果相似度超过了预先定义的阈值，那么将图标分类为相应的敏感用户输入类别。</p>
+<p>编辑距离（Edit Distance）是一种广泛使用的方法，它通过计算将一个字符串转换为另一个字符串所需的最低操作成本来量化两个字符串的不同程度。然而，在分类过程中，编辑距离面临两个问题：冗余词和多关键字匹配。</p>
+<ol>
+<li>冗余词。指提取的文本通常包含在使用敏感数据时不表达意图的冗余词。例如，对于包含文本“enablegps”（提取时没有使用基于OCR的空格）的文本图标，单词“gps”表示打算使用用户的GPS数据，这是敏感的，而单词“enable”是多余的。冗余词也可能来自于OCR识别的错误结果。文章引入n-gram子字符串生成方法解决这一问题。给定一个关键词$k$，此方法从单词$w$开始，生成一系列长度区间为$[length(k)-1, length(k)+1]$的子字符串，并将每一个子字符串与“gps”对比并找出准确的匹配。</li>
+<li>多关键字匹配。由于关键字的长度不同，在许多情况下，Levenshtein距离（指两个字串之间，由一个转成另一个所需的最少编辑操作次数）并不能反映预期的相似性。例如，给定单词“locatl”，将其与“locate”和“call”比较。“locatl”与“locate的编辑距离为1。对于“call”，文章生成一个n-gram列表${ “loca”, “ocat”, “catl” }$，“catl”与“call”的编辑距离也为1。虽然两者的距离相同，但我们知道“locatl”更接近于“locate”而不是“call”。为解决这个问题，文章建议通过考虑关键字长度$k: Sim_{w,k} = 1 - \frac{Ed}{length(k)}$来衡量相似度，其中$Ed$是原本的编辑距离，$length(k)$是关键字$k$的长度。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/" rel="prev" title="DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习">
+                  <i class="fa fa-chevron-left"></i> DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/05/18/DroidFusion-A-Novel-Multilevel-Classifier-Fusion-Approach-for-Android-Malware-Detection/" rel="next" title="DroidFusion：多级分类器融合的 Android 恶意 APP 检测方法">
+                  DroidFusion：多级分类器融合的 Android 恶意 APP 检测方法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

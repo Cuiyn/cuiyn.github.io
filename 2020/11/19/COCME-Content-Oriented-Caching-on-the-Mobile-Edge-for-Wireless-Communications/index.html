@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2019年 IEEE Wireless Communications 期刊的一篇文章，题目是《COCME: Content-Oriented Caching on the Mobile Edge for Wireless Communications》， DOI 信息在这里。 这篇文章在总结目前网络缓存存在的问题之后，提出了部署在移动网络边缘、面向内容的无线通信缓存方法，基于对热门内容的推">
+<meta property="og:type" content="article">
+<meta property="og:title" content="COCME：针对无线网络通信面向内容的移动边缘缓存">
+<meta property="og:url" content="http://cuiyn.github.io/2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2019年 IEEE Wireless Communications 期刊的一篇文章，题目是《COCME: Content-Oriented Caching on the Mobile Edge for Wireless Communications》， DOI 信息在这里。 这篇文章在总结目前网络缓存存在的问题之后，提出了部署在移动网络边缘、面向内容的无线通信缓存方法，基于对热门内容的推">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201119/content-delivery.gif">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201119/content-access-times.gif">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201119/COCME.gif">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201119/evaluation.gif">
+<meta property="article:published_time" content="2020-11-19T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="边缘计算">
+<meta property="article:tag" content="缓存">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20201119/content-delivery.gif">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/","path":"2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/","title":"COCME：针对无线网络通信面向内容的移动边缘缓存"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>COCME：针对无线网络通信面向内容的移动边缘缓存 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E7%BA%BF%E9%80%9A%E4%BF%A1%E4%B8%AD%E7%9A%84%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91"><span class="nav-number">3.</span> <span class="nav-text">无线通信中的内容分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#COCME-%E6%A1%86%E6%9E%B6"><span class="nav-number">4.</span> <span class="nav-text">COCME 框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E9%97%AE%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">设计问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.1.</span> <span class="nav-text">系统设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%8E%E5%88%86%E6%9E%90"><span class="nav-number">6.</span> <span class="nav-text">实验与分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.</span> <span class="nav-text">实验设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E6%9E%9C%E4%B8%8E%E5%88%86%E6%9E%90"><span class="nav-number">8.</span> <span class="nav-text">实验结果与分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A8%E8%AE%BA"><span class="nav-number">9.</span> <span class="nav-text">讨论</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="COCME：针对无线网络通信面向内容的移动边缘缓存 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          COCME：针对无线网络通信面向内容的移动边缘缓存
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-11-19 08:00:00" itemprop="dateCreated datePublished" datetime="2020-11-19T08:00:00+08:00">2020-11-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2019年 <em>IEEE Wireless Communications</em> 期刊的一篇文章，题目是《COCME: Content-Oriented Caching on the Mobile Edge for Wireless Communications》， DOI 信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1109/MWC.2019.1800401">这里</a>。</p>
+<p>这篇文章在总结目前网络缓存存在的问题之后，提出了部署在移动网络边缘、面向内容的无线通信缓存方法，基于对热门内容的推荐，设计了新颖的移动边缘缓存方案。</p>
+<span id="more"></span>
+
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>随着移动网络和移动通信的快速发展，各种内容 （content） 可以被方便地访问。最近，一些新颖的基于缓存的方法被提出，以提高无线通信中的 QoE ，但由于传统的 D2D 通信和缓存策略的限制，在无线通信中开发先进的内容传输仍然是一个挑战。为了解决这些挑战，本文提出了面向内容的移动边缘缓存在无线通信中的应用。具体来说，文章设计了基于流行内容推荐的新型移动边缘缓存。文章进行了充分的实验，证明提出的方案能够通过在移动边缘使用可接受的存储资源量，有效地降低流量负载。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>由于移动网络与无线通信的快速发展，我们可以方便地访问由先进的信息技术开发的各种服务与应用，例如社交网络、商业广告、内容推送与移动广播。但是，随着数据的爆炸性增长，对于用户生成的数据和移动多媒体数据，如何提高传输效率，改善服务质量 （QoS） 和体验质量 （QoE） 是一个挑战。</p>
+<p>有一些新颖的基于缓存的方案已被提出，以增强无线网络通信的 QoE 。例如，同时考虑社会关系、共同兴趣和设备到设备 (D2D) 的传输方案，通过缓存移动设备中的内容，提高 QoE 。这个方案的问题在于，移动设备的性能限制了进一步的提升。因此，通过在无线通信缓存策略中引入边缘计算，能够扩展边缘的缓存能力，提高无线通信质量。</p>
+<p>边缘计算是移动计算的一种新兴模式转变，它将计算、控制和存储推向移动边缘，而不是集中式的云，从而在资源有限的移动设备上实现计算密集型和延迟关键型应用。虽然缓存和边缘通信被广泛认为是实现低延迟、高带宽和灵活的无线通信的关键技术，但以下挑战还没有得到充分的研究：</p>
+<ul>
+<li>D2D 通信中的缓存是有限的。目前，作为 5G 系统的核心组件之一，无线 D2D 通信中的缓存可能有效降低网络流量。但是，由于用户的流动性和接触时间的随机性，很难保证缓存内容能够完整、流畅地下载到移动终端上。此外，由于移动设备的容量不足，特别是考虑到缓存提供商设备上不可避免的能源消耗，通过缓存策略只能传输有限的内容。</li>
+<li>移动边缘的资源利用不足。移动边缘计算已经被认为是一种很有前途的技术，可以为大规模的低功耗无线设备提供增强的通信能力和可持续的能源供应，因此，许多重要的工作都集中在利用移动边缘的计算和控制资源的高效计算卸载方案上。但是，移动边缘的缓存能力还没有得到充分的讨论。例如，为了满足主流用户的需求，哪些内容、多少内容应该被缓存到移动边缘上。</li>
+</ul>
+<p>为解决上述问题，文章提出一种在移动边缘基于内容缓存的策略 （content-oriented caching strategy on the mobile edge, COCME） ，以通过优化移动边缘的单元化 （unitization） 缓存能力，扩展总体缓存能力，从而超越传统的 D2D 通信。具体地，文章作出以下贡献：</p>
+<ul>
+<li>设计了一种面向内容的缓存策略，在移动边缘缓存最受欢迎的内容，以提高无线通信的 QoS 和 QoE ，从而降低移动网络或 D2D 通信的传输延迟和流量负载。</li>
+<li>提出了一种基于机器学习的数据驱动方法，以确定哪些内容、多少内容应该被缓存在移动边缘。</li>
+<li>提出了一个具有代表性的应用案例，以评估所提出方法的前景效益，并讨论潜在的挑战和机遇。</li>
+</ul>
+<p>在这篇文章中，作者研究了先进网络 （advanced networking） 、 D2D 通信和一种新型的无线通信缓存策略，并探讨了潜在的研究挑战和机会。</p>
+<h2 id="无线通信中的内容分发"><a href="#无线通信中的内容分发" class="headerlink" title="无线通信中的内容分发"></a>无线通信中的内容分发</h2><p>内容分发是移动网络与无线通信的最重要服务之一。已有许多先进的框架与技术被提出，如以信息为中心的无线网络与基于 D2D 的内容分发。下图示意了传统方法与基于边缘缓存的无线网络内容分发方法。</p>
+<p><img src="/statics/images/20201119/content-delivery.gif" alt="无线网络中的内容分发" title="无线网络中的内容分发"></p>
+<p>本文旨在开发一个有价值的边缘缓存系统。例如，音乐系统存在信息过载的问题，大部分用户没有特定的需求。文章利用机器学习和数据挖掘的方法，科学地将歌曲加入到缓存列表中。传统的网络拥堵导致网络下载速度慢等一系列问题。因此，本文提出了一种通过数据挖掘和机器学习开发的歌曲资源缓存系统。该系统将中心服务器的资源提前推送到网络边缘，减少了用户与资源之间的距离。该系统还为局域网内的用户提供了一个共享环境。</p>
+<h2 id="COCME-框架"><a href="#COCME-框架" class="headerlink" title="COCME 框架"></a>COCME 框架</h2><h2 id="设计问题"><a href="#设计问题" class="headerlink" title="设计问题"></a>设计问题</h2><p>一般来说，设计一个优秀的内容缓存策略是具有挑战性的，要解决两个问题：哪些内容和多少内容应该被缓存。为解决上述问题，文章分析了来自 <a target="_blank" rel="noopener" href="http://www.spotifyprem/">Spotify</a> 于 <a target="_blank" rel="noopener" href="https://recsys-challenge.spotify.com/">RecSys Challenge 2018</a> 提供的数据集。Spotify 是一个数字音乐服务，让移动用户可以访问数百万首歌曲。这个数据集包含 10,000 个用户播放的 17 万首歌曲，适合讨论所提出的方法的可用性。</p>
+<p>通过统计分析，发现受多数移动用户访问的内容类型是极少的。如下图，极少数内容被下载超过 100 次，大多数内容只被少量用户访问。</p>
+<p><img src="/statics/images/20201119/content-access-times.gif" alt="内容访问次数" title="内容访问次数"></p>
+<p>根据分析结果，内容缓存策略为移动用户找到热门内容。它作为一个群体推荐系统，预测移动边缘上要缓存的热门内容的 Top-N 列表。如果请求的内容已经被缓存在移动边缘，用户可以直接快速访问，而无需连接到云端。</p>
+<h3 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h3><p>下图展示了 COCME 的框架，其中包括多个移动终端、远程服务器与移动边缘服务器（可以是智能电表、带有计算与存储能力的接入点或其它由软件定义、能够扮演具有计算与存储能力的小型数据中心的设备）。通过部署与边缘交换机相关联的虚拟机，可以将相关的计算任务迁移到边缘网络服务器上，也可以由用户申请迁移。内容数据在边缘网络服务器上进行缓存。计算迁移和数据缓存是重要的功能。缓存决策策略的优劣直接影响移动边缘计算系统的性能。在 COCME 中，基于 AI 的方法用于优化计算迁移与数据缓存模型，从而有效地提高缓存空间的使用效率、提高用户体验。</p>
+<p><img src="/statics/images/20201119/COCME.gif" alt="内容访问次数" title="内容访问次数"></p>
+<p>在 COCME 的辅助下，可以大大降低远程服务器的卸载量，广泛降低移动网络中的流量负荷，让用户更方便快捷地访问内容。具体来说，该框架由以下几个核心组件组成。</p>
+<ul>
+<li>用户-内容矩阵：存储连接到每个边缘服务器的移动用户的访问内容记录。它是一个稀疏矩阵，并应该根据用户的移动而动态更新。例如，图中用户 Cleir 由边缘服务器 1 覆盖的区域移动至边缘服务器 2 覆盖的区域，因此她的访问内容记录应由边缘服务器 1 传输至边缘服务器 2 。</li>
+<li>基于 AI 的缓存方法：用于决定哪些内容应该被缓存在边缘。虽然各种基于机器学习、深度学习和其他先进 AI 的方法都可以用来处理这个问题，但由于计算资源有限，计算复杂性应该是一个主要的关注点。因此，在本文的实验中，在 COCME 中实现了两种简单的方法：潜在语义索引 （latent semantic indexing，LSI） 和协同过滤 （collaborative filtering，CF） 。</li>
+<li>边缘服务器间的内容传输：预计将广泛降低移动网络的流量负荷。最受欢迎的内容将被缓存在边缘，而缓存的内容可以根据基于 AI 的方法的预测分析，从一个边缘快速传输到其他边缘。例如，图中内容 C3 首先被边缘服务器 1 从远程服务器下载并缓存。在 Cleir 移动后， C3 被考虑移至边缘服务器 2 作为受欢迎的内容。此时， C3 由边缘服务器 1 提供，而不是远程服务器。</li>
+</ul>
+<h2 id="实验与分析"><a href="#实验与分析" class="headerlink" title="实验与分析"></a>实验与分析</h2><h2 id="实验设计"><a href="#实验设计" class="headerlink" title="实验设计"></a>实验设计</h2><p>作者根据中南财经政法大学校园音乐应用的访问日志，设计了充分的实验来验证所提出的方法的可用性和有效性，对以下问题进行了考虑。</p>
+<ul>
+<li>哪些内容应被缓存？如前所述，文章通过基于推荐的方法决定受欢迎的内容。为了选择更合适的方法，在实验中实现了两种具有代表性的方法，即潜在语义索引和协同过滤进行比较。</li>
+<li>多少内容应被缓存？这是由缓存歌曲的数量决定的。此外，在本文中，假设缓存空间大约等于应该缓存的歌曲数量。</li>
+<li>如何评价所提出的方法的性能？根据下面两个公式，从流量负载和缓存命中率两个方面对性能进行评估。其中， $n$ 代表被缓存的歌曲数量， $S$ 代表所有用户访问的歌曲总量（可能存在重复）， $S_i$ 代表用户 $i$ 访问的歌曲总量（没有重复）。</li>
+</ul>
+<p>$$<br>Traffic &#x3D; 1 - \frac{\sum_{n\in cache} Count(n\in S)}{S}<br>$$</p>
+<p>$$<br>Cache &#x3D; Avg(S_i \in S) \frac{\sum_{n\in cache} Count(n\in S_i)}{S_i}<br>$$</p>
+<h2 id="实验结果与分析"><a href="#实验结果与分析" class="headerlink" title="实验结果与分析"></a>实验结果与分析</h2><p>下图示意了不同缓存容量 $N$ 下的性能评估（即流量负载与缓存命中）实验结果。</p>
+<p>图 a 显示，使用 COCME 后，流量负载得到有效降低，特别是基于 LSI 的方法的性能优于基于 CF 的方法，尤其是在缓存大小为 300～400 的情况下。这种优越性可能是由于主要内容中包含丰富的语义信息的特点造成的，而 LSI 被认为在处理语义信息方面比 CF 更有效。图 b 显示， $N$ 的最佳值应该在 200 到 300 之间。当 $N$ 在 $200～300$ 范围内时，流量负荷有效降低 10% 。假设缓存一首歌曲需要 5 MB 空间，移动边缘仅提供 1-1.5 GB 的缓存空间就可以提高 10% 无疑通信性能。当 $N$ 为 400 到 500 之间时，流量负载进一步降低、缓存命中进一步增大，但是更大的 $N$ 意味着移动边缘需要更多的空间用于缓存数据。</p>
+<p><img src="/statics/images/20201119/evaluation.gif" alt="基于 LSI 与 CF 的 COCME 性能评估" title="基于 LSI 与 CF 的 COCME 性能评估"></p>
+<h2 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h2><p>考虑到移动边缘的存储容量有限，缓存不宜过大，尽管大缓存可以存储更多的热门内容，进一步优化性能。考虑到移动边缘有限的计算能力，深度学习等复杂算法不适合用于测量内容的受欢迎程度。更高级的算法可望改善缓存策略的性能，但可能需要更多宝贵的计算资源。</p>
+<p>此外，通过实验，作者发现本文工作有以下局限性或不足之处：</p>
+<ul>
+<li>由于用户的移动性，一个独立用户的记录应该和相应的内容一起从一个移动边缘传输到另一个边缘。如果用户的轨迹可以预测，相关数据可以传输到目的边缘服务器，从而进一步提高 QoS 和QoE 。但是，本工作没有考虑这个问题。</li>
+<li>缓存的内容只考虑在相邻边缘之间传输。在先进的分布式存储技术的辅助下，未来应研究多移动边缘之间的协同缓存策略。</li>
+<li>实验未考虑连接到移动边缘的用户数量，也未评估其对性能的影响。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97/" rel="tag"># 边缘计算</a>
+              <a href="/tags/%E7%BC%93%E5%AD%98/" rel="tag"># 缓存</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/11/06/Edge-Computing-Vision-and-Challenges/" rel="prev" title="边缘计算：愿景与挑战">
+                  <i class="fa fa-chevron-left"></i> 边缘计算：愿景与挑战
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/03/VAHunt-Warding-Off-New-Repackaged-Android-Malware-in-App-Virtualization-s-Clothing/" rel="next" title="应用虚拟化场景中的 Android 恶意软件防护">
+                  应用虚拟化场景中的 Android 恶意软件防护 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

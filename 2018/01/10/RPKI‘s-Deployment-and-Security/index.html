@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="当今互联网存在着诸多新的协议，它们的安全性和必要性已被反复证实，但却因某些原因未能大范围推广。本篇文章主要介绍的RPKI协议就属于这类情况。论文题目是《Are We There Yet? On RPKI’s Deployment and Security》，其URL在这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RPKI的部署及安全情况">
+<meta property="og:url" content="http://cuiyn.github.io/2018/01/10/RPKI%E2%80%98s-Deployment-and-Security/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="当今互联网存在着诸多新的协议，它们的安全性和必要性已被反复证实，但却因某些原因未能大范围推广。本篇文章主要介绍的RPKI协议就属于这类情况。论文题目是《Are We There Yet? On RPKI’s Deployment and Security》，其URL在这里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180110/origin.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180110/Collateral-benefit-and-damage.png">
+<meta property="article:published_time" content="2018-01-09T17:55:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="网络安全">
+<meta property="article:tag" content="路由">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20180110/origin.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/01/10/RPKI%E2%80%98s-Deployment-and-Security/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/01/10/RPKI%E2%80%98s-Deployment-and-Security/","path":"2018/01/10/RPKI‘s-Deployment-and-Security/","title":"RPKI的部署及安全情况"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>RPKI的部署及安全情况 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ROV%E4%BD%BF%E7%94%A8%E7%8A%B6%E5%86%B5"><span class="nav-number">3.</span> <span class="nav-text">ROV使用状况</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E5%88%86%E9%83%A8%E7%BD%B2%E7%9A%84%E5%AE%89%E5%85%A8%E7%8A%B6%E5%86%B5"><span class="nav-number">4.</span> <span class="nav-text">部分部署的安全状况</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9E%E5%B8%A6%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">4.1.</span> <span class="nav-text">连带产生的优缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E8%AF%84%E4%BC%B0"><span class="nav-number">4.2.</span> <span class="nav-text">安全评估</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84ROA"><span class="nav-number">5.</span> <span class="nav-text">不安全的ROA</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E9%9A%9C%E7%A2%8D"><span class="nav-number">6.</span> <span class="nav-text">部署障碍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ROA%E4%B8%AD%E7%9A%84%E9%94%99%E8%AF%AF"><span class="nav-number">6.1.</span> <span class="nav-text">ROA中的错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E7%BB%87%E9%97%B4%E7%9A%84%E4%BE%9D%E8%B5%96%E6%80%A7"><span class="nav-number">6.2.</span> <span class="nav-text">组织间的依赖性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RPKI%E7%9A%84%E6%8E%A8%E8%BF%9B"><span class="nav-number">7.</span> <span class="nav-text">RPKI的推进</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">8.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/01/10/RPKI%E2%80%98s-Deployment-and-Security/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="RPKI的部署及安全情况 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RPKI的部署及安全情况
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-01-10 01:55:00" itemprop="dateCreated datePublished" datetime="2018-01-10T01:55:00+08:00">2018-01-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>当今互联网存在着诸多新的协议，它们的安全性和必要性已被反复证实，但却因某些原因未能大范围推广。本篇文章主要介绍的RPKI协议就属于这类情况。论文题目是《Are We There Yet? On RPKI’s Deployment and Security》，其URL在<a target="_blank" rel="noopener" href="http://dblp.org/rec/journals/iacr/GiladCHSS16">这里</a>。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>资源公共密钥基础架构（Resource Public Key Infrastructure，RPKI）将IP地址与其拥有者的公钥绑定在一起。RPKI实现了路由器的源路由验证（Route Origin Validation，ROV），以阻止例如IP前缀注入之类的严重攻击。但是，虽然付出了广泛的努力，RPKI的部署却非常缓慢，使得Internet大面积处于不安全状态。文章选取了与当今RPKI部署和安全的几个问题：RPKI与ROV的使用情况如何？部分部署可能对全球安全带来怎样的影响？部署缓慢的根本原因是什么？如何向前推进部署？文章针对这些问题做了调查与分析，并给出结果。文章提出了第一手测量ROV使用情况的研究，揭示了在互联网核心的令人失望的低使用率。相对，如果没有大型ISP的普遍采用，就无法获得重大的安全收益。文章接下来暴露一个关键的安全漏洞：大约有三分之一用于IP前缀的RPKI授权，不能保护前缀不受劫持攻击。</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>边界网关协议（Border Gateway Protocol，BGP）在成千上万个小型网络（称为自治系统，Autonomous System，AS）之间计算路由，从而组成了互联网。AS的范围包括从大型的ISP与内容提供商，到小型的商业机构与大学。众所周知，BGP协议对毁灭性的攻击与配置错误十分脆弱。因此，国家和企业不断受到攻击的威胁，利用BGP的不安全性，将AS从互联网上断开，并进行高效的中间人攻击。一种格外令人担心、常见的攻击方式是IP前缀劫持，AS通过BGP宣告一个不属于它的IP前缀。前缀攻击十分有效且易于实现，还提供了一个看似合理的借口：配置错误。每年都有几起前缀劫持事引起的重大事件成为新闻，还有许多不为人知。</p>
+<p>资源公共密钥基础架构（Resource Public Key Infrastructure，RPKI）是一种分级的认证系统。RPKI存储有源路由授权（Route Origin Authorization，ROA），它是一个将IP地址块与允许在BGP中宣告它的AS绑定签名的记录。ROA可以被BGP路由器用于源路由验证（Route Origin Validation，ROV）：验证并丢弃来自未授权AS的“无效的”BGP路由宣告，以此防止IP前缀劫持攻击。除了作为领先的、迄今为止唯一标准化的前缀劫持解决方案，RPKI也是重要的路由安全机制（如BGPsec）的先决条件，以及其他防御BGP路径操纵攻击的建议方法。</p>
+<p>但虽然RPKI在互联网安全中具有重要地位，RPKI的部署却非常缓慢，使得互联网大部分暴露在危险的劫持流量中。文章对RPKI的部署和安全作了系统的研究，并提出了以下几个基本问题：</p>
+<ul>
+<li>RPKI与ROV的使用状况如何？</li>
+<li>部分部署RPKI与ROV对安全可能带来哪些影响？</li>
+<li>部署缓慢的根本原因是什么？</li>
+<li>部署如何能够被推动？</li>
+</ul>
+<p>文章针对这些问题做了大量调研，篇幅主要以这几个问题构成。</p>
+<h1 id="ROV使用状况"><a href="#ROV使用状况" class="headerlink" title="ROV使用状况"></a>ROV使用状况</h1><p>源路由验证使得BGP路由器通过检测传入的BGP宣告是否ROA有效，来阻止前缀劫持。主要厂家都在其BGP路由器中内置了ROV支持，且计算影响可以忽略不计。因此，部署ROV只需要一个简单的、一次性的安装工作，并且没有重大的操作开销。</p>
+<p>文章提出了一种方法，来获得ROV使用无效BGP路由宣告程度（即与ROA不兼容的宣告）的经验观测，来判断AS是否使用了ROV。首先寻找一个AS，它既是一个<strong>非无效的</strong>（即被分类为有效或未知的）BGP路由宣告起点，也自身发出一个无效的BGP宣告，如图中的origin节点。</p>
+<p><img src="/statics/images/20180110/origin.png" alt="Origin节点示意图" title="Origin节点示意图"></p>
+<p>之后，检测哪个AS丢弃了无效的BGP宣告，但接受了来自同一AS的有效BGP宣告。认为符合这一要求的AS是使用ROV的。检测结果是前100的ISP几乎都不使用ROV，实际上只有3个ISP使用了ROV。为补充和确证这个结果，文章向超过100位网络安全从业者做了匿名调查。其中超过84%的回复表示他们从不使用ROV。</p>
+<h1 id="部分部署的安全状况"><a href="#部分部署的安全状况" class="headerlink" title="部分部署的安全状况"></a>部分部署的安全状况</h1><h2 id="连带产生的优缺点"><a href="#连带产生的优缺点" class="headerlink" title="连带产生的优缺点"></a>连带产生的优缺点</h2><ul>
+<li>优点。ROV使得开启它的AS对其后的AS具有阻止恶意路由宣告的作用，即便这些AS本身没有开启ROV。</li>
+<li>缺点。没有开启ROV的AS可以导致开启ROV的AS与受害者断开连接，或使得它们的流量流向攻击者，如图。当攻击者进行前缀劫持攻击时，开启ROV的AS 3经验证丢弃无效的BGP路由宣告，导致合法的源也被断开。当攻击者进行子前缀攻击时，即使AS 3已经断开同恶意AS的连接，没有开启ROV的AS 2仍会把带有子前缀的包转发给恶意AS。</li>
+</ul>
+<p><img src="/statics/images/20180110/Collateral-benefit-and-damage.png" alt="部分部署安全状况示意图" title="部分部署安全状况示意图"></p>
+<h2 id="安全评估"><a href="#安全评估" class="headerlink" title="安全评估"></a>安全评估</h2><p>文章对部分部署产生的优缺点，通过大范围基于经验的模拟作了量化。分析发现，在Internet核心部分部署ROV能够减轻前缀及子前缀攻击。此外，当所有前100的ISP都部署ROV时，攻击成功率大幅下降。在Internet的非核心部分，部署ROV带来的收益不如核心部分，是否部署ROV几乎没有区别。能够得出结论，在Internet核心部署ROV，既必要又能获得可观的收益。因此，在大型ISP大量部署ROV之前，其它AS没有部署的足够动力。</p>
+<h1 id="不安全的ROA"><a href="#不安全的ROA" class="headerlink" title="不安全的ROA"></a>不安全的ROA</h1><p>文章提出了RPKI的一个新漏洞，它使得ROA所覆盖的IP前缀中有三分之一能够受到非法的流量劫持攻击，即使ROV被广泛采用。</p>
+<p>若并非所有ROA允许最大长度下的子前缀被宣告，则称其为<strong>松散的</strong>ROA。例如，最大长度为&#x2F;24，但只有&#x2F;20子前缀被合法源AS在BGP中宣告。几乎30%的ROA覆盖IP前缀是这样的。实际上这说明网络管理员通常对最大长度规定十分放松，超过85%的松散ROA允许的最大长度是&#x2F;24（IPv4前缀）或&#x2F;48（IPv6前缀），而它们是最常见的前缀长度。</p>
+<p>假设某个ROA说明一个IP前缀$p$只能由源AS$a$合法地通过BGP宣告，且这个ROA是松散的。之后，攻击者可以宣告BGP消息$666-a-\bar p$，其中666表示攻击者控制的AS，$\bar p$是$p$的一个允许的子前缀。由于$\bar p$是$p$的一个子前缀，根据最长匹配原则，目的地IP地址在$\bar p$中的流量会被发送到攻击者。此攻击不能被ROV检测到，因为攻击者的BGP宣告说明了合法的源，AS $a$。此类攻击是子前缀攻击与下一跳攻击的结合，前者能够被ROV检测到但保证了受害者的流量全部流向攻击者，后者不能被ROV检测到但通常效果较差。通过这一种攻击方式，攻击者既能吸引来自受害者的所有流量，又能避免被ROV发现。</p>
+<h1 id="部署障碍"><a href="#部署障碍" class="headerlink" title="部署障碍"></a>部署障碍</h1><p>文章调查了RPKI与ROV部署缓慢的根本原因。上面提到只有极少ISP开启了ROA，因此，毫不奇怪的是，RPKI在发布ROA和采用ROV之间的循环依赖关系中受到了影响：只要有如此多的IP前缀没有受到ROA的保护，就不会从采用ROV获得足够的好处，但是发布一个ROA的动机不足，因为几乎没有AS开启ROV。文章将注意力放在了其它两个导致部署缓慢的因素上：由于签发不合适ROA导致RPKI的不可靠性，以及组织间的依赖性。</p>
+<h2 id="ROA中的错误"><a href="#ROA中的错误" class="headerlink" title="ROA中的错误"></a>ROA中的错误</h2><p>操作员应在ROA中指定由其组织发布IP前缀的3个字段：AS序号、IP前缀与最大长度。不幸的是，签发ROA的时候经常出现错误。文章举了一个真实的例子。Orange是法国的一家大型ISP，它为自己的AS 3215签发了一个IP前缀为194.2.0.0&#x2F;15的ROA。Orange有许多用户，它们有不同的AS序号，使用BGP协议宣告194.2.0.0&#x2F;15的子前缀。例如，Danone宣告子前缀194.2.35.0&#x2F;24，AS 1272。大多数Orange的用户，包括Danone与Ubisoft，没有签发ROA。因此，RPKI认为通过BGP宣告的是无效的（因为它们看上去像子前缀劫持）。所以，任何开启ROV的AS会丢弃所有具有这些IP前缀的BGP路由宣告。在BGP宣告中，仅有6.5%被ROA覆盖，其中又只有62.5%是有效且受保护的，其余为无效的（8.4%）或有效但不受保护的（29.1%，由于松散ROA产生）。</p>
+<h2 id="组织间的依赖性"><a href="#组织间的依赖性" class="headerlink" title="组织间的依赖性"></a>组织间的依赖性</h2><p>当为某个前缀签发RC（资源认证，Resource Certificate）和&#x2F;或ROA时，组织间存在的依赖性使得一个机构必须等待其它机构先操作。存在两种依赖关系：向上的和向下的。向上的依赖关系用于签发RC，前缀$p$的RC必须由已经拥有一个有效的、包含$p$的RC的实体签发。向下的依赖关系用于签发ROA，如果一个前缀$p$起源于某一AS $a$，但$p$含有一子前缀$\bar p$，它起源于AS $b$，两个AS属于不同的组织。如果首先签发ROA宣告$b$是$\bar p$的源，之后签发ROA宣告$a$是$p$的源，那么对$\bar p$的BGP宣告就会变为无效。</p>
+<p>通过量化分析，20%的前缀存在向上依赖。大约90%不受ROA保护的IP前缀不是向下依赖的。虽然向下依赖的前缀相对较少，但构成了IP地址空间的很大一部分，且属于一些世界范围较大的ISP。也就是说，少量的组织拥有多数的向下依赖前缀。因为大多数AS是较小的机构，大型的ISP拥有更大的地址块，所以这个结论是合理的。</p>
+<h1 id="RPKI的推进"><a href="#RPKI的推进" class="headerlink" title="RPKI的推进"></a>RPKI的推进</h1><p>文章提出了几个具体的建议，以解决前面讨论的关于RPKI和ROV部署的问题。</p>
+<ul>
+<li><p>从大型ISP入手。前面已经说明，大型ISP部署ROV后，能够对现有全球网络安全带来较大提升。</p>
+</li>
+<li><p>提高RPKI的可靠性与完整性。如前所述，少数组织要为多数ROA错误签发负责。因此，由于人为错误导致的BGP宣告被错误地分类为无效的数量可以通过集中努力显著降低。</p>
+</li>
+<li><p>使用通配符ROA消除向下依赖。通配符ROA是文章提出的一个新概念，它可以使一个具有RC的、包含若干个不属于它的IP前缀$p_i$的AS，在其它AS宣告拥有$p_i$时，自己不受影响。也就是说，任意一个AS可以为它自己签发一个ROA，无需等待它的后代。这个AS只需使用通配符AS序号签发另一个ROA，其中包含所有不再属于它的、可被其它AS宣告的IP前缀。通配符ROA的优先级必须低于“正常的”ROA，以使得当一个IP前缀同时包含在通配符ROA与正常ROA中的时候，合法用户不受攻击，</p>
+</li>
+</ul>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>有太多的优秀协议、规范因为某些原因没有大量部署，如本文主要讲的RPKI，再如IPv6。调查它们推广的难点，也许会有一些发现。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag"># 网络安全</a>
+              <a href="/tags/%E8%B7%AF%E7%94%B1/" rel="tag"># 路由</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/" rel="prev" title="物联网的区块链与智能合约">
+                  <i class="fa fa-chevron-left"></i> 物联网的区块链与智能合约
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/01/18/Use-Tensorflow-to-Build-Deep-Learning-Model/" rel="next" title="利用Tensorflow构建深度学习模型">
+                  利用Tensorflow构建深度学习模型 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

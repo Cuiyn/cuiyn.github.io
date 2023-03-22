@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背包问题（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论动态规划(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂">
+<meta property="og:type" content="article">
+<meta property="og:title" content="背包问题概述">
+<meta property="og:url" content="http://cuiyn.github.io/2017/11/13/Knapsack-Problem/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="背包问题（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论动态规划(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171113/01kp-table.png">
+<meta property="article:published_time" content="2017-11-12T18:18:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="Batman">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171113/01kp-table.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/11/13/Knapsack-Problem/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/11/13/Knapsack-Problem/","path":"2017/11/13/Knapsack-Problem/","title":"背包问题概述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>背包问题概述 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0-1%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">0-1背包问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E4%BC%98%E5%8C%96"><span class="nav-number">1.3.</span> <span class="nav-text">空间优化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E5%AE%83%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">其它背包问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E5%85%A8%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">完全背包问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E9%87%8D%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.</span> <span class="nav-text">多重背包问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98"><span class="nav-number">2.3.</span> <span class="nav-text">混合背包问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/11/13/Knapsack-Problem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="背包问题概述 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          背包问题概述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-13 02:18:00" itemprop="dateCreated datePublished" datetime="2017-11-13T02:18:00+08:00">2017-11-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><strong>背包问题</strong>（Knapsack problem）是一种组合优化的NP完全问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中。通过暴力搜索，枚举所有可能性，可以找出最优解。但这里我们主要讨论<strong>动态规划</strong>(Dynamic programming，DP)解法：背包问题作为NP完全问题，暂时不存在多项式时间算法，动态规划属于背包问题求解最优解的可行方法之一。</p>
+<span id="more"></span>
+
+<h1 id="0-1背包问题"><a href="#0-1背包问题" class="headerlink" title="0-1背包问题"></a>0-1背包问题</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在0-1背包问题中，给定每种物品仅有一个，对于每个物品，都有“选择”与“不选择”两个状态。</p>
+<p>下面给出一个具体的问题：有编号分别为$a,b,c,d,e$的五件物品，它们的重量分别是$2,2,6,5,4$，它们的价值分别是$6,3,5,4,6$，现在给你个承重为10的背包，如何让背包里装入的物品具有最大的价值总和？</p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>在动态规划中，<strong>状态转移方程</strong>是一个重要概念，它用来确定如何从一个状态转移到下一个状态。对上面的例子，状态转移方程可以表示为：</p>
+<p>$$F[i, v] &#x3D; max{F [i − 1, v], F [i − 1, v − C_i ] + W_i }$$</p>
+<p>这个方程非常重要，基本上所有跟背包相关的问题的方程都是由它衍生出来的，所以有必要将它详细解释一下：“将前$i$件物品放入容量为$v$的背包中”这个子问题，若只考虑第$i$件物品的策略(放或不放)，那么就可以转化为一个只和前$i − 1$件物品相关的问题：如果不放第$i$件物品，那么问题就转化为“前$i − 1$件物品放入容量为$v$的背包中”，价值为$F[i − 1, v]$；如果放第$i$件物品，那么问题就转化为“前$i − 1$件物品放入剩下的容量为$v − C_i$的背包中”，此时能获得的最大价值就是$F[i − 1, v − C_i]$再加上通过放入第$i$件物品获得的价值$W_i$。</p>
+<p>我们用下面的表格来描述这个问题。为了叙述方便，用$e2$单元格表示$e$行2列的单元格，这个单元格的意义是用来表示只有物品$e$时，有个承重为2的背包，那么这个背包的最大价值是0，因为$$物品的重量是4，背包装不了。对于d2单元格，表示只有物品$e,d$时，承重为2的背包，所能装入的最大价值，仍然是0，因为物品$e,d$都不是这个背包能装的。同理，$c2&#x3D;0，b2&#x3D;3，a2&#x3D;6$。</p>
+<p><img src="/statics/images/20171113/01kp-table.png" alt="0-1背包问题分析表" title="0-1背包问题分析表"></p>
+<p>对于承重为8的背包，$a8&#x3D;15$，是怎么得出的呢？根据0-1背包的状态转换方程，需要考察两个值，一个是$F[i-1,v]$，对于这个例子来说就是$b8$的值9，另一个是$F[i-1,v−C_i]+W_i$；在这里，$F[i-1,v]$表示我有一个承重为8的背包，当只有物品$b,c,d,e$四件可选时，这个背包能装入的最大价值。$F[i-1,v−C_i]$表示我有一个承重为6的背包（等于当前背包承重减去物品$a$的重量），当只有物品$b,c,d,e$四件可选时，这个背包能装入的最大价值。$F[i - 1, v − C_i]$就是指单元格$b6$,值为9，$P_i$指的是a物品的价值，即6。由于$F[i-1, v − C_i]+W_i &#x3D; 9 + 6 &#x3D; 15$大于$F[i-1,v]$，所以物品a应该放入承重为8的背包。</p>
+<h2 id="空间优化"><a href="#空间优化" class="headerlink" title="空间优化"></a>空间优化</h2><p>对于上面的算法，时间复杂度应该是不能再进行优化了，但是我们还可以对空间进行优化。注意到状态转移方程中$F[i, v]$的值只与$F[i-1, x], x&#x3D;1,2,3,\ldots, v$有关，因此可以缩减成一维数组，状态转移方程转换为:</p>
+<p>$$F[v]&#x3D;max(F[v], F[v - c[i]] + W_i)$$</p>
+<h1 id="其它背包问题"><a href="#其它背包问题" class="headerlink" title="其它背包问题"></a>其它背包问题</h1><h2 id="完全背包问题"><a href="#完全背包问题" class="headerlink" title="完全背包问题"></a>完全背包问题</h2><p>与0-1背包问题的区别是：在0-1背包问题中，每个物品仅有一件；在完全背包问题中，每个物品有无限件。</p>
+<p>完全背包问题有一个很简单有效的优化：若两件物品$i,j$满足$C_i \leq C_j$且$W_i \geq W_j$，则可以将物品$j$去掉，因为物品$j$占空间大、价值低，不予考虑至少不会吃亏。</p>
+<p>我们可以将完全背包问题转化为0-1背包问题求解。最简单的想法是，考虑到第$i$件物品最多选$\lfloor V &#x2F;C_i \rfloor$件，于是可以把第$i$种物品转化为$\lfloor V &#x2F;C_i \rfloor$件费用及价值均不变的物品，然后求解这个0-1背包问题。例如背包大小为20，某物品$i$占体积费用$C_i&#x3D;3$，则该物品最多装6个，这时可以假设有6个同样的物品$i$（而不是无限个）。</p>
+<p>更为高效的做法是利用二进制的思想：把第$i$件物品拆成费用为$C_i2^k$、价值为$W_i2^k$的若干件物品，其中$k$是使得$C_i2^k\leq V$的自然数。参考上例，我们可以把第$i$件物品拆成费用为$3$、价值为$W_i$，费用为$6$、价值为$2W_i$与费用为$12$、价值为$4W_i$的3件物品。这里相当于把十进制数字6用3位二进制数字表示。</p>
+<h2 id="多重背包问题"><a href="#多重背包问题" class="headerlink" title="多重背包问题"></a>多重背包问题</h2><p>与完全背包问题的区别是：在完全背包问题中，每个物品有无限件；在多重背包问题中，每个物品有$M_i$件。</p>
+<p>一种容易想到的方法是，与完全背包问题同理，将多重背包问题转化为0-1背包问题求解。同时，我们仍然可以利用二进制的思想，但此时要注意物品是有限的，放入背包的物品数量不能超过其件数$M_i$。解决方法是：将第$i$种物品分成若干件0-1背包中的物品，其中每件物品有一个系数。这件物品的费用和价值均是原来的费用和价值乘以这个系数。系数的范围是：$1,2,2^2, \ldots, 2^{k-1},M_i-2^k+1$，$k$是满足$M_i-2^k+1 &gt; 0$的最大整数。例如，如果$M_i&#x3D;14$，则$k&#x3D;3$，这个最多取14件的物品应被分成系数为$1,2,4,7$的四件物品。</p>
+<h2 id="混合背包问题"><a href="#混合背包问题" class="headerlink" title="混合背包问题"></a>混合背包问题</h2><p>混合背包问题相当于上面提到所有背包问题的混合：有的物品仅有1件，有的物品有无限件，有的物品有$M_i$件（有限件）。与上面的理论相同，分类进行转化即可，不再赘述。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li>背包问题九讲. 崔添翼.</li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98">背包问题 - 维基百科</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/11/06/Multiple-Host-Ambiguities-in-HTTP-Implementations/" rel="prev" title="HTTP实现导致的多重Host歧义">
+                  <i class="fa fa-chevron-left"></i> HTTP实现导致的多重Host歧义
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/" rel="next" title="通过域名服务器攻击域名">
+                  通过域名服务器攻击域名 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

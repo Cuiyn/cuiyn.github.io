@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文主要针对Batman成员的讲解做出总结，介绍区块链技术的前景及应用。同时，若想了解区块链与智能合约相关论文，请参考本站博文物联网的区块链与智能合约。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="区块链技术简介">
+<meta property="og:url" content="http://cuiyn.github.io/2018/03/06/Blockchain-Technology/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文主要针对Batman成员的讲解做出总结，介绍区块链技术的前景及应用。同时，若想了解区块链与智能合约相关论文，请参考本站博文物联网的区块链与智能合约。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180306/net_version.jpg">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180306/payment.jpg">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180306/pay.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180306/bitcoin.png">
+<meta property="article:published_time" content="2018-03-06T03:05:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="Batman">
+<meta property="article:tag" content="区块链">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20180306/net_version.jpg">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/03/06/Blockchain-Technology/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/03/06/Blockchain-Technology/","path":"2018/03/06/Blockchain-Technology/","title":"区块链技术简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>区块链技术简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%AD%A6%E4%B9%A0%E5%8C%BA%E5%9D%97%E9%93%BE%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">为什么要学习区块链？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E6%8A%80%E6%9C%AF%E6%A6%82%E5%86%B5"><span class="nav-number">2.</span> <span class="nav-text">区块链技术概况</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AF%94%E7%89%B9%E5%B8%81%E7%AE%80%E4%BB%8B"><span class="nav-number">2.2.</span> <span class="nav-text">比特币简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%84%8F%E4%B9%89%E3%80%81%E7%89%B9%E5%BE%81%E4%B8%8E%E5%88%86%E7%B1%BB"><span class="nav-number">2.3.</span> <span class="nav-text">意义、特征与分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%95%E6%9C%9B"><span class="nav-number">2.4.</span> <span class="nav-text">展望</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">3.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/03/06/Blockchain-Technology/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="区块链技术简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          区块链技术简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-03-06 11:05:00" itemprop="dateCreated datePublished" datetime="2018-03-06T11:05:00+08:00">2018-03-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文主要针对Batman成员的讲解做出总结，介绍区块链技术的前景及应用。同时，若想了解区块链与智能合约相关论文，请参考本站博文<a href="/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT.html">物联网的区块链与智能合约</a>。</p>
+<span id="more"></span>
+
+<h1 id="为什么要学习区块链？"><a href="#为什么要学习区块链？" class="headerlink" title="为什么要学习区块链？"></a>为什么要学习区块链？</h1><p>我们知道，互联网的进化之路在必然性、适应性和偶然性三个因素交织共同作用下，很难也不会处于完美的<strong>“分散、失控、自组织”</strong>状态下直线前进，更接近于螺旋状反复修正的路线。如互联网的初始阶段（NET1.0）是处于“分散、失控、自组织”的原始发展状态，并逐步由若干个有限分布的小网络逐步扩张成一个全球认同和接入的网络，同时也涌现了如FTP&#x2F;BBS&#x2F;GOPHER&#x2F;WEB等丰富的网络应用。之后，以YAHOO的出现为标志，互联网进入以“集中”为特征的新阶段（NET2.0），在这个阶段逐步地引入商业化，并因为商业资本的逐利本性导致用户和流量由分散到很多小网站逐步趋向集中于少数大平台直至形成“垄断”。</p>
+<p><img src="/statics/images/20180306/net_version.jpg" alt="互联网进化示意图" title="互联网进化示意图"></p>
+<p>互联网当前仍处于我们认为的NET2.0阶段，此阶段的互联网总体用户数和流量都得到了明显的指数级发展,但因为进化的适应性和偶然性，这个阶段实际上是偏离了初期的“分散、失控、自组织”状态而转向到资本利益主导的“集中、控制、被组织”的道路，如果这个偏离持续下去，互联网将进入“集中、控制、稳定”的死胡同，其进化将停滞。但非常幸运地是，2009年比特币（Bitcoin）横空出世，其底层的区块链(Blockchain)技术将此前的P2P、数字现金、非对称加密等技术巧妙地融合，在历史上第一个实现了“组织形式上去中心化、业务逻辑上却能保持完美一致性中心化”的创新特性，堪称“革命”。</p>
+<p>区块链技术不只能用来“炒币”，相反，由于智能合约等的出现，其优势逐渐被人们认识到。区块链可以使原本仅能在安全中介环境下运行的程序，现在能在一个分布式的、不考虑中央授权的环境下，实现同样的功能，而这在以前是不可能的。NET 3.0是否会以区块链为代表？我们拭目以待。</p>
+<h1 id="区块链技术概况"><a href="#区块链技术概况" class="headerlink" title="区块链技术概况"></a>区块链技术概况</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>互联网上的贸易，几乎都需要借助可资信赖的第三方信用机构来处理电子支付信息，如支付宝付款依赖于其服务器的正常运行。这类系统仍然内生性地受制于“基于信用的模式”。区块链技术是构建比特币区块链网络与交易信息加密传输的基础技术。它基于密码学原理而不基于信用，使得任何达成一致的双方直接支付，从而不需要第三方中介的参与。</p>
+<p><img src="/statics/images/20180306/payment.jpg" alt="区块链支付系统对比示意图" title="区块链支付系统对比示意图"></p>
+<p>区块链是比特币的基础支撑技术，首次出现在中本聪（Satoshi Nakamoto）发表的“Bitcoin: a peer-to-peer electronic cash system”论文中。文中详细描述了如何建立一套全新的、去中心化的、不需要信任基础的点到点交易体系的方法，其可实现性已经被自 2009 年运行至今的比特币所证明。</p>
+<h2 id="比特币简介"><a href="#比特币简介" class="headerlink" title="比特币简介"></a>比特币简介</h2><p>由于区块链伴随着比特币诞生，这里对比特币进行介绍，</p>
+<p>在银行系统的数据库里记录着跟我们身份ID对应的财产，称这样的记录为账本。如张三的卡10月1日转入1万元, 余额10万元。比特币系统可以类比为这样的账本，不同银行由单一的组织负责记录，比特币的记账由所有运行系统的人（即节点，可以简单理解为一台电脑）共同参与记录，每个节点都保存（同步）一份完整的账本。同时使用简单多数原则，来保证账本的一致性。举个例子：如果有人在自己电脑上把自己的余额从1万元改为1百万元，他这个账本和大多数人的账本不一致，就会被比特币系统认为是无效的。</p>
+<p>任何机器都可以运行一个完整的比特币节点，一个完整的比特币节点包括如下功能：</p>
+<ul>
+<li>钱包，允许用户在区块链网络上进行交易</li>
+<li>完整区块链，记录了所有交易历史，通过特殊的结构保证历史交易的安全性，并且用来验证新交易的合法性</li>
+<li>矿工，通过记录交易及解密数学题来生成新区块，如果成功可以赚取奖励</li>
+<li>路由功能，把其它节点传送过来的交易数据等信息再传送给更多的节点</li>
+</ul>
+<p>下面重点介绍交易。交易是将比特币从交易输入移至输出。输入是指钱币的来源，通常是之前一笔交易的输出。交易的输出则是通过关联一个密钥的方式将钱赋予一个新的所有者。目的密钥被称为是安全锁（Encumbrance）。这样就给资金强加了一个要求：有签名才能在以后的交易中赎回资金。一笔交易的输出可以被当做另一笔新交易的输入，这样随着钱从一个地址被移动到另一个地址的同时形成了一条所有权链。</p>
+<p><img src="/statics/images/20180306/pay.png" alt="比特币交易过程示意图" title="比特币交易过程示意图"></p>
+<p>如图，比特币交易过程可分为以下五步：</p>
+<ol>
+<li>所有者A利用他的私钥对前一次交易（比特币来源）和下一位所有者B签署一个数字签名，并将这个签名附加在这枚货币的末尾，制作成交易单。B以公钥作为接收方地址。</li>
+<li>A将交易单广播至全网，比特币就发送给了B，每个节点都将收到的交易信息纳入一个区块中。对B而言，该枚比特币会即时显示在比特币钱包中，但直到区块确认成功后才可用。目前一笔比特币从支付到最终确认成功，得到6个区块确认之后才能真正确认到帐。</li>
+<li>每个节点通过解一道数学难题，从而去获得创建新区块权利，并争取得到比特币的奖励（新比特币会在此过程中产生）。求解这个难题的过程也叫做“挖矿”，节点反复尝试寻找一个数值，使得将该数值、区块链中最后一个区块的Hash值以及交易单三部分送入SHA256算法后能计算出散列值X（256位）满足一定条件（比如前20位均为0），即找到数学难题的解。注意解并不唯一。</li>
+<li>当一个节点找到解时，它就向全网广播该区块记录的所有盖时间戳交易，并由全网其他节点核对。时间戳用来证实特定区块必然于某特定时间是的确存在的。比特币网络采取从5个以上节点获取时间，然后取中间值的方式作为时间戳。</li>
+<li>全网其他节点核对该区块记账的正确性，没有错误后他们将在该合法区块之后竞争下一个区块，这样就形成了一个合法记账的区块链。每个区块的创建时间大约在10分钟。随着全网算力的不断变化，每个区块的产生时间会随算力增强而缩短、随算力减弱而延长。其原理是根据最近产生的2016个区块的时间差（约两周时间），自动调整每个区块的生成难度（比如减少或增加目标值中0的个数），使得每个区块的生成时间平均是10分钟。</li>
+</ol>
+<h2 id="意义、特征与分类"><a href="#意义、特征与分类" class="headerlink" title="意义、特征与分类"></a>意义、特征与分类</h2><p>有了以上知识作基础，现在我们尝试为区块链下定义：<strong>区块链是一个分布式账本，一种通过去中心化、去信任的方式集体维护一个可靠数据库的技术方案。</strong>区块链是由包含交易信息的区块从后向前有序链接起来的数据结构。它可以被存储为flat file（一种包含没有相对关系记录的文件），或是存储在一个简单数据库中。比特币核心客户端使用Google的LevelDB数据库存储区块链元数据。区块被从后向前有序地链接在这个链条里，每个区块都指向前一个区块。区块链经常被视为一个垂直的栈，第一个区块作为栈底的首区块，随后每个区块都被放置在其他区块之上。</p>
+<p><img src="/statics/images/20180306/bitcoin.png" alt="比特币式区块链示意图" title="比特币式区块链示意图"></p>
+<p>从数据的角度来看，区块链是一种几乎不可能被更改的分布式数据库。这里的“分布式”不仅体现为数据的分布式存储，也体现为数据的分布式记录（即由系统参与者共同维护）；而从技术的角度来看，区块链并不是一种单一的技术，而是多种技术整合的结果。这些技术以新的结构组合在一起，形成了一种新的数据记录、存储和表达的方式。它有如下四个特征：</p>
+<ul>
+<li>开放，共识。任何人都可以参与到区块链网络，每一台设备都能作为一个节点，每个节点都允许获得一份完整的数据库拷贝。节点间基于一套共识机制，通过竞争计算共同维护整个区块链。任一节点失效，其余节点仍能正常工作。</li>
+<li>去中心，去信任。区块链由众多节点共同组成一个端到端的网络，不存在中心化的设备和管理机构。节点之间数据交换通过数字签名技术进行验证，无需互相信任，只要按照系统既定的规则进行，节点之间不能也无法欺骗其它节点。</li>
+<li>交易透明，双方匿名。区块链的运行规则是公开透明的，所有的数据信息也是公开的，因此每一笔交易都对所有节点可见。由于节点与节点之间是去信任的，因此节点之间无需公开身份，每个参与的节点都是匿名的。</li>
+<li>不可篡改，可追溯。单个甚至多个节点对数据库的修改无法影响其他节点的数据库，除非能控制整个网络中超过51%的节点同时修改，这几乎不可能发生。区块链中的每一笔交易都通过密码学方法与相邻两个区块串联，因此可以追溯到任何一笔交易的前世今生。</li>
+</ul>
+<p>区块链可分为以下三类：</p>
+<ul>
+<li>公有链。无官方组织及管理机构，无中心服务器，参与的节点按照系统规则自由接入网络、不受控制，节点间基于共识机制开展工作。</li>
+<li>私有链。建立在某个企业内部，系统的运作规则根据企业要求进行设定，修改甚至是读取权限仅限于少数节点，同时仍保留着区块链的真实性和部分去中心化的特性。</li>
+<li>联盟链。由若干机构联合发起，介于公有链和私有链之间，兼具部分去中心化的特性。</li>
+</ul>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>从2008年的比特币开始，区块链经历了可编程货币、可编程金融与可编程社会三大应用时代，其应用范围逐步扩展到社会生活的方方面面。从需求端来看，金融、医疗、公证、通信、供应链、域名、投票等领域都开始意识到区块链的重要性并开始尝试将技术与现实社会对接；从投资端来看，区块链的投资资金供给逐步上升， 风投的投资热情也不断高涨，投资密度越来越大，供给端的资金供给有望推动技术的进一步发展；从市场应用来看，区块链能成为一种市场工具，帮助社会削减平台成本，让中间机构成为过去；区块链将促使公司现有业务模式重心的转移，有望加速公司的发展；从底层技术来看，区块链有望促进数据记录、数据传播及数据存储管理方式的转型；区块链本身更像一种互联网底层的开源式协议，在不远的将来会触动甚至最后彻底取代现有互联网的底层基础协议。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>区块链不只能挖矿赚钱，它作为一个越来越被人们重视的工具、平台，也许会逐渐成长为计算机行业的下一个热点。错过炒币不可怕，但是这个热点，我们要迎头赶上。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/02/01/Bitmap/" rel="prev" title="Bitmap算法简介">
+                  <i class="fa fa-chevron-left"></i> Bitmap算法简介
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/" rel="next" title="一种基于区块链的软件许可验证方法">
+                  一种基于区块链的软件许可验证方法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="最近听取了Batman成员关于神经网络的讲座，十分精彩，学习到了不少东西，担心遗忘，在这里做个总结与回顾。 阅读本篇博文，可能需要掌握机器学习的一些基础知识。我在本科阶段选修了《数据仓库与数据挖掘》，对相关领域有所了解就足够了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="神经网络简介">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/18/Neural-Network/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="最近听取了Batman成员关于神经网络的讲座，十分精彩，学习到了不少东西，担心遗忘，在这里做个总结与回顾。 阅读本篇博文，可能需要掌握机器学习的一些基础知识。我在本科阶段选修了《数据仓库与数据挖掘》，对相关领域有所了解就足够了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171018/SingleNeuron.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171018/Network.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171018/gradient.png">
+<meta property="article:published_time" content="2017-10-17T18:08:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="神经网络">
+<meta property="article:tag" content="Batman">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171018/SingleNeuron.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/18/Neural-Network/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/18/Neural-Network/","path":"2017/10/18/Neural-Network/","title":"神经网络简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>神经网络简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E8%A1%A8%E8%BE%BE"><span class="nav-number">1.2.</span> <span class="nav-text">公式表达</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E5%AF%BC%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">反向传导算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">梯度下降法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E8%A1%A8%E8%BE%BE-1"><span class="nav-number">2.2.</span> <span class="nav-text">公式表达</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E4%BB%B7%E5%87%BD%E6%95%B0"><span class="nav-number">2.2.1.</span> <span class="nav-text">代价函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.2.</span> <span class="nav-text">反向传播算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/18/Neural-Network/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="神经网络简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          神经网络简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-18 02:08:00" itemprop="dateCreated datePublished" datetime="2017-10-18T02:08:00+08:00">2017-10-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近听取了Batman成员关于神经网络的讲座，十分精彩，学习到了不少东西，担心遗忘，在这里做个总结与回顾。</p>
+<p>阅读本篇博文，可能需要掌握机器学习的一些基础知识。我在本科阶段选修了《数据仓库与数据挖掘》，对相关领域有所了解就足够了。</p>
+<span id="more"></span>
+
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>首先引用西瓜书对于神经网络的定义：神经网络是由具有适应性的简单单元组成的广泛并行互联的网络，它的组织能够模拟生物神经系统对真实世界物体所作出的交互反应。</p>
+<p>定义中提及的简单单元常被称为<strong>神经元</strong>。生物的神经元是这样的：接收来自$n$个其它神经元传递过来的输入信号，加权后与阈值比较，通过一个阶跃函数处理产生自己的输出。在机器学习领域中，神经元也是类似的，只不过这里用<strong>激活函数</strong>代替阶跃函数。激活函数多种多样，常见的有sigmoid函数$f(z)&#x3D;\frac{1}{1+e^{-z}}$。此外，还增加了截距使得直线可平移，截距项被称为<strong>偏置节点</strong>。</p>
+<p><img src="/statics/images/20171018/SingleNeuron.png" alt="神经元示意图" title="神经元示意图"></p>
+<p>这个神经元是一个以$x_1,x_2,x_3$及截距$+1$为输入值的运算单元，输出为$h_{W,b}(x)&#x3D;f(W^T x)&#x3D;f(\sum_{i&#x3D;1}^3 W_i x_i+b)$。</p>
+<p>神经网络就是将许多个单一神经元按照一定的层次结构连接在一起，一个神经元的输出就可以是另一个神经元的输入。例如，下图就是一个简单的神经网络。</p>
+<p><img src="/statics/images/20171018/Network.png" alt="神经网络示意图" title="神经网络示意图"></p>
+<p>神经网络最左边的一层叫做<strong>输入层</strong>，最右的一层叫做<strong>输出层</strong>。中间所有节点组成的层叫做<strong>隐藏层</strong>。上图中，只有一个隐藏层和一个输出节点，然而它们也可以有多个。</p>
+<h2 id="公式表达"><a href="#公式表达" class="headerlink" title="公式表达"></a>公式表达</h2><p>下面给出数学公式表达形式。用$n_l$表示网络的层数，$L_l$表示第$l$层。例如，图中$n_l&#x3D;3$，输出层是$L_{n_l}$即为$L_{3}$。设$W_{ij}^{(l)}$是第$l$层第$j$单元与第$l+1$层第$i$单元之间的连接权重，$b_{i}^{(l)}$是第$l+1$层第$i$单元的偏置项，$s_l$为第$l$层的节点数（不含偏置节点）。</p>
+<p>我们用$a_{i}^{(l)}$表示第$l$层第$i$单元的输出值。当$l&#x3D;1$时，$a_{i}^1&#x3D;x_i$。于是，对于给定参数集合$W,b$，神经网络可以按照函数$h_{W,b}(x)$计算输出结果。本例神经网络的计算步骤如图。</p>
+<p>$a_1^{(2)}&#x3D;f(W_{11}^{(1)}x_1+W_{12}^{(1)}x_2+W_{13}^{(1)}x_3+b_1^{(1)})$</p>
+<p>$a_2^{(2)}&#x3D;f(W_{21}^{(1)}x_1+W_{22}^{(1)}x_2+W_{23}^{(1)}x_3+b_2^{(1)})$</p>
+<p>$a_3^{(2)}&#x3D;f(W_{31}^{(1)}x_1+W_{32}^{(1)}x_2+W_{33}^{(1)}x_3+b_3^{(1)})$</p>
+<p>$h_{W,b}(x)&#x3D;a_1^{(3)}&#x3D;f(W_{11}^{(2)}a_1^{(2)}+W_{12}^{(2)}a_2^{(2)}+W_{13}^{(2)}a_3^{(2)}+b_1^{(2)})$</p>
+<p>我们用$z_i^{(l)}$表示第$l$层第$i$单元输入的加权和（包括偏置单元），例如$z_i^{(2)} &#x3D; \sum_{j&#x3D;1}^n W^{(1)}_{ij} x_j + b^{(1)}_i$。这样就可以采用下面这种更简洁的表示法。将激活函数$f(\cdot)$扩展为用向量（分量的形式）来表示，即$f([z_1, z_2, z_3]) &#x3D; [f(z_1), f(z_2), f(z_3)]$，则上面的等式可以表示为：</p>
+<p>$z^{(2)}&#x3D;W^{(1)}x+b^{(1)}$</p>
+<p>$a^{(2)}&#x3D;f(z^{(2)})$</p>
+<p>$z^{(3)}&#x3D;W^{(2)}a^{(2)}+b^{(2)}$</p>
+<p>上面的计算步骤叫作前向传播。之前用$a^{(1)} &#x3D; x$表示输入层的激活值，那么给定第$l$层的激活值$a^{(l)}$后，第 $l+1$ 层的激活值$a^{(l+1)}$就可以按照下面步骤计算得到：</p>
+<p>$z^{(l+1)}&#x3D;W^{(l)}a^{(l)}+b^{(l)}$</p>
+<p>$a^{(l+1)}&#x3D;f(z^{(l+1)})$</p>
+<p>可以看出，这些参数实际上就是一个个矩阵。使用矩阵－向量的形式，可以利用线性代数的知识，快速求解、证明神经网络的一些问题。</p>
+<h1 id="反向传导算法"><a href="#反向传导算法" class="headerlink" title="反向传导算法"></a>反向传导算法</h1><p>显然，多层神经网络的学习能力比单层网络强得多，实际上也是如此。反向传导算法（error BackPropagation，简称BP，又译为误差逆传播算法）就是一个训练多层神经网络的优秀算法。其基本思想是，学习过程由<strong>信号的正向传播</strong>与<strong>误差的反向传播</strong>两个过程组成。正向传播时，输入样本从输入层传入，经各隐藏层逐层处理后，传向输出层。若输出层的实际输出与期望的输出不符，则转入误差的反向传播阶段。误差反传是将输出误差以某种形式通过隐藏层向输入层逐层反传，并将误差分摊给各层的所有单元，从而获得各层单元的误差信号，此误差信号即作为修正各单元权值的依据。这种信号正向传播与误差反向传播的各层权值调整过程，是周而复始地进行的。权值不断调整的过程，也就是网络的学习训练过程。此过程一直进行到网络输出的误差减少到可接受的程度，或进行到预先设定的学习次数为止。</p>
+<h2 id="梯度下降法"><a href="#梯度下降法" class="headerlink" title="梯度下降法"></a>梯度下降法</h2><p>BP算法基于梯度下降（gradient descent）策略。梯度下降法常用来递归性地逼近最小偏差模型，沿梯度的方向逼近极小值。下图给出一个函数图象作为示例。</p>
+<p><img src="/statics/images/20171018/gradient.png" alt="梯度下降示意图" title="梯度下降示意图"></p>
+<p>梯度下降法沿右边箭头方向，逐渐逼近函数的极小值。本例中，这个极小值就是函数的最小值。</p>
+<p>梯度下降法的迭代公式可以表示为$a_{k+1}&#x3D;a_k+\rho_k \bar s_{(k)}$，其中$\bar s_{(k)}$代表梯度负方向，$\rho_k$ 表示梯度方向上的搜索步长。梯度方向我们可以通过对函数求导得到。步长的确定比较麻烦，太大了的话可能会发散，太小收敛速度又太慢，一般确定步长的方法是由线性搜索算法来确定，即把下一个点的坐标看做是$a_{k+1}$的函数，然后求满足$f(a_{k+1})$的最小值即可。</p>
+<p>一般情况下，导数值为0则说明达到极值点。采用梯度下降算法进行最优化求解时，算法迭代的终止条件是梯度向量的幅值接近0即可，可以设置一个非常小的常数作为阈值。</p>
+<h2 id="公式表达-1"><a href="#公式表达-1" class="headerlink" title="公式表达"></a>公式表达</h2><h3 id="代价函数"><a href="#代价函数" class="headerlink" title="代价函数"></a>代价函数</h3><p>假设我们有一个固定样本集${ (x^{(1)}, y^{(1)}), \ldots, (x^{(m)}, y^{(m)}) }$，它包含$m$个样例。我们可以用批量梯度下降法来求解神经网络。具体来讲，对于单个样例$(x,y)$，其代价函数为：</p>
+<p>$J(W,b; x,y) &#x3D; \frac{1}{2} \left| h_{W,b}(x) - y \right|^2$</p>
+<p>这是一个（二分之一的）方差代价函数。使用二分之一的原因是后面求导的方便。给定一个包含$m$个样例的数据集，我们可以定义整体代价函数为：</p>
+<p>$J(W,b) &#x3D; \left[ \frac{1}{m} \sum_{i&#x3D;1}^m J(W,b;x^{(i)},y^{(i)}) \right]  + \frac{\lambda}{2} \sum_{l&#x3D;1}^{n_l-1} ; \sum_{i&#x3D;1}^{s_l} ; \sum_{j&#x3D;1}^{s_{l+1}} \left( W^{(l)}_{ji} \right)^2 $</p>
+<p>$&#x3D; \left[ \frac{1}{m} \sum_{i&#x3D;1}^m \left( \frac{1}{2} \left| h_{W,b}(x^{(i)}) - y^{(i)} \right|^2 \right) \right] + \frac{\lambda}{2} \sum_{l&#x3D;1}^{n_l-1} ; \sum_{i&#x3D;1}^{s_l} ; \sum_{j&#x3D;1}^{s_{l+1}} \left( W^{(l)}_{ji} \right)^2$</p>
+<p>以上关于$J(W,b)$定义中的第一项是一个<strong>均方差项</strong>。第二项是一个<strong>规则化项</strong>（也叫权重衰减项），其目的是减小权重的幅度，防止过度拟合。$\lambda$叫做<strong>权重衰减参数</strong>，用于控制公式中两项的相对重要性，需要算法工程师根据经验调整。使用二分之一的原因同样是后面求导的方便。</p>
+<p>以上的代价函数经常被用于分类和回归问题。在分类问题中，我们用$y &#x3D; 0$或$1$来代表两种类型的标签。对于回归问题，我们首先要变换输出值域$y$，以保证其范围为$[0,1]$。值域应根据激活函数确定，此处使用$[0,1]$是因为sigmoid激活函数的值域为$[0,1]$。</p>
+<p>我们的目标是针对参数$W$和$b$来求其函数$J(W,b)$的最小值。为了求解神经网络，我们需要将每一个参数$W^{(l)}_{ij}$和$b^{(l)}_i$初始化为一个很小的、接近零的<strong>随机值</strong>，之后对目标函数使用诸如批量梯度下降法的最优化算法。因为$J(W, b)$是一个非凸函数，梯度下降法很可能会收敛到局部最优解；但是在实际应用中，梯度下降法通常能得到令人满意的结果。</p>
+<p>最后，需要再次强调的是，要将参数进行随机初始化，而不是全部置为$0$。如果所有参数都用相同的值作为初始值，那么所有隐藏层单元最终会得到与输入值有关的、相同的函数（也就是说，对于所有$i$，$W^{(1)}_{ij}$都会取相同的值，那么对于任何输入 $x$都会有：$a^{(2)}_1 &#x3D; a^{(2)}_2 &#x3D; a^{(2)}_3 &#x3D; \ldots$）。随机初始化的目的是使对称失效。</p>
+<p>梯度下降法中每一次迭代都按照如下公式对参数$W$和$b$进行更新：</p>
+<p>$W_{ij}^{(l)} &#x3D; W_{ij}^{(l)} - \alpha \frac{\partial}{\partial W_{ij}^{(l)}} J(W,b)$</p>
+<p>$b_{i}^{(l)} &#x3D; b_{i}^{(l)} - \alpha \frac{\partial}{\partial b_{i}^{(l)}} J(W,b)$</p>
+<p>其中$\alpha$是学习速率。</p>
+<h3 id="反向传播算法"><a href="#反向传播算法" class="headerlink" title="反向传播算法"></a>反向传播算法</h3><p>公式计算的关键步骤是计算偏导数。下面介绍反向传播算法，它是计算偏导数的一种有效方法。本节内容涉及到许多复杂的数学求解，请耐心阅读。</p>
+<p>首先计算$\frac{\partial}{\partial W_{ij}^{(l)}} J(W,b; x, y)$和$\frac{\partial}{\partial b_{i}^{(l)}} J(W,b; x, y)$，这两项是单个样例$(x,y)$的代价函数$J(W,b;x,y)$的偏导数。一旦我们求出该偏导数，就可以推导出整体代价函数$J(W,b)$的偏导数：</p>
+<p>$\frac{\partial}{\partial W_{ij}^{(l)}} J(W,b) &#x3D;\left[ \frac{1}{m} \sum_{i&#x3D;1}^m \frac{\partial}{\partial W_{ij}^{(l)}} J(W,b; x^{(i)}, y^{(i)}) \right] + \lambda W_{ij}^{(l)}$</p>
+<p>$\frac{\partial}{\partial b_{i}^{(l)}} J(W,b) &#x3D;\frac{1}{m}\sum_{i&#x3D;1}^m \frac{\partial}{\partial b_{i}^{(l)}} J(W,b; x^{(i)}, y^{(i)})$</p>
+<p>第一行比第二行多出一项，是因为权重衰减是作用于$W$而不是$b$。</p>
+<p>反向传播算法的思路如下：给定样例$(x,y)$，首先进行<strong>前向传导</strong>运算，计算出网络中所有的激活值，包括$h_{W,b}(x)$的输出值。之后，针对第$l$层的每一个节点$i$，我们计算出其<strong>残差</strong>$\delta^{(l)}_i$，该残差表明了该节点对最终输出值的残差产生了多少影响。对于最终的输出节点，我们可以直接算出网络产生的激活值与实际值之间的差距，我们将这个差距定义为$\delta^{(n_l)}_i$（第$n_l$层表示输出层）。对于隐藏单元，将基于第$l+1$层节点）残差的加权平均值计算$\delta^{(l)}_i$，这些节点以$a^{(l)}_i$作为输入。</p>
+<p>下面是反向传导算法的细节：</p>
+<ol>
+<li><p>进行前馈传导计算，利用前向传导公式，得到$L_2, L_3, \ldots$直到输出层$L_{n_l}$的激活值。</p>
+</li>
+<li><p>对于第$n_l$层（输出层）的每个输出单元$i$，根据以下公式计算残差：</p>
+<p> $\delta_i^{(n_l)} &#x3D; \frac{\partial}{\partial z_i^{n_l}}J(W,b;x,y)&#x3D; \frac{\partial}{\partial z_i^{n_l}}\frac{1}{2} \left|y - h_{W,b}(x)\right|^2$</p>
+<p> $&#x3D; \frac{\partial}{\partial z_i^{n_l}}\frac{1}{2} \sum_{j&#x3D;1}^{S_{n_l}} (y_j-a_j^{(n_l)})^2&#x3D; \frac{\partial}{\partial z_i^{n_l}}\frac{1}{2} \sum_{j&#x3D;1}^{S_{n_l}} (y_j-f(z_j^{(n_l)}))^2$</p>
+<p> 因为$(x^\mu)’&#x3D;\mu x^{\mu -1}$，根据复合函数求导法则，对上式继续化简有：<br> $\delta_i^{(n_l)} &#x3D; - (y_i - f(z_i^{(n_l)})) \cdot f’(z^{(n_l)}_i)&#x3D; - (y_i - a^{(n_l)}_i) \cdot f’(z^{(n_l)}_i)$</p>
+</li>
+<li><p>对$l &#x3D; n_l-1, n_l-2, n_l-3, \ldots, 2$的各个层，第$l$层的第$i$个节点的残差计算方法如下：</p>
+<p> $\delta_i^{(n_l-1)} &#x3D;\frac{\partial}{\partial z_i^{n_l-1}}J(W,b;x,y)&#x3D; \frac{\partial}{\partial z_i^{n_l-1}}\frac{1}{2} \left|y - h_{W,b}(x)\right|^2 &#x3D; \frac{\partial}{\partial z_i^{n_l-1}}\frac{1}{2} \sum_{j&#x3D;1}^{S_{n_l}}(y_j-a_j^{(n_l)})^2 $</p>
+<p> $&#x3D; \frac{1}{2} \sum_{j&#x3D;1}^{S_{n_l}}\frac{\partial}{\partial z_i^{n_l-1}}(y_j-a_j^{(n_l)})^2&#x3D; \frac{1}{2} \sum_{j&#x3D;1}^{S_{n_l}}\frac{\partial}{\partial z_i^{n_l-1}}(y_j-f(z_j^{(n_l)}))^2$</p>
+<p> 因为$z_j^{n_l}&#x3D;\sum W_{jk}^{n_l-1}f(z_k^{n_l-1})+b$，</p>
+<p> $\delta_i^{(n_l-1)} &#x3D; \sum_{j&#x3D;1}^{S_{n_l}}-(y_j-f(z_j^{(n_l)})) \cdot \frac{\partial}{\partial z_i^{(n_l-1)}}f(z_j^{(n_l)})$</p>
+<p> 又因为$\frac{\partial}{\partial z_i^{n_l-1}}f(z_j^{n_l})&#x3D;\frac{\partial}{\partial z_i^{n_l}} \frac{\partial z_i^{n_l}}{\partial z_i^{n_l-1}} f(z_j^{n_l})$，继续推导，</p>
+<p> $\delta_i^{(n_l-1)} &#x3D; \sum_{j&#x3D;1}^{S_{n_l}}-(y_j-f(z_j^{(n_l)})) \cdot  f’(z_j^{(n_l)}) \cdot \frac{\partial z_j^{(n_l)}}{\partial z_i^{(n_l-1)}}$</p>
+<p> $&#x3D; \sum_{j&#x3D;1}^{S_{n_l}} \delta_j^{(n_l)} \cdot \frac{\partial z_j^{(n_l)}}{\partial z_i^{n_l-1}}&#x3D; \sum_{j&#x3D;1}^{S_{n_l}} \left(\delta_j^{(n_l)} \cdot \frac{\partial}{\partial z_i^{n_l-1}}\sum_{k&#x3D;1}^{S_{n_l-1}}f(z_k^{n_l-1}) \cdot W_{jk}^{n_l-1}\right)$</p>
+<p> $&#x3D; \sum_{j&#x3D;1}^{S_{n_l}} \delta_j^{(n_l)} \cdot  W_{ji}^{n_l-1} \cdot f’(z_i^{n_l-1})&#x3D; \left(\sum_{j&#x3D;1}^{S_{n_l}}W_{ji}^{n_l-1}\delta_j^{(n_l)}\right)f’(z_i^{n_l-1})$</p>
+<p> 将上式中的$n_l-1$与$n_l$的关系替换为$l$与$l+1$的关系，就可以得到：</p>
+<p> $ \delta_i^{(l)} &#x3D; \left( \sum_{j&#x3D;1}^{s_{l+1}} W^{(l)}_{ji} \delta^{(l+1)}_j \right) f’(z^{(l)}_i)$</p>
+<p> 观察到，计算前一层的导数，用到了后一层的导数结果。逐次从后向前求导的过程即为“反向传导”的本意所在。</p>
+</li>
+<li><p>计算我们需要的偏导数：</p>
+<p> $\frac{\partial}{\partial W_{ij}^{(l)}} J(W,b; x, y) &#x3D; a^{(l)}_j \delta_i^{(l+1)}$</p>
+<p> $\frac{\partial}{\partial b_{i}^{(l)}} J(W,b; x, y) &#x3D; \delta_i^{(l+1)}$</p>
+</li>
+</ol>
+<p>下面用矩阵-向量表示法重写以上算法。上面定义过$f([z_1, z_2, z_3]) &#x3D; [f(z_1), f(z_2), f(z_3)]$，则有$f’([z_1, z_2, z_3]) &#x3D; [f’(z_1), f’(z_2), f’(z_3)]$。“$\bullet$”表示向量乘（点乘）。反向传播算法可表示为以下几个步骤：</p>
+<ol>
+<li>进行前馈传导计算，利用前向传导公式，得到$L_2, L_3, \ldots$直到输出层$L_{n_l}$的激活值。</li>
+<li>对输出层（第$n_l$层），计算$\delta^{(n_l)}&#x3D; - (y - a^{(n_l)}) \bullet f’(z^{(n_l)})$。</li>
+<li>对于$l &#x3D; n_l-1, n_l-2, n_l-3, \ldots, 2$的各层，计算$\delta^{(l)} &#x3D; \left((W^{(l)})^T \delta^{(l+1)}\right) \bullet f’(z^{(l)})$</li>
+<li>计算最终需要的偏导数值：<br> $\begin{align}<br> \nabla_{W^{(l)}} J(W,b;x,y) &#x3D; \delta^{(l+1)} (a^{(l)})^T, \<br> \nabla_{b^{(l)}} J(W,b;x,y) &#x3D; \delta^{(l+1)}.<br> \end{align}$</li>
+</ol>
+<p>利用偏导数值，对参数$W$与$b$进行迭代更新，减小代价函数$J(W,b)$的值，即可求解神经网络。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ol>
+<li><a target="_blank" rel="noopener" href="http://ufldl.stanford.edu/">Deep Learning, Computer Science Department, Stanford University</a></li>
+<li><a target="_blank" rel="noopener" href="http://baike.baidu.com/">百度百科</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="tag"># 神经网络</a>
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/" rel="prev" title="悬空DNS记录带来的安全威胁">
+                  <i class="fa fa-chevron-left"></i> 悬空DNS记录带来的安全威胁
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/23/Automatically-Evading-Classifiers/" rel="next" title="基于遗传编程的恶意代码自动逃逸分类">
+                  基于遗传编程的恶意代码自动逃逸分类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天分析的这篇论文在2016年于NDSS会议发表，题目是《Automatically Evading Classifiers: A Case Study on PDF Malware Classifiers》，其发布信息在这里。 论文主要针对恶意PDF样本，使用遗传编程算法，提出了一种使机器学习产生错误分类的方法。文章对知识积累的要求不高，听说过遗传算法、了解机器学习的基本概念即可。下面开始介绍文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于遗传编程的恶意代码自动逃逸分类">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/23/Automatically-Evading-Classifiers/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="今天分析的这篇论文在2016年于NDSS会议发表，题目是《Automatically Evading Classifiers: A Case Study on PDF Malware Classifiers》，其发布信息在这里。 论文主要针对恶意PDF样本，使用遗传编程算法，提出了一种使机器学习产生错误分类的方法。文章对知识积累的要求不高，听说过遗传算法、了解机器学习的基本概念即可。下面开始介绍文">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171023/gp.png">
+<meta property="article:published_time" content="2017-10-23T02:31:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="PDF">
+<meta property="article:tag" content="恶意代码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171023/gp.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/23/Automatically-Evading-Classifiers/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/23/Automatically-Evading-Classifiers/","path":"2017/10/23/Automatically-Evading-Classifiers/","title":"基于遗传编程的恶意代码自动逃逸分类"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于遗传编程的恶意代码自动逃逸分类 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF%E7%9F%A5%E8%AF%86"><span class="nav-number">2.</span> <span class="nav-text">背景知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%81%B6%E6%84%8FPDF%E6%96%87%E6%A1%A3"><span class="nav-number">2.1.</span> <span class="nav-text">恶意PDF文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%88%86%E7%B1%BB%E5%99%A8"><span class="nav-number">2.2.</span> <span class="nav-text">机器学习分类器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">攻击方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">攻击模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BB%E6%89%BE%E9%80%83%E9%80%B8%E6%A0%B7%E6%9C%AC"><span class="nav-number">3.2.</span> <span class="nav-text">寻找逃逸样本</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/23/Automatically-Evading-Classifiers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于遗传编程的恶意代码自动逃逸分类 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于遗传编程的恶意代码自动逃逸分类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-23 10:31:00" itemprop="dateCreated datePublished" datetime="2017-10-23T10:31:00+08:00">2017-10-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>今天分析的这篇论文在2016年于NDSS会议发表，题目是《Automatically Evading Classifiers: A Case Study on PDF Malware Classifiers<br>》，其发布信息在<a target="_blank" rel="noopener" href="https://www.researchgate.net/publication/316904628_Automatically_Evading_Classifiers_A_Case_Study_on_PDF_Malware_Classifiers">这里</a>。</p>
+<p>论文主要针对恶意PDF样本，使用遗传编程算法，提出了一种使机器学习产生错误分类的方法。文章对知识积累的要求不高，听说过遗传算法、了解机器学习的基本概念即可。下面开始介绍文章内容。</p>
+<span id="more"></span>
+
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>机器学习被广泛应用于开发安全领域的分类器。但是，这些分类方法在面对有目的的攻击者时，其稳定性是不能确定的。文中提出了一种评估分类器在攻击中稳定性的方法。其关键思路是，随机操纵一个恶意样本，来寻找一个<strong>保留恶意行为</strong>的变种，但这个变种被分类器分类为<strong>良性</strong>。文中提出了一种寻找逃逸变种的一般方法，并利用这个技术对两个恶意PDF分类器：PDFrate和Hidost，进行了实验。对于实验的500个恶意样本，此方法可以<strong>全部</strong>自动地找到针对两个分类器的逃逸变种，由此对分类器的有效性提出了严重的质疑。</p>
+<h1 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h1><p>论文提出一种自动化的方法，来模拟攻击者试图为一个目标分类器检测到的恶意样本寻找一个逃逸的变种。攻击者的目标是找到一个恶意变种，它保留原始样本的恶意行为，但被目标分类器错误地归类为良性。</p>
+<h2 id="恶意PDF文档"><a href="#恶意PDF文档" class="headerlink" title="恶意PDF文档"></a>恶意PDF文档</h2><p>PDF（Portable Document Format，便携式文档格式）是一种用独立于应用程序、硬件、操作系统的方式呈现文档的文件格式。因为PDF的文件格式性质广泛用于商业办公，引起众多攻击者对其开展技术研究。在一些APT（Advanced Persistent Threat）攻击中，可以针对特定目标投递含有恶意代码的PDF文档，安全意识薄弱的用户只要打开PDF文档就会受到攻击。</p>
+<p>PDF文件是一种高度结构化的文件，这一定程度上方便了检测与使用遗传算法进行变异。恶意PDF文件往往嵌套有JavaScript代码，通过解析漏洞或堆溢出实现攻击。</p>
+<h2 id="机器学习分类器"><a href="#机器学习分类器" class="headerlink" title="机器学习分类器"></a>机器学习分类器</h2><p>机器学习是从数据中学习和预测的。基于机器学习的分类器试图找到一个假设函数$f$，它将数据点映射到不同的类。例如，一个恶意软件分类系统会找出一个假设函数$f$，它将一个数据点（一个恶意样本）映射到为“良性”或“恶意”。</p>
+<p>训练机器学习系统的过程从特征提取开始。由于大多数机器学习算法不能对高度结构化的数据进行操作，数据样本通常在专门设计的特征空间中表示。例如，一个恶意软件分类器可以提取文件大小和函数调用跟踪作为特征。每个特征都是特征空间中的一个维度。因此，每个样本都被表示为一个向量。在分类算法中，当特性的数量太大时，可以进行额外的特征选择，以减少特征的数量。</p>
+<p>在安全任务中，使用最广泛的机器学习算法使用的是监督学习，其中训练数据集带有标识每个训练样本类的标签。假设函数$f$的训练目标是使得训练集上的预测误差最小化。这个函数通常会导致较低的错误率在平稳性假设下的运营数据分布的数据点在未来将会遇到一样的训练集的分布。</p>
+<p>机器学习已经产生了许多令人印象深刻的成果，并被广泛部署用于特定的安全任务，包括恶意软件分类。如果不检查真实系统中可疑恶意软件的行为，恶意软件分类器通常使用静态属性来预测恶意软件，如文件结构、文件大小、元数据、令牌或系统调用。尽管这种方法在验证测试中经常达到很高的精度，分类器学习的属性可能只是训练数据的表面特征，而不是与恶意软件内在相关的属性。这是因为训练数据中的恶意软件样本很可能与良性样本不同，在许多方面它们的恶意行为特征并不重要。</p>
+<h1 id="攻击方式"><a href="#攻击方式" class="headerlink" title="攻击方式"></a>攻击方式</h1><h2 id="攻击模型"><a href="#攻击模型" class="headerlink" title="攻击模型"></a>攻击模型</h2><p>假设攻击者从一个被目标分类器（正确地）分类为“恶意”的恶意样本开始，希望创建一个具有相同恶意行为的样本，但它被错误归类为良性。攻击者可以在许多方面操纵恶意样本，而且很可能对那些（正确地）分类为良性的样本有所了解。</p>
+<p>假设攻击者能够以黑盒方式访问目标分类器，并且可以向该分类器提交许多变种。对于每个提交的变种，攻击者了解其分类分数。分类分数是一个在0与1之间的实数，表明分类器对恶意的预测，在某些阈值之上（比如0.5）则被认为是恶意的，分类分数较低的样本被认为是良性的。文章不假设攻击者有任何关于分类器的内部信息，只是将它作为一个获得样本分类分数的黑盒。假设对分类器进行的操作不使分类器适应所提交的变体（许多分类器具有自学习能力，但如果攻击者离线访问分类器，则必须是这种情况）。</p>
+<h2 id="寻找逃逸样本"><a href="#寻找逃逸样本" class="headerlink" title="寻找逃逸样本"></a>寻找逃逸样本</h2><p>文中介绍的方法使用遗传编程技术来对可能的样本空间进行定向搜索，以找到那些在保留所期望的恶意行为的同时避开分类器的样本。</p>
+<p>遗传编程（Genetic programming，GP）是一种进化算法，最初是为自动生成针对某一特定任务的计算机程序而开发的。它本质上是一种随机搜索方法，利用计算模拟生物的突变和交换来产生变异，并使用用户定义的<strong>适应度函数</strong>对达尔文自然选择进行建模。具有更高适应度的变体将被选择继续演化，并且这个过程会持续数代，直到找到一个具有所需属性的变体（或者搜索过程在超过资源利用范围后终止）。遗传编程算法已经在多个领域显示其高效，例如修复旧有软件的错误、软件逆向工程与软件再工程（re-engineering）。</p>
+<p>基于遗传编程寻找逃逸样本的过程如果所示。</p>
+<p><img src="/statics/images/20171023/gp.png" alt="遗传编程寻找逃逸样本过程示意图" title="遗传编程寻找逃逸样本过程示意图"></p>
+<p>这个过程从一个显示恶意行为、并被目标分类器分类为恶意的种子样本开始。目的是寻找一个逃逸样本，它保留恶意行为，但被目标分类器错误地分类为良性。</p>
+<p>首先，我们通过对恶意样本进行随机操作来初始化一个<strong>种群</strong>（population）。然后，每个变体由<strong>目标分类器</strong>（target classifier）和<strong>先知</strong>（oracle）评估。目标分类器是一个黑盒，输出的数字代表对输入样本恶意的预测。有一个规定的阈值用来决定它是恶意的还是良性的。先知用于确定给定的样本是否具有特定的恶意行为。在大多数实例中，这将涉及开销巨大的动态测试。</p>
+<p>一个由目标分类器分类为良性、但实际上具有恶意的变体，是一个成功的逃逸样本。如果在种群中没有发现任何逃逸样本，就会根据一项适合于寻找逃逸样本的适应性措施，为下一代选择生成变种的一个子集。由于不太可能将恶意行为重新引入到一个变体中，已经丢失了恶意行为的被损坏的变体将替换为其他变体或原始样本。</p>
+<p>接下来，被选中的变种被遗传演算随机操纵，以产生下一代的种群。这个过程一直持续下去，直到找到一个逃逸样本，或者达到阈值。</p>
+<p>为了提高搜索的效率，文中收集了所使用突变操作的<strong>追溯</strong>（trace），并重用有效的追溯。如果搜索结果发现了任何逃逸变体，那么在逃逸变体上的突变将被存储为成功的追溯。否则，将存储一个具有最高适应度值变体的突变追溯。这些追溯随后被应用到其他的恶意样本，以生成它们的种群初始化的变种。由于PDF的结构和突变操作的性质，相同的突变序列通常可以有效地应用于许多初始样本。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>与神经网络类似，遗传算法是非常“仿生学”的一个思路，并在许多领域产生了惊人的效果。对结构性较强的数据进行分析时，不妨试试这个算法。同时，要广泛阅读各领域的书籍资料（不局限于计算机），也许某个领域极其普通的思路，在计算机行业就是翻天覆地的创新。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/PDF/" rel="tag"># PDF</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/18/Neural-Network/" rel="prev" title="神经网络简介">
+                  <i class="fa fa-chevron-left"></i> 神经网络简介
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/25/Simulated-annealing/" rel="next" title="模拟退火算法简介">
+                  模拟退火算法简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

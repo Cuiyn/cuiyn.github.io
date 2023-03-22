@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文以一加 3 设备为例，介绍 LineageOS 14.1 （Android 7.1） 在 Arch Linux 下的编译过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 Arch Linux 下编译 Android 7">
+<meta property="og:url" content="http://cuiyn.github.io/2023/03/22/Compile-Android-7-on-Arch-Linux/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文以一加 3 设备为例，介绍 LineageOS 14.1 （Android 7.1） 在 Arch Linux 下的编译过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-22T05:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:33:37.651Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="技术">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2023/03/22/Compile-Android-7-on-Arch-Linux/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2023/03/22/Compile-Android-7-on-Arch-Linux/","path":"2023/03/22/Compile-Android-7-on-Arch-Linux/","title":"在 Arch Linux 下编译 Android 7"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在 Arch Linux 下编译 Android 7 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%8B%89%E5%8F%96"><span class="nav-number">2.</span> <span class="nav-text">代码拉取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">3.</span> <span class="nav-text">编译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-2-%E4%BB%A3%E7%A0%81%E5%87%BA%E9%94%99"><span class="nav-number">3.1.</span> <span class="nav-text">Python 2 代码出错</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E8%AE%BF%E9%97%AE-java-lang-Object"><span class="nav-number">3.2.</span> <span class="nav-text">无法访问 java.lang.Object</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#yylloc-%E9%87%8D%E5%A4%8D%E5%AE%9A%E4%B9%89%E9%97%AE%E9%A2%98"><span class="nav-number">3.3.</span> <span class="nav-text">yylloc 重复定义问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jack-%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%90%AF%E5%8A%A8%E9%97%AE%E9%A2%98"><span class="nav-number">3.4.</span> <span class="nav-text">Jack 服务器启动问题</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2023/03/22/Compile-Android-7-on-Arch-Linux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="在 Arch Linux 下编译 Android 7 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在 Arch Linux 下编译 Android 7
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-22 13:00:00 / 修改时间：22:33:37" itemprop="dateCreated datePublished" datetime="2023-03-22T13:00:00+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文以一加 3 设备为例，介绍 LineageOS 14.1 （Android 7.1） 在 Arch Linux 下的编译过程。</p>
+<span id="more"></span>
+
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><p>首先，按照 <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/title/Android#Building">ArchWiki 相关介绍</a> 安装编译工具：<code>lineageos-devel</code>、<code>repo</code> 与 <code>JDK</code>。这里以 LineageOS 14.1 为例，因此需要安装的 <code>JDK</code> 版本为 8。</p>
+<h2 id="代码拉取"><a href="#代码拉取" class="headerlink" title="代码拉取"></a>代码拉取</h2><p>创建源代码工作及编译目录，以清华大学的 <a target="_blank" rel="noopener" href="https://mirror.tuna.tsinghua.edu.cn/help/lineageOS/">lineageOS 源代码镜像使用帮助</a> 为指引，同步 LineageOS 源代码即可。</p>
+<p>之后，参考 <a target="_blank" rel="noopener" href="https://wiki.lineageos.org/devices/oneplus3/build">LineageOS 一加 3 设备编译指引</a>，开启 <code>ccache</code> ，下载设备对应代码与内核，并连接设备以同步闭源二进制文件。在下载设备对应代码时，由于此时并未生成 <code>vendor</code> 目录，可能出现失败，只需在同步二进制文件后再次执行相关命令即可。</p>
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>执行相关命令，开始编译。下面总结一些遇到的问题。</p>
+<h3 id="Python-2-代码出错"><a href="#Python-2-代码出错" class="headerlink" title="Python 2 代码出错"></a>Python 2 代码出错</h3><p>一些 <code>Python 2</code> 时代的编译工具脚本无法在 <code>Python 3</code> 下运行。安装 <code>python2-bin</code>，新建一个 <code>env-python2</code> 目录，在其中执行 <code>ln -s /usr/bin/python2 python</code> 生成一个名为 <code>python</code> 指向 <code>Python 2</code> 的链接，之后将此目录加入环境变量 <code>PATH</code> 即可。</p>
+<h3 id="无法访问-java-lang-Object"><a href="#无法访问-java-lang-Object" class="headerlink" title="无法访问 java.lang.Object"></a>无法访问 java.lang.Object</h3><p>确认 <code>JDK</code> 版本无误。可使用 <code>archlinux-java</code> 工具查看。之后执行 <code>make clean</code> 命令，清除旧编译内容再次编译即可。</p>
+<h3 id="yylloc-重复定义问题"><a href="#yylloc-重复定义问题" class="headerlink" title="yylloc 重复定义问题"></a>yylloc 重复定义问题</h3><p>由于 <code>GCC</code> 工具链较 LineageOS 14.1 版本过高导致的问题，需要修改源代码解决此错误。对应文件位于设备内核代码目录下的 <code>scripts/dts/</code> 目录中，将 dtc-lexer.lex.c_shipped文件中 <code>YYLTYPE yyloc</code> 这一行代码前添加 <code>extern</code>。</p>
+<p>此外，也有前辈提到应将 <code>LC_ALL</code> 设置为 <code>C</code> 以清除本地化对编译可能带来的影响。</p>
+<h3 id="Jack-服务器启动问题"><a href="#Jack-服务器启动问题" class="headerlink" title="Jack 服务器启动问题"></a>Jack 服务器启动问题</h3><p><code>Jack</code> 服务器是 Android Java 相关源代码的编译工具。提示它不能启动，是因为 <code>JDK</code> 存在配置问题。</p>
+<p>修改 <code>/etc/java-8-openjdk/security/java.security</code> 文件，将 <code>jdk.tls.disabledAlgorithms</code> 配置项中的 <code>TLSv1, TLSv1.1</code> 删除。执行命令重启 <code>Jack</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./prebuilts/sdk/tools/jack-admin kill-server</span><br><span class="line">./prebuilts/sdk/tools/jack-admin start-server</span><br></pre></td></tr></table></figure>
+
+<p>此时重新运行编译命令，编译过程恢复。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/04/28/Enhancing-State-of-the-art-Classifiers-with-API-Semantics-to-Detect-Evolved-Android-Malware/" rel="prev" title="使用 API 语义增强先进分类器以检测演化后的 Android 恶意软件">
+                  <i class="fa fa-chevron-left"></i> 使用 API 语义增强先进分类器以检测演化后的 Android 恶意软件
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

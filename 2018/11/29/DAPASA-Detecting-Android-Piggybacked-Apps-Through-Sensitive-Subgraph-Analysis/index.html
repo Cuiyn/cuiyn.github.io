@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2017年IEEE Trancactions的一篇文章，题目是《DAPASA: Detecting Android Piggybacked Apps Through Sensitive Subgraph Analysis》，DOI信息在这里。 这篇文章通过将Android APP的API调用关系转化为图，再使用图算法提取关键信息，最后利用机器学习的方法构建检测器，较好地解决了Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于敏感子图分析的Android负载APP检测">
+<meta property="og:url" content="http://cuiyn.github.io/2018/11/29/DAPASA-Detecting-Android-Piggybacked-Apps-Through-Sensitive-Subgraph-Analysis/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2017年IEEE Trancactions的一篇文章，题目是《DAPASA: Detecting Android Piggybacked Apps Through Sensitive Subgraph Analysis》，DOI信息在这里。 这篇文章通过将Android APP的API调用关系转化为图，再使用图算法提取关键信息，最后利用机器学习的方法构建检测器，较好地解决了Android">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/SFCG.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/SSG.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/DAPASA.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/terms.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/algorithm_1.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/algorithm_2.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/scg.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/tsd.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/motif.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/motif-2.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20181129/tnsm.png">
+<meta property="article:published_time" content="2018-11-28T18:11:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="恶意代码分析">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20181129/SFCG.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/11/29/DAPASA-Detecting-Android-Piggybacked-Apps-Through-Sensitive-Subgraph-Analysis/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/11/29/DAPASA-Detecting-Android-Piggybacked-Apps-Through-Sensitive-Subgraph-Analysis/","path":"2018/11/29/DAPASA-Detecting-Android-Piggybacked-Apps-Through-Sensitive-Subgraph-Analysis/","title":"基于敏感子图分析的Android负载APP检测"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于敏感子图分析的Android负载APP检测 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E5%87%BA%E6%96%B9%E6%B3%95%E7%9A%84%E6%A6%82%E8%BF%B0"><span class="nav-number">2.2.</span> <span class="nav-text">提出方法的概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A1%E7%8C%AE"><span class="nav-number">2.3.</span> <span class="nav-text">贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TF-IDF%E7%AE%80%E4%BB%8B"><span class="nav-number">2.4.</span> <span class="nav-text">TF-IDF简介</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DAPASA"><span class="nav-number">4.</span> <span class="nav-text">DAPASA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%8F%E6%84%9F%E5%BA%A6%E7%B3%BB%E6%95%B0%E6%B5%8B%E9%87%8F"><span class="nav-number">4.1.</span> <span class="nav-text">敏感度系数测量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSG%E7%9A%84%E7%94%9F%E6%88%90"><span class="nav-number">4.2.</span> <span class="nav-text">SSG的生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%9E%84%E5%BB%BA"><span class="nav-number">4.3.</span> <span class="nav-text">特征构建</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">5.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/11/29/DAPASA-Detecting-Android-Piggybacked-Apps-Through-Sensitive-Subgraph-Analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于敏感子图分析的Android负载APP检测 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于敏感子图分析的Android负载APP检测
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-29 02:11:00" itemprop="dateCreated datePublished" datetime="2018-11-29T02:11:00+08:00">2018-11-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2017年IEEE Trancactions的一篇文章，题目是《DAPASA: Detecting Android Piggybacked Apps Through Sensitive Subgraph Analysis》，DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1109/TIFS.2017.2687880">这里</a>。</p>
+<p>这篇文章通过将Android APP的API调用关系转化为图，再使用图算法提取关键信息，最后利用机器学习的方法构建检测器，较好地解决了Android负载（Piggybacked）APP的检测问题。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>随着智能手机市场越来越快地成长，针对智能手机的恶意软件攻击者也对用户造成了严重的威胁。大多数的Android恶意软件通过向良性APP<strong>负载</strong>（piggybacking）恶意payload生成，它们被称为负载APP。在本文中，作者提出DAPASA，一个使用敏感图分析的Android负载APP检测方法。文章建立了两个假设，以表示恶意payload（称为rider）与其寄宿APP（称为carrier）的不同敏感API调用模式。根据这两个假设，DAPASA生成一个敏感子图（sensitive subgraph，SSG），来表示一个APP最可疑的行为。从SSG中，5个特征被提取出，以描画<strong>调用模式</strong>（invocation pattern）。之后，这5个特征被放入机器学习算法中，用于检测一个APP是良性或被负载。DAPASA建立在大量真实数据之上，其中有2551个负载APP与44921个受欢迎的良性APP。大范围的评估结果显示，与三种基线方法相比，即使只有5种数值特征，文章所提出的方法也显示出令人印象深刻的检测性能。此外，该方法可以从调用结构的新角度，结合这5个特性，对基于权限的方法和基于API的方法作补充。</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>Android智能手机最近非常流行。许多Android应用（APP）市场已经建立，如Google Play和安智市场，用户可以下载各种应用。Android平台已经成为恶意软件的主要目标。据奇虎最近的一项研究报告显示，2016年第一季度，每天约有3.7万起安卓恶意软件攻击被检测到。</p>
+<p>恶意软件作者使用最常见的技术之一是在流行的应用程序上负载恶意payload以生成恶意软件。在收集的1260个样本中，大约86%的样本是带有恶意付费的合法APP负载版本。通过负载创建的恶意软件叫做负载APP。负载APP有两个主要部分，即原始的良性代码和注入的恶意payload。我们使用术语carrier指代前者，使用术语rider指代后者。</p>
+<p>从零开始创建新的恶意软件需要大量劳动，但恶意软件作者能够使用负载技术将rider添加到多个carrier中，从而快速产生、分发大量的负载APP。例如，臭名昭著的恶意软件家族Geinimi的成员通常把自己重新包装成各种合法的游戏APP，窃取个人信息并发送到远程服务器。通常情况下，恶意软件作者从官方市场下载付费APP，将其拆解、添加恶意有效payload、重新组装，然后将“新的”APP免费提交到官方或替代的Android市场。新产生的负载APP会诱导用户下载安装。</p>
+<p>随着新rider代码的不断加入，负载APP带来了可观的安全威胁，有必要研究有效的检测技术。许多研究已经提出了恶意软件检测的原型系统。当前方法的主要的挑战是处理恶意软件变种与零日恶意软件。现有的商业反病毒系统与基于签名的方法通过在二进制代码中寻找特定的模式来检测，它们能够有效地识别已知的恶意软件，但很容易被二进制层面的代码混淆逃避。因此，提出了多个基于机器学习的方法。这些方法从应用程序行为（例如，权限请求和API调用）中提取特征，并应用机器学习算法执行二进制分类。虽然这些机器学习方法具有较高的检测精度，但它们仅从外部症状中提取特征，并不寻求对APP行为的准确完整的解释。</p>
+<h2 id="提出方法的概述"><a href="#提出方法的概述" class="headerlink" title="提出方法的概述"></a>提出方法的概述</h2><p>在本文中，作者利用能够分辨的、在rider与carrier之间的敏感API调用模式来检测Android负载APP。敏感API受APP权限控制，以访问敏感信息（如用户电话号码或位置）或执行敏感任务（如更改WIFI状态、发送消息）。值得注意的是，敏感API只占整个Android API的一小部分，现有技术无法轻易混淆它们，而用户定义函数的名称通常被混淆为a、b或c。</p>
+<p>为了进一步理解能够分辨的调用模式，文章在对负载APP进行实证分析的基础上建立了两个假设。</p>
+<ul>
+<li>假设1：为完成恶意任务，rider需要引入比carrier更多的敏感API。</li>
+<li>假设2：一般来说，在rider中，敏感API的内聚性（通过调用距离来衡量）要高于carrier。</li>
+</ul>
+<p>通过利用上面两个假设，作者开发出DAPASA，一种通过敏感图分析检测Android负载APP的方法。DAPASA由以下4步组成：</p>
+<ol>
+<li>DAPASA首先构造一个给定APP的静态函数调用图。它是一个有向图，其中节点表示APP调用的函数，而边表示这些函数之间的实际调用。</li>
+<li>为了区分不同敏感API的恶意程度，DAPASA通过一种类似TF-IDF的度量方式来计算每个敏感API的敏感度系数。</li>
+<li>DAPASA将静态函数调用图启发式地划分为一组带有敏感API节点及其邻近正常节点的子图。选择灵敏度系数最高的子图作为敏感子图，从而对给定APP最可疑的行为进行剖析。</li>
+<li>从敏感子图中构造5个特征。利用敏感子图的敏感度系数（sensitive subgraph，scg）和敏感子图的总敏感距离（total sensitive distance，tsd）两个特征，可以分别测量敏感API的恶意度和内聚性。此外，利用三种不同类型的敏感<strong>模式</strong>（motif）进一步以细粒度的方式描述敏感API的本地调用模式。最后，将这5个特征输入机器学习算法，以检测APP是被负载的还是良性的。</li>
+</ol>
+<p>DAPASA是在一个包含2551个负载APP和44921个流行的良性APP的大型真实数据集上进行评估的。评价结果表明，DAPASA表现良好，真阳性率为95%，假阳性率为0.7%。</p>
+<h2 id="贡献"><a href="#贡献" class="headerlink" title="贡献"></a>贡献</h2><p>文章的主要贡献如下。</p>
+<ul>
+<li>文章对于rider和carrier不同的敏感API调用模式，提出了两个假设。利用这两个假设，文章构造了一个敏感子图来表示整个调用图，并分析给定APP最可疑的行为。</li>
+<li>文章从生成的敏感子图中提出了5个数值特征。这些特征不仅可以独立检测负载APP，还可以在性能和检测结果解释上补充基于权限的方法和基于API的方法。</li>
+<li>基于TF-IDF的思想，文章提出了一种类似TF-IDF的方法来计算每个敏感API的敏感度系数。它可以减少同时在良性和恶意APP中频繁出现的敏感API的干扰因素。</li>
+</ul>
+<h2 id="TF-IDF简介"><a href="#TF-IDF简介" class="headerlink" title="TF-IDF简介"></a>TF-IDF简介</h2><p>在术语TF-IDF中，TF指词频（Term Frequency），是一个词语在单一文件内重要性的度量；IDF指逆向文件频率（Inverse Document Frequency），是一个词语普遍重要性的度量。词频指的是某一个给定的词语在该文件中出现的频率，可以用该词在文件中的出现次数除以文件所有词的出现次数计算。词频指的是某一个给定的词语在该文件中出现的频率，可以由总文件数目除以包含该词语之文件的数目，再将得到的商取以10为底的对数得到。</p>
+<p>TF-IDF是TF与IDF的乘积，它的主要思想是：如果某个词或短语在一篇文章中出现的频率TF高，并且在其他文章中很少出现，则认为此词或者短语具有很好的类别区分能力，适合用来分类。</p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>本部分介绍两个基本概念：静态函数调用图与敏感子图。</p>
+<p>考虑到有限的资源会在运行时妨碍监视APP，DAPASA使用静态分析。它将给定的APP用静态函数调用图表示，图中有足够的结构信息以概述APP的行为。</p>
+<p><strong>定义1</strong> 静态函数调用图（Static Function-Call Graph，SFCG）：SFCG由反编译Android APK文件得到的函数调用关系构建而来。它可以表示为一个有向图$SFCG&#x3D;(V, E)$，其中$V$是节点，代表函数名；$E$是边，代表调用关系。</p>
+<p>下图示意了一个来自Geinimi家族样例的SFCG，包含上千个节点。为识别恶意APP，只需关注由Android权限管理的敏感API。敏感API仅占所有API的一小部分；然而，恶意APP可以通过它们访问敏感信息或执行敏感任务。</p>
+<p><img src="/statics/images/20181129/SFCG.png" alt="SFCG示例" title="SFCG示例"></p>
+<p>文章使用了Pscout工具提供的680个敏感API。在上例中，有15个敏感API被使用。通过这些API，样例APP能够获取设备最后一次确定的定位（通过<em>getLastKnownLocation()</em> API）、能够发送短信（通过<em>sendTextMessage()</em> API）。</p>
+<p>在提出的两个假设中，对于负载APP，rider和carrier对于敏感API的调用模式是不同的，这可以作为本文方法的基础。然而，分析整个图既难以见效（恶意部分隐藏在APP代码中），又缺乏效率（节点和边缘太多，无法分析）。从SFCG中挖掘一个具有代表性的调用结构可以帮助理解给定APP中最可疑的行为。对于负载APP，从它们挖掘出的调用结构中敏感API的恶意度和内聚性要高于良性APP。因此，通过识别出的敏感API，SFCG可以被划分为一组带有敏感API节点及其附近正常节点的子图。选择敏感度系数最高的子图作为APP恶意程度的指标，称之为敏感子图。</p>
+<p><strong>定义2</strong> 敏感子图（Sensitive Subgraph，SSG）：在所有子图（$SGS$）中有最高敏感度系数的子图，可以由以下两个公式获得：<br>$$<br>SSG&#x3D;\mathop{argmax}\limits_{SG_j\in SGS}(scg(SG_j)),<br>$$</p>
+<p>$$<br>scg(SG_j)&#x3D;\sum_{s_i\in SNG(SG_j)} scs(s_i), 1\leq j\leq m.<br>$$</p>
+<p>其中，</p>
+<ul>
+<li>$scg(SG_j)$是子图$SG_j$的敏感度系数。</li>
+<li>$SNG(SG_j)$是$SG_j$包含的敏感API集合。</li>
+<li>$scs(s_i)$是敏感API$s_i$的敏感度系数。</li>
+<li>$m$是$SGS$中的子图数量。</li>
+</ul>
+<p>下图示意了上文提及样例的SSG。该SSG包含6个敏感API与临近的正常节点。</p>
+<p><img src="/statics/images/20181129/SSG.png" alt="SSG示例" title="SSG示例"></p>
+<h1 id="DAPASA"><a href="#DAPASA" class="headerlink" title="DAPASA"></a>DAPASA</h1><p>如下图所示，DAPASA由4部分组成。首先给定一个APK文件作为输入，它的classes.dex文件被apktool转化为smali文件。通过扫描smali文件，可以获得函数及其调用关系。因此，可以采用节点表示函数、边表示调用的方式构造SFCG。其次，进行两个关键步骤：测量每个敏感API的敏感度系数、挖掘生成的SGS中的SSG。最后，构造SSG的5个特征，并将其输入机器学习算法中，以检测该APP是否带有恶意。</p>
+<p><img src="/statics/images/20181129/DAPASA.png" alt="DAPASA概览图" title="DAPASA概览图"></p>
+<h2 id="敏感度系数测量"><a href="#敏感度系数测量" class="headerlink" title="敏感度系数测量"></a>敏感度系数测量</h2><p>测量敏感度系数是为了表示敏感API在执行恶意行为时的恶意程度。考虑到许多敏感API同时在恶意软件和良性API中被使用，如果只根据敏感API在恶意数据集中出现的频率计算敏感API的系数，那么度量就会有偏差。因此，文章使用一种类似TF-IDF的度量方式来计算每个敏感API的敏感度系数。文章分析了来自VirusShare的6154个恶意样本和来自Google Play和安智市场等的、涉及26类（如游戏、个性化、天气）的44921个良性样本，使用敏感API的6个术语（term）来理解其在恶意和良性数据集中的分布。</p>
+<ul>
+<li>$mc(s_i)$：$s_i$在恶意数据集中的数量（malicious count）。</li>
+<li>$bc(s_i, c)$：$s_i$在良性数据集$c$类APP中的数量（benign count）。</li>
+<li>$mrt(s_i)$：$mc(s_i)$与恶意数据集中恶意APP数量的比例，可用$mrt(s_i)&#x3D;\frac{mc(s_i)}{p}$来计算。这里$p&#x3D;6154$。</li>
+<li>$brt(s_i, c)$：$bc(s_i, c)$与良性数据集中$c$类良性APP数量（表示为$q(c)$）的比例，可用$brt(s_i, c)&#x3D;\frac{1+bc(s_i, c)}{q(c)}$来计算。</li>
+<li>$mrk(s_i)$：$mrt(s_i)$在所有敏感API中的排名。</li>
+<li>$brk(s_i, c)$：$brt(s_i, c)$在$c$类所有敏感API中的排名。</li>
+</ul>
+<p>下表示意了一些$mrt$较高的敏感API，及其关联的在游戏、个性化、天气几类中的$brt$与$brk$。</p>
+<p><img src="/statics/images/20181129/terms.png" alt="一些$mrt$较高的敏感API及其关联信息示意表" title="一些$mrt$较高的敏感API及其关联信息示意表"></p>
+<p>从上表中，可以得到以下的观察结果：</p>
+<ol>
+<li>一些敏感API同时在恶意与良性数据集中被频繁使用。例如*openConnection()<em>与</em>connect()*两个API常用于连接网络。无论类别如何，它们的$brk$都非常小。</li>
+<li>一些敏感API在恶意数据集中比在良性数据集中使用更加频繁。例如*sendTextMessage()*，它的$mrk$是2，但在3个类别中的$brk$都超过了50。</li>
+<li>在不同的类别中，$brt$与$brk$不同。例如，在游戏与天气类别中，几乎所有的敏感API的$brt$高于其在个性化类别的值。</li>
+</ol>
+<p>通过以上3个观察结果，为了更好地理解敏感度系数的测量，文章考虑了以下问题。</p>
+<p><strong>问题1：如果一个敏感API的$mrt$较高，那么它的敏感度系数也较高吗？</strong>在表中，*openConnection()<em>与</em>getSimSerialNumber()<em>（通常用于获取用户的SIM卡号）的$mrt$分别为0.479与0.285，这是否意味着</em>openConnection()<em>比</em>getSimSerialNumber()<em>具有更高的敏感度系数？答案是否定的。从前两个观察结果可得知，</em>openConnection()<em>在恶意与良性APP中均大量使用，因为当今大多数APP需要联网。相比之下，</em>getSimSerialNumber()<em>在恶意APP中出现的频率明显高于良性APP，因为良性APP很少会需要SIM卡号。凭直觉，</em>getSimSerialNumber()<em>的敏感度系数应该高于</em>openConnection()*。</p>
+<p><strong>问题2：使用getLastKnownLocation()获取位置信息的应用程序是否显得可疑？</strong>答案也是否定的。从最后一个观察结果可得知，3个类别的$brt$是不同的。在个性化类别中，这个API的$brt$仅为0.079，可能泄露用户位置信息；在天气类别中，这个API的$brt$是0.595，通常用于根据用户位置获取天气信息，根据这些讨论，可以利用分类信息来测量敏感度系数。对于同一敏感API，其不同类别的敏感度系数也会不同。</p>
+<p>在文本挖掘文献中，TF-IDF是一种数值化的统计方法，旨在反映词语（term）对语料库中的文档的区别程度。通过使用TF-IDF的方法作参考，文章使$scs$与$mrt$正相关，与$brt$负相关。对于一个属于类别$c$的APP，其敏感API$s_i$的敏感度系数可以用下面的公式计算。</p>
+<p>$$<br>scs(s_i) &#x3D; mrt(s_i) \times \log \frac{1}{brt(s_i, c)}.<br>$$</p>
+<p>例如，游戏类别共有3505个APP，其中2801个APP使用了*openConnection()<em>，174个使用了</em>getSimSerialNumber()<em>。它们的$scs$分别是0.047和0.371。</em>getSimSerialNumber()<em>明显比</em>openConnection()*更加敏感。</p>
+<p>上表也展示了敏感API的$scs$与$rank$。*sendTextMessage()<em>在所有3个类别中拥有最高的$scs$，考虑到它常被恶意APP使用、较少被良性APP使用。这种情况反映了偷发短信的攻击较为常见，从而让这些号码的主人从受攻击者那里赚钱。与发送短信相结合，用于获取用户隐私信息的敏感API，如电话号码（</em>getLine1Number()<em>）、SIM号码（</em>getSimSerialNumber()<em>）也具有较高的系数。与前面的API不同，在恶意和良性APP中均频繁使用的敏感API（如</em>openConnection()*）的系数很低。</p>
+<p>结果表明，采用类似TF-IDF方法计算的敏感度系数可以反映不同类别敏感API的恶意程度。但是，存在一些没有类别信息的APP，尤其是从VirusShare下载的恶意样本。文章使用下面的方法计算这些APP的敏感度系数：</p>
+<p>$$<br>scs(s_i) &#x3D; mrt(s_i) \times \log \frac{1}{brt(s_i)}.<br>$$<br>其中，$brt(s_i)$表示在所有良性APP中，使用敏感API$s_i$的比例。它使用下面的公式计算出，其中$C$表示所有良性类别的集合。</p>
+<p>$$<br>brt(s_i) &#x3D; \frac{1 + \sum_{c\in C} bc(s_i, c)}{\sum_{c\in C} q(c)}.<br>$$</p>
+<h2 id="SSG的生成"><a href="#SSG的生成" class="headerlink" title="SSG的生成"></a>SSG的生成</h2><p>基于文章提出的假设，将SFCG划分为一组子图，选择敏感度系数最高的子图作为SSG，从而可以对给定APP的可疑行为进行剖析。SSG可以通过下面几个步骤生成。</p>
+<p><img src="/statics/images/20181129/algorithm_1.png" alt="算法1：生成SGS" title="算法1：生成SGS"></p>
+<p><strong>步骤1：生成SGS。</strong>算法1展示了给定一个APP的SFCG与它含有的敏感API节点集合（sensitice API node set，SS）作为输入后，生成子图集合的步骤。对每一个敏感API节点，建立一个含有它邻近节点的子图。函数$dis(v_k, v_i)$返回从节点$v_k$到节点$v_i$的最短路径长度。在本文的工作中，SFCG的平均最短路径在3到5之间。建立子图时，普通节点与敏感API节点的距离应小于或等于2。</p>
+<p>算法1中的*RemoveLibNodes($V_i$)*函数通过使用一个库列表（library list）删除$V_i$中由第三方库引入的节点。在本文的方法中，潜在的可疑库可能导致假阳性误报，因为此类库包含与恶意payload类似的敏感API调用模式。测试结果显示，在数据集中，大约81.8%的应用程序包含第三方库，如com&#x2F;google&#x2F;ads、com&#x2F;facebook和com&#x2F;umeng。通过该过程，可以有效地过滤出潜在的可疑库。</p>
+<p><img src="/statics/images/20181129/algorithm_2.png" alt="算法2：从SGS中选出SSG" title="算法2：从SGS中选出SSG"></p>
+<p><strong>步骤2：SSG的选择。</strong>算法2展示了从算法1生成的SGS中选出SSG的过程。在SGS中，两个子图可能包含同一个敏感API节点。因此，算法2使用条件$SNG(SG_i) \cap SNG(SG_j) \ne \varnothing$来确保每个敏感API节点只出现在一个子图中。之后，每个$SG_j \in SGS$的敏感度系数使用上面的公式计算，再选出具有最高敏感度系数的子图作为SSG。如果给定的APP没有敏感API调用，那么它没有SSG。</p>
+<h2 id="特征构建"><a href="#特征构建" class="headerlink" title="特征构建"></a>特征构建</h2><p>基于两个假设，文章从SSG中提取特征集。这些特征分为三个领域，分别从不同方面区分负载APP和良性APP。分别随机选择500个负载APP和500个良性APP，以确定这些特征是否能够区分它们。</p>
+<p><strong>SSG的敏感度系数（Sensitivity Coefficient）：$scg(SSG)$。</strong> $scg(SSG)$定义为一个SSG的恶意度。假设1提到，为完成恶意任务，rider会使用更多的敏感API调用。因此，负载APP的SSG的恶意度应该高于良性APP。如下图，负载APP系数的中位数是1.341，良性APP是0.444，从而证明假设1是合理的。明显看，$scg(SSG)$能够区分负载APP与良性APP。</p>
+<p><img src="/statics/images/20181129/scg.png" alt="负载APP与良性APP的scg(SSG)" title="负载APP与良性APP的scg(SSG)"></p>
+<p><strong>SSG的总敏感距离（Total Sensitive Distance）：$tsd(SSG)$。</strong> 假设2提到，rider中的敏感API的内聚性通常高于carrier。使用$tsd(SSG)$表示SSG中敏感API的内聚度，它由敏感API节点的调用距离计算出。</p>
+<p>$tsd(SSG)$由以下两个公式计算，其中$sd(s_i)$代表敏感API节点$s_i$到SSG中其他敏感API节点的平均距离。</p>
+<p>$$<br>tsd(SSG) &#x3D; \sum_{s_i \in SNG(SSG)} sd(s_i).<br>$$</p>
+<p>$$<br>sd(s_i) &#x3D; \frac{1}{\left| SNG(SSG) \right| - 1} \times \sum_{s_j \in SNG(SSG), j \ne i} \frac{1}{dis(s_i, s_j)}.<br>$$</p>
+<p>如下图，负载APP系数的中位数是1.875，甚至高于良性APP的上四分之一，从而证明假设2是合理的。因此，$tsd(SSG)$能够区分负载APP与良性APP。</p>
+<p><img src="/statics/images/20181129/tsd.png" alt="负载APP与良性APP的tsd(SSG)" title="负载APP与良性APP的tsd(SSG)"></p>
+<p><strong>SSG中敏感模式实例的总数（Total Number of Sensitive Motif Instances）：$tnsm(SSG)$。</strong> 文章试图获得敏感API节点和正常节点之间调用模式的更详细的理解。调用模式反映了APP的一种恶意行为，可以用<strong>模式</strong>（motif）来描述。网络模式是根据连通性来定义的，这种连通性模式出现的频率远远高于纯粹的偶然性。具体地说，它们出现的频率比从具有相同程度结构的随机图集合中出现的频率要高。由于SSG中不存在互边，因此存在4种包含3个节点的模式。这4种3个节点的模式及其Z-score如下表所示。Z-score越高，说明这3个节点作为模式越重要。模式4的Z-score小于0，说明它在SSG中很少出现。因此，它在后面的计算中被忽略了。</p>
+<p><img src="/statics/images/20181129/motif.png" alt="3节点模式及其Z-score示意表" title="3节点模式及其Z-score示意表"></p>
+<p>在本文中，敏感模式被定义为包含至少一个敏感API节点的重要模式，如上表所示。例如，下图中敏感模式2表示通过使用对象<em>rally&#x2F;e</em>和调用<em>getSubscriberId()</em> API获取唯一用户ID号的恶意行为。</p>
+<p><img src="/statics/images/20181129/motif-2.png" alt="模式2的一个示例图" title="模式2的一个示例图"></p>
+<p>在假设1和假设2中，由于rider中敏感API的数量及内聚性大于carrier，因此SSG中敏感模式1的实例较多。此外，在rider中，敏感API被许多用户定义的威胁函数调用，导致了许多敏感模式2和敏感模式3的实例。使用$tnsm_k (SSG), k &#x3D; 1,2,3$表示SSG中敏感模式k实例的总数。下图为良性APP与负载APP的$tnsm_k (SSG)$，这说明在这三种敏感模式中，负载APP对应的$tnsm_k (SSG)$均高于良性APP。</p>
+<p><img src="/statics/images/20181129/tnsm.png" alt="负载APP与良性APP的tnsm(SSG)" title="负载APP与良性APP的tnsm(SSG)"></p>
+<p>负载APP的SSG构建的特征与良性应用的SSG构建的特征存在显著差异。DAPASA将上述5个特征嵌入到一个特征空间中，自动将新的APP分类为负载APP或不存在负载的APP。特征空间表示为：</p>
+<p>$$<br>\left( scg(SSG) \ tsd(SSG) \ tnsm_1 (SSG)\ tnsm_2 (SSG)\ tnsm_3 (SSG) \right).<br>$$</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>本篇文章叙述清楚，方法新颖，适合学习。不足之处在于作者使用了过多的简称，给阅读带来了一定困难。建议多遍阅读，捋清文章思路与结构，思考几个算法与特征的构建方式，如此学习，收获较大。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/10/29/Classification-of-Android-Apps-and-Malware-Using-Deep-Neural-Networks/" rel="prev" title="基于深度神经网络的Android APP与恶意软件分类">
+                  <i class="fa fa-chevron-left"></i> 基于深度神经网络的Android APP与恶意软件分类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/01/02/Android-Malware-Familial-Classification-and-Representative-Sample-Selection-via-Frequent-Subgraph-Analysis/" rel="next" title="基于频率子图分析的Android恶意软件家族分类与典型样例选取">
+                  基于频率子图分析的Android恶意软件家族分类与典型样例选取 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

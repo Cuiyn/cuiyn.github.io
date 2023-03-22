@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2019年 Computers &amp; Security 期刊的一篇文章，题目是《Espydroid+: Precise reflection analysis of android apps》，DOI信息在这里。 文章以恶意程序用于逃逸检测的反射 API 入手，提出一种叫做 Espydroid+ 的混合分析方法。其中，静态分析主要用来分析调用反射 API 的程序路径，动态分析主要负责">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Espydroid+： 对 Android App 进行精准的反射分析">
+<meta property="og:url" content="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2019年 Computers &amp; Security 期刊的一篇文章，题目是《Espydroid+: Precise reflection analysis of android apps》，DOI信息在这里。 文章以恶意程序用于逃逸检测的反射 API 入手，提出一种叫做 Espydroid+ 的混合分析方法。其中，静态分析主要用来分析调用反射 API 的程序路径，动态分析主要负责">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/example.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/Espydroid+.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step1.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/algorithm1.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step3.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/algorithm2.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200622/step4.png">
+<meta property="article:published_time" content="2020-06-21T18:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="恶意代码分析">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20200622/example.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/","path":"2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/","title":"Espydroid+： 对 Android App 进行精准的反射分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Espydroid+： 对 Android App 进行精准的反射分析 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E8%A1%A8%E6%A1%88%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">代表案例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Espydroid"><span class="nav-number">4.</span> <span class="nav-text">Espydroid+</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RGSS"><span class="nav-number">4.1.</span> <span class="nav-text">RGSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%BA%E8%83%BD-UI-%E6%8E%A2%E7%B4%A2"><span class="nav-number">4.2.</span> <span class="nav-text">智能 UI 探索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E9%80%A0%E5%8F%8D%E5%B0%84-API"><span class="nav-number">4.3.</span> <span class="nav-text">改造反射 API</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Espydroid-%E7%9A%84%E4%B8%8D%E8%B6%B3"><span class="nav-number">5.</span> <span class="nav-text">Espydroid+ 的不足</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2020/06/22/Espydroid+-Precise-reflection-analysis-of-android-apps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Espydroid+： 对 Android App 进行精准的反射分析 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Espydroid+： 对 Android App 进行精准的反射分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-22 02:00:00" itemprop="dateCreated datePublished" datetime="2020-06-22T02:00:00+08:00">2020-06-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2019年 <em>Computers &amp; Security</em> 期刊的一篇文章，题目是《Espydroid+: Precise reflection analysis of android apps》，DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1016/j.cose.2019.101688">这里</a>。</p>
+<p>文章以恶意程序用于逃逸检测的反射 API 入手，提出一种叫做 Espydroid+ 的混合分析方法。其中，静态分析主要用来分析调用反射 API 的程序路径，动态分析主要负责按上述路径执行。此外， Espydroid+ 还提供了智能 UI 探索、反射 API 改写等功能。</p>
+<span id="more"></span>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>Android 恶意软件使用反射（reflection） API 获取用户数据，盗窃个人信息。这些恶意软件可以通过使用参数混淆、加密等方法逃避基于静态分析的检测。动态分析是一种检测运行时恶意行为的可行方案，但动态分析通常会带来大量无用的程序分支，它们与反射 API 的分析无关，而且会严重影响动态分析的效率。</p>
+<p>在本文中，作者提出一种叫做 <code>Espydroid+</code> 的混合分析（hybrid analyze）方法，以克服上述问题。<code>Espydroid+</code> 结合了<strong>反射引导的静态切片</strong>（Reflection Guided Static Slicing， RGSS），它是一种有效的方法，通过修剪（prune）不相关的程序路径来处理大量程序路径的探索，并确保结果路径在次动态分析中得到执行。作者观察到 <code>Espydroid+</code> 成功移除了数据集总路径的 59.91% ，且没有丢失任何语义信息，因此认为 <code>Espydroid+</code> 是快速有效的。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>自 Android 系统发布以来，研究界和反病毒行业不断发现和报告安卓应用的各种安全问题。从 Android app 的增长速度来看，人工分析恶意软件是不可行的。恶意软件的作者每时每刻都会在恶意 app 中加入各种先进的技术，以阻碍自动化工具的分析。</p>
+<p>反射（reflection）和运行时绑定（run-time binding）是恶意软件作者常用的几种主要技术。有文献分别指出观测样本中的 57.08% 、 49.13% 与 76.4% 使用反射。这些统计数据促使作者开发一个更精确和可扩展的解决方案来分析反射 API 。</p>
+<p>基于静态分析的方法有几个固有的限制。首先，静态分析会遗漏许多反射目标，因为恶意软件作者通常会将反射与运行时依赖代码结合起来。这包括对反射 API 的参数使用数组索引、子串、加密、多态等。其次，基于类型推理的静态分析会产生很多假阳性，导致精度不高。</p>
+<p>基于动态分析的解决方案通过执行 app 来观察其行为，改善了这种情况下的分析。然而，其缺点是在动态分析过程中存在大量的路径需要探索。因此，动态分析受到路径爆炸的挑战，无法达到理想的覆盖率。</p>
+<p>为解决静态分析与动态分析的问题，一些混合分析方法被提出。但它们都存在一些不足： <code>Tamiflex</code> 易丢失隐藏在复杂GUI操作后面的目标； <code>MIRROR</code> 采用了 Java 程序分析的方法，但由于异步与事件驱动机制，用于传统 Java 的方法并不适合 Android 。</p>
+<p>Android 自身提供 <code>Monkey</code> 作为 Android SDK的一部分，用于在测试中生成一定数量的随机事件。 <code>Monkey</code> 的局限在于：</p>
+<ol>
+<li>事件是随机的，因此，可能与测试目标不相关</li>
+<li>产生很多重复的事件</li>
+<li>产生正确的文本输入的概率很低</li>
+<li>没有保证覆盖面<br>此外，动态分析工具不能解决用户输入带来的问题，几乎所有基于动态分析的工具均不能处理依赖于用户输入的 app 。</li>
+</ol>
+<p>这篇文章提出 <code>Espydroid+</code> ，联合动态分析与作者设计的 RGSS 静态分析技术。 RGSS 通过删除所有不会导致调用任何反射的组件，生成一个优化的 app ，以确保反射 API 在运行时得到执行。文章的主要贡献如下：</p>
+<ul>
+<li>提出 <code>Espydroid+</code> ，一种用于Android应用中反射分析的混合分析方法，与现有的静态方法相比，能够精确地处理混淆的反射调用。</li>
+<li><code>Espydroid+</code> 使用 RGSS 对 app 进行剪枝。在动态分析前， RGSS 去除不含反射 API 的不相关路径，生成一个切片 app，减少了接下来 <code>Espydroid+</code> 的动态分析阶段面临的状态空间爆炸的影响。</li>
+<li>文章对 <code>Espydroid+</code> 使用由 660 个 app 组成的数据集进行测试。 RGSS 移除了总路径的 59.91% 。 <code>Espydroid+</code> 在精度与找回率两方面均体现出优于其它方案的效果。</li>
+</ul>
+<h2 id="代表案例"><a href="#代表案例" class="headerlink" title="代表案例"></a>代表案例</h2><p>文章通过下面的例子说明了反射 API 的运行时绑定如何限制了最先进的静态分析方法。</p>
+<p><img src="/statics/images/20200622/example.png" alt="通过反射 API 逃避静态分析检测代码结构图"></p>
+<p>如图，这个 app 共有 6 个 <code>Activity</code> 组件、 1 个 <code>Service</code> 组件、 1 个 <code>Receiver</code> 组件和 2 个 Java 类。 <code>A.3</code> 引发了 <code>B</code> 组件的 <code>onCreate()</code> 方法被调用，之后根据 <code>B.4-B.6</code> 又调用了 <code>clz</code> 类的 <code>meth</code> 变量中存储的方法。但是由于变量做了编码，其值需要在运行时中获取。这使得基于字符串和类型推理的静态分析方法都被欺骗了。该方法实际调用了 <code>J</code> 类的 <code>write_sf()</code> 方法。</p>
+<p>上例显示了目前最先进的方法在分析中存在的问题：</p>
+<ul>
+<li>反射目标的绑定过晚。这使静态分析解决方案受挫，因为它们在这种情况下无法发现正确的参数值。</li>
+<li>组件间通信（ ICC ）。 ICC 在 Android 中有广泛的应用，它解决了对其它组件代码的依赖问题。 ICC 动态加载类与方法名，而现有方法不能准确识别。</li>
+<li>条件约束。部分恶意软件家族使用条件约束实现反模拟器运行，以逃避检测。如检测 <code>BRAND</code> 值，其一般为设备生产厂商名，但模拟器为 <code>generic</code> 或 <code>generic_86</code>。</li>
+<li>复杂 GUI 。一些恶意 app 将恶意代码隐藏在复杂的 GUI 操作后面，以逃避基于 <code>Monkey</code> 的检测。</li>
+</ul>
+<p>上述讨论强调了开发能够克服这些复杂问题的方法的必要性，以确保 Android app 的隐私。</p>
+<h2 id="Espydroid"><a href="#Espydroid" class="headerlink" title="Espydroid+"></a>Espydroid+</h2><p><code>Espydroid+</code> 的主要贡献是提出了一种更好的剪枝算法，通过剪去没有反射调用的组件，使得更多的反射调用被执行，同时不影响精确度。此外， <code>Espydroid+</code> 添加了用于处理逃避分析（ anti-analyse ）的解决方法。</p>
+<p>下图展示了 <code>Espydroid+</code> 的结构，主要包括3个阶段。最重要的是 RGSS 阶段，将重点说明。</p>
+<p><img src="/statics/images/20200622/Espydroid+.png" alt=" `Espydroid+` 结构图"></p>
+<h3 id="RGSS"><a href="#RGSS" class="headerlink" title="RGSS"></a>RGSS</h3><p>剪枝过程主要针对 GUI 组件（即 <code>Activity</code> ）进行。这一阶段生成一个切片后的 app，间接提高目标 API 的可达性。文章描述了一种粗粒度的组件级切片方法，除了对不包含任何相关 API 的组件进行断链外，不会从任何组件中删除任何代码。</p>
+<p>文章将 app 表示为 5 元组状态图 $(Q, \sum, \delta, q_0, F)$ ，其中</p>
+<ul>
+<li>每个状态 $q \in Q$ 代表 app 的类</li>
+<li>每个输入事件 $e \in (\sum)$ 是一条指令，它的执行会使 app 跳转至下一个状态</li>
+<li>$\delta$ 表示$e$ 执行时两个状态之间的转移</li>
+<li>$q_0$ 是起始状态，是 app 的启动 <code>Activity</code> ，对每个 app 唯一，在 <code>manifest</code> 文件中注明</li>
+<li>所有拥有反射调用的状态是终状态 $F$</li>
+</ul>
+<p>文章通过消除不相关的转移来生成一个缩小的状态图，并将其称为反射引导状态图( Reflection Guided State Diagram ， RGSD )。文章首先描述了一种从 Android app 中建模标准状态图的方法，然后设计了一种从原始状态图生成 RGSD 的算法，共分5个步骤。</p>
+<p><strong>步骤 1 ：组件转移分析</strong> 此步骤从 app 的字节码中构建状态图。在 Android 系统中，两个组件之间的通信是通过 ICC 方法进行的，这些方法是标准的、预定义的。文章使用 <code>DialDroid</code> 作为工具，生成状态转移图。下图是以“代表案例”中的 app 为例的生成结果。</p>
+<p><img src="/statics/images/20200622/step1.png" alt="步骤 1 结果示意图"></p>
+<p><strong>步骤 2 ：提取终状态</strong> 在处理类是否存在来自其中间代码的 RPC 调用的同时，文章也会对反射API进行解析，并将结果以 “CN-MN” 的形式存储，其中 MN 是包含反射 API 的 CN 类的一个方法。在解析反射 API 时， Android 的所有框架类都被排除在外。这些类是状态图的终状态( $F$ )，并作为下一步的输入。对于上例， $F &#x3D; { A, B, C, D }$ 。</p>
+<p><strong>步骤 3 ：状态图转化为 RGSD</strong> 删除不能到达终状态的所有转移。</p>
+<p><img src="/statics/images/20200622/algorithm1.png" alt="算法 1 ：状态图转化为 RGSD"></p>
+<p>上述算法描述了这一步骤。上一步骤的结果，即状态转移图与 $F$ 作为本步骤的输入。 <code>processQueue</code> 队列用于维护即将处理的状态。初始状态下，将 $F$ 添加到 <code>processQueue</code> 中，因为后向分析是从终状态开始的。 <code>RQ</code> 用于存储相关状态， <code>Rδ</code> 用于存储相关转移。遍历从处理初始化的 <code>processQueue</code> 开始，一直持续到队列变空。空队列表示处理已经结束。该算法每次从 <code>processQueue</code> 中取出（ deque ）一个元素，存储在 <code>CQ</code> 中，并找到它的前级元素（第 6 行）。如果节点有前级元素，那么所有还没有出现在队列中的前级元素，都会被排到 <code>processQueue</code> 。这个检查是为了确保在遍历过程中不会产生循环。这些前级元素被添加到 <code>RQ</code> 列表中。每一个前级元素和 <code>CQ</code> 之间的所有转移都是相关的，所以它们也被添加到 <code>Rδ</code> 中（第 9-15 行）。</p>
+<p>在路径计算过程中，会遇到一些既不是初始状态( $q_0$ )，也不是没有被调用的状态。这意味着从启动 <code>Activity</code> 中没有通往这些状态的路径。目标是在动态分析过程中不遗漏任何这样的路径。因此，文章准备了一个单独的列表， <code>UnlinkedStates</code> ，包含了所有这样的状态，这些状态没有任何从初始状态的路径，但它们或者是终状态，或者是通往终状态的路径（第 18-20 行）。</p>
+<p>最后，移除所有不在 <code>Rδ</code> 中且具有 activity 目标的转移（第 23-27 行）。下图给出了步骤 1 结果经步骤 3 处理后的结果。</p>
+<p><img src="/statics/images/20200622/step3.png" alt="步骤 3 结果示意图"></p>
+<p><strong>步骤 4 ：约束处理</strong> 主要针对一些恶意软件家族的反分析约束，例如示例代码的 <code>A.6</code> 检测了 <code>Build Brand</code>。</p>
+<p><img src="/statics/images/20200622/algorithm2.png" alt="算法 2 ：约束重写"></p>
+<p>上述算法解释了处理约束的方法。首先找出每个转移的根方法（ root method ），这里根方法指的是包含过渡方法的最上层的调用者。之后，使用控制流图计算从根方法的第一条语句到当前转移的控制流路径，判断其中的程序分支（主要是 <code>If</code> 、 <code>For</code> 与 <code>While</code> 语句）应该如何选择。重写 <code>For</code> 与 <code>While</code> 语句时可能导致程序无限循环，文章采用 <code>Soot</code> 工具的 <code>LoopFinder</code> 解决此问题。输出示例如下图。</p>
+<p><img src="/statics/images/20200622/step4.png" alt="步骤 4 结果示意图"></p>
+<p><strong>步骤 5 ：明确无关联组件的意图</strong> 本步骤主要处理步骤 3 生成的 <code>UnlinkedStates</code> 中的状态。它们主要由 <code>receiver</code> 与 <code>service</code> 这些非 GUI 组件组成。 Android 的事件驱动机制导致其存在，由于其主要由系统事件驱动执行，在动态分析中，可能由于没有相应事件而导致其逃避检测。文章提供 <code>Dynodroid</code> 工具作为解决方法之一，它通过观察 app 监听的事件，通过在检测时产生同样的事件，使得这些组件得到执行。</p>
+<h3 id="智能-UI-探索"><a href="#智能-UI-探索" class="headerlink" title="智能 UI 探索"></a>智能 UI 探索</h3><p>这部分工作主要是作者基于以前工作的提高。集中在两个方面：</p>
+<ol>
+<li>在没有输入正确的文本时， app 就会终止执行，这是不希望出现的。因此，文章建议生成有效的文本输入，例如：电子邮件地址、日期、电话号码等。通过维护有效输入的数据库，提供特定内容的输入，该数据库与 app 中这些输入的可能标签提示相关联（而不是随机生成一个输入）。</li>
+<li>使用错误检测与处理模块。在执行过程中，由于无效输入或事件、数据不足等原因导致 app 异常终止的 widget 被记录下来，并确保在后续运行中忽略错误的 <code>view</code> 组件。这样就避免了不必要的、不成功的 app 执行。</li>
+</ol>
+<h3 id="改造反射-API"><a href="#改造反射-API" class="headerlink" title="改造反射 API"></a>改造反射 API</h3><p>此阶段通过语义上等价的非反射方式（即传统的Java调用）来构造使用反射的代码语句，并在原来的 app 中使用这些语句。根据 <code>Soot</code> 的内建 <code>Jimple</code> 表达完成。经过这一步骤， app 可以经由其它静态分析方法工具正确地检测。 示例中<code>A.12</code> 的 <code>Jimple</code> 代码表示如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$r9 = new com.example.read;</span><br><span class="line">$r7 = virtualinvoke $r9.&lt;com.example.read: void read_sf()&gt;();</span><br></pre></td></tr></table></figure>
+
+<h2 id="Espydroid-的不足"><a href="#Espydroid-的不足" class="headerlink" title="Espydroid+ 的不足"></a>Espydroid+ 的不足</h2><p>最后，作者总结了 <code>Espydroid+</code> 的两点不足：</p>
+<ul>
+<li>不能处理包含非 Android Native 代码的 app 与基于 JavaScript 的 app 。 <code>Espydroid+</code> 主要基于对 Java 字节码的分析，若 app 不以 Java 字节码实现，则不能实现检测效果。</li>
+<li>无法分析那些实现了防止被修改或被修改后功能不正常的机制的 app 。动态分析的基础是 app 的正常运行。一些 app 在运行前检查其代码的完整性，或者经过修改后 app 运行异常，均不能进行动态分析。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/05/18/DroidFusion-A-Novel-Multilevel-Classifier-Fusion-Approach-for-Android-Malware-Detection/" rel="prev" title="DroidFusion：多级分类器融合的 Android 恶意 APP 检测方法">
+                  <i class="fa fa-chevron-left"></i> DroidFusion：多级分类器融合的 Android 恶意 APP 检测方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/27/Coevolution-of-Mobile-Malware-and-Anti-Malware/" rel="next" title="移动恶意软件与反恶意软件的共同进化">
+                  移动恶意软件与反恶意软件的共同进化 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

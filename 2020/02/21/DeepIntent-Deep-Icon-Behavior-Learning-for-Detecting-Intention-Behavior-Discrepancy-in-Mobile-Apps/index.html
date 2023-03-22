@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2019年CCS会议的一篇文章，题目是《DeepIntent: Deep Icon-Behavior Learning for Detecting Intention-Behavior Discrepancy in Mobile Apps》，DOI信息在这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习">
+<meta property="og:url" content="http://cuiyn.github.io/2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2019年CCS会议的一篇文章，题目是《DeepIntent: Deep Icon-Behavior Learning for Detecting Intention-Behavior Discrepancy in Mobile Apps》，DOI信息在这里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200221/example.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200221/deep-icon.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20200221/icon.png">
+<meta property="article:published_time" content="2020-02-20T18:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="恶意代码分析">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20200221/example.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/","path":"2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/","title":"DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DeepIntent%E8%BF%87%E7%A8%8B%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">DeepIntent过程示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E6%A0%87-%E8%A1%8C%E4%B8%BA%E5%85%B3%E8%81%94"><span class="nav-number">3.</span> <span class="nav-text">图标-行为关联</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E5%9B%BE%E6%A0%87-%E8%A1%8C%E4%B8%BA%E5%AD%A6%E4%B9%A0"><span class="nav-number">4.</span> <span class="nav-text">深度图标-行为学习</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E6%A0%87-%E8%A1%8C%E4%B8%BA%E5%B7%AE%E5%BC%82%E6%A3%80%E6%B5%8B"><span class="nav-number">5.</span> <span class="nav-text">图标-行为差异检测</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2020/02/21/DeepIntent-Deep-Icon-Behavior-Learning-for-Detecting-Intention-Behavior-Discrepancy-in-Mobile-Apps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DeepIntent：用于移动APP意图-行为差异检测的深度图标-行为学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-02-21 02:00:00" itemprop="dateCreated datePublished" datetime="2020-02-21T02:00:00+08:00">2020-02-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2019年CCS会议的一篇文章，题目是《DeepIntent: Deep Icon-Behavior Learning for Detecting Intention-Behavior Discrepancy in Mobile Apps》，DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1145/3319535.3363193">这里</a>。</p>
+<span id="more"></span>
+<h1 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h1><p>移动APP已经成为我们日常生活中不可缺少的一部分。然而，存在许多潜在的有害APP可能会利用用户的隐私数据，例如，收集用户的信息或在后台发送消息。让这些不受欢迎的APP远离市场是一个持续的挑战。</p>
+<p>虽然现有的工作提供了确定APP行为的技术（例如，可能导致信息泄露的APP行为），但几乎没有研究针对APP的行为是否与APP的UI所反映的意图兼容。在这项工作中，作者探索了深度学习和程序分析的协同合作，以解决这一问题。</p>
+<p>文章基于一个重要的观查现象：<strong>组件触发的操作应与其外形相符</strong>。例如，音乐播放器UI上的“+”图标，通常功能是将音乐添加至播放列表中。若其在点击后调用了用户的GPS数据，则应发出警报，因为这可能是违反用户意图的APP行为。</p>
+<p>为了检测移动APP中不受欢迎的行为，本文的出发点是：APP的意图和程序行为的兼容性是否可以用来判断APP是否会按照用户的期望运行？由于用户可感知的APP UI信息（如文本和图片）代表用户对APP行为的期望，文章的目标是自动检查APP的意图和它们的幕后行为之间的兼容性，也就是检测<strong>意图-行为</strong>差异。</p>
+<p>检查图标widget（小部件）的意图及其行为之间的兼容性是一项具有挑战性的任务：</p>
+<ol>
+<li>它们的意图主要是通过图标和文本的混合来表达的，很难使用这些非结构化的组件来建模这种相关性。现有方法或者对文本语义建模，以通过UI检测用户敏感输入的暴露；或者使用计算机视觉技术检测敏感UI widget。但是，它们都没有对图标与文本的联合语义进行建模；</li>
+<li>Android的UI设计模型和异步编程模型对准确识别图标widget的敏感行为提出了挑战。Android APP可通过UI布局文件与程序代码与带有图标widget的UI处理器联系。此外，UI处理器可以通过Android的多线程和组件间通信调用敏感的API。现有的方法或者由于列举了所有可能的生命周期方法组合而产生大量的误报，或者由于覆盖率低而未能识别某些行为；</li>
+<li>很难将APP的意图和行为联系起来，以确定行为是否不受欢迎。已经有研究工作检测不希望披露的通过用户界面的敏感用户输入，然而，这些方法产生的行为模式只能捕获一组固定的不希望的行为。此外，UI widget的行为通常使用多个权限。现有基于预测的方法主要侧重于基于意图预测单个权限使用，而缺乏对多个权限使用的建模，使得在检测意图-行为差异方面的效果较差。</li>
+</ol>
+<p>本文提出DeepIntent，它的设计基于3个关键的观察结果：</p>
+<ol>
+<li>移动APP的UI一般明确显示给用户，且执行相同类型操作的图标应该有相似的外观。因此，基于CNN的图象识别技术适于本研究</li>
+<li>在不同的UI上下文环境中，同一种图标可能对应不同的意图</li>
+<li>用户在与具有特定外观的图标小部件交互时期望某些行为，而不期望的行为通常与用户的期望相矛盾</li>
+</ol>
+<p>基于以上3个观察，DeepIntent提出一种新颖的学习方法：深度图标行为学习，包含3个主要阶段：</p>
+<ol>
+<li>图标widget分析</li>
+<li>学习图标行为模型</li>
+<li>检测意图-行为的差异</li>
+</ol>
+<h1 id="DeepIntent过程示例"><a href="#DeepIntent过程示例" class="headerlink" title="DeepIntent过程示例"></a>DeepIntent过程示例</h1><p><img src="/statics/images/20200221/example.png" alt="DeepIntent过程示例图"></p>
+<p>如图，可以分为三个阶段：</p>
+<ol>
+<li>从UI layout文件中提取资源ID，分析处理按钮操作的代码，建立调用关系图，将按钮与其需要的权限作对应；</li>
+<li>使用从受欢迎的良性APP提取的特征三元组，学习图标-行为模型，基于假设：这些APP中的大多数图标恰当地使用图标与权限，符合用户的大致期待。通过学习图标-行为模型，DeepIntent还训练了一个差异检测模型，该模型可用于计算测试图标的离群值；</li>
+<li>对于需要进行意图行为差异检查的按钮，DeepIntent采用相同的方法提取特征三元组并送入模型，以判断是否存在差异。</li>
+</ol>
+<h1 id="图标-行为关联"><a href="#图标-行为关联" class="headerlink" title="图标-行为关联"></a>图标-行为关联</h1><p><img src="/statics/images/20200221/deep-icon.png" alt="图标-行为关联示意图"></p>
+<p>构建扩展的调用图来修补Android环境引入的缺失的调用关系，并使用扩展调用图来标识UI widget调用的API。</p>
+<ol>
+<li>图标-widget关联。UI布局文件与源代码均可进行图标与widget的关联。文章中使用IconIntent工具，通过静态分析方法完成。</li>
+<li>扩展调用图构建。首先使用已有的静态调用图技术，基于调用语句构建调用图；之后再对其进行扩展，添加代表隐式调用关系的边。</li>
+<li>widget-API关联。使用Android静态分析工具GATOR关联UI handler与UI widget，之后将GATOR的输出与图标-widget关联组件的输出进行组合，从而建立图标、布局文件、UI widget与UI handler的关联。</li>
+<li>API权限检查。使用PScout，获得Android API与Android权限的对应。本组件给出每个图标与权限集合的对应关系。</li>
+</ol>
+<p>此外，DeepIntent提取3种上下文相关文本：包含在XML布局文件中的布局文本、OCR技术识别出的图标内嵌文本、按变量命名约定划分的资源名称。</p>
+<h1 id="深度图标-行为学习"><a href="#深度图标-行为学习" class="headerlink" title="深度图标-行为学习"></a>深度图标-行为学习</h1><p><img src="/statics/images/20200221/icon.png" alt="深度图标-行为学习示意图"></p>
+<p>深度图标-行为学习主要分为三个阶段。</p>
+<ol>
+<li>图标特征提取：使用目前最优的图像特征提取模型DenseNet。文章没有使用预训练的DenseNet模型，原因有二：1、预训练模型使用的数据集如CIFAR与ImageNet包含相机拍摄的自然图片，但图标往往由人工制造；2、预训练模型没有考虑描述图像透明度的alpha通道，但是很多图标使用了这一通道，忽略它可能导致学习特征的误导。</li>
+<li>文本特征提取：使用目前最优的双向RNN提取文本特征。</li>
+<li>特征组合：最近提出的协同注意层可以在相互的指导下同时更新图标特征和文本特征，从而捕获图标和文本之间的相关性。</li>
+</ol>
+<h1 id="图标-行为差异检测"><a href="#图标-行为差异检测" class="headerlink" title="图标-行为差异检测"></a>图标-行为差异检测</h1><p>图标-行为差异检测中，文章提出了两种方法，且通过实验证明了它们的有效性。</p>
+<ol>
+<li>基于组的检测：将Android敏感权限划为权限组，对每个权限组基于AutoEncoder训练异常检测器，解决一个图标对应多个权限的问题。</li>
+<li>聚集：混合了基于距离的聚集方法与基于预测的聚集方法。又可分为两种：基于距离的聚集方法（距离指待测图标与权限组图标的相似度）、基于预测的聚集方法（如果图标-行为模型预测图标应该使用某个权限，那么待测图标在这个权限组中往往不是一个离群值）</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本文从移动APP的GUI界面入手，通过组件触发的行为，判断一个APP是否具有恶意行为。这篇文章利用人工智能领域较为先进的研究成果与技术方法，基于Android APP的图标行为检测是否带有恶意，其方法思路、文章结构及人工智能方法值得认真学习。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 恶意代码分析</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/05/30/DroidCat-Effective-Android-Malware-Detection-and-Categorization-via-App-Level-Profiling/" rel="prev" title="DroidCat：基于App层面的Android恶意软件检测与分类">
+                  <i class="fa fa-chevron-left"></i> DroidCat：基于App层面的Android恶意软件检测与分类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/04/06/IconIntent-Automatic-Identification-of-Sensitive-UI-Widgets-based-on-Icon-Classification-for-Android-Apps/" rel="next" title="IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别">
+                  IconIntent：基于图标分类的 Android APP 敏感 UI Widget 自动识别 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

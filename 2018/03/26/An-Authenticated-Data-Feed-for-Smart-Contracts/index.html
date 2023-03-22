@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍一篇来自2016年CCS会议的论文，其题目是《Town Crier: An Authenticated Data Feed for Smart Contracts》，主要实现了一个用于智能合约的认证数据源，其DOI信息在这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一种用于智能合约的可认证数据馈送">
+<meta property="og:url" content="http://cuiyn.github.io/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍一篇来自2016年CCS会议的论文，其题目是《Town Crier: An Authenticated Data Feed for Smart Contracts》，主要实现了一个用于智能合约的认证数据源，其DOI信息在这里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180326/architecture.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20180326/data_flow.png">
+<meta property="article:published_time" content="2018-03-25T23:09:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="区块链">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20180326/architecture.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/","path":"2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/","title":"一种用于智能合约的可认证数据馈送"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>一种用于智能合约的可认证数据馈送 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">3.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SGX"><span class="nav-number">3.1.</span> <span class="nav-text">SGX</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6"><span class="nav-number">3.2.</span> <span class="nav-text">智能合约</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%B8%8E%E5%AE%89%E5%85%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">结构与安全模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84"><span class="nav-number">4.1.</span> <span class="nav-text">结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">安全模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="nav-number">4.3.</span> <span class="nav-text">数据流</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">5.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="一种用于智能合约的可认证数据馈送 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一种用于智能合约的可认证数据馈送
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-03-26 07:09:00" itemprop="dateCreated datePublished" datetime="2018-03-26T07:09:00+08:00">2018-03-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍一篇来自2016年CCS会议的论文，其题目是《Town Crier: An Authenticated Data Feed for Smart Contracts》，主要实现了一个用于智能合约的认证数据源，其DOI信息在<a target="_blank" rel="noopener" href="http://dl.acm.org/citation.cfm?doid=2976749.2978326">这里</a>。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>智能合约是在区块链上自动执行的程序。它们所设想的主要适用途径（例如金融工具）要求它们从区块链以外的地方消费数据（例如股票报价）。因此，支持广泛的数据请求的可信<strong>数据馈送</strong>（data feed）对智能合同生态系统至关重要。</p>
+<p>本文提出了一种叫做Town Crier (后文简称TC)的可认证数据馈送。TC充当了智能合约和现有web站点之间的桥梁，这些站点已经普遍信任非区块链应用程序。它结合了一个区块链前端和一个可信的硬件后端，以获取支持HTTPS的站点，并向依赖它的智能合约提供可认证源的数据。</p>
+<p>TC还支持加密。它允许使用加密参数的私有数据请求。此外，在一个TC执行智能合约逻辑的实例中，系统允许安全使用用户凭证来获取具有访问控制的在线数据源。</p>
+<p>文章描述了TC的设计原则和架构，并阐明了使用Intel最近提出的Software Guard Extensions (SGX)来为以太坊（Ethereum）智能合约系统提供数据的实现。文章在形式上建立了TC模型，并对其基本的安全特性进行了定义和证明。同时，计划尽快推出TC，作为一个在线公共服务。</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>智能合约由Szabo于1994年首先提出。诸如比特币的密码学货币为智能合约提供了关键技术：通过程序直接控制资金，通过公平的、去中心化的协商一致机制实现自动代码执行。最近推出的以太坊支持图灵完备（Turing-complete）的代码，从而充分表达自我执行的去中心化智能合约——这是朝着研究人员和支持者的愿景迈出的一大步。</p>
+<p>然而，正如Szabo的例子所显示的，智能合约最引人注目的应用（比如金融工具）还需要访问有关真实世界的事件和数据。数据馈送的目标是满足这个需求。简单来说，数据馈送是在区块链上的合约，它能够为其它合约提供数据请求服务。现在，一些以太坊上的数据馈送提供来自可信站点的数据，但是不能保证正确地将这些数据传递给他们的操作者（通常是个人或小型实体）之外。使用HTTPS连接到一个可信赖的网站似乎提供了一个解决方案，但是智能合约缺乏网络访问，HTTPS也没有对数据进行数字签名来进行带外（out-of-band）验证。</p>
+<p>文章提出了一种叫做Town Crier (TC)的系统，可以通过为智能合约提供可验证的数据馈送，来解决这个问题。TC就像一个高度可信的桥，架设在启用HTTPS的数据站点与以太坊区块链之间。它从站点取回数据，之后把数据作为<strong>数据报</strong>（datagram）提供给它依赖的合约。TC使用一种新型的SGX与智能合约前端的组合，它将其核心功能作为可信代码在SGX<strong>安全区</strong>（enclave）中执行。它可以防止恶意的进程或操作系统，并且可以向远程客户端证明其正在使用一个合法的、SGX支持的TC代码实例。智能合约前端可对区块链上的合约请求作出类似下面的回复：“参数params指定的数据报X在指定的时间帧T中由一个启用了HTTPS的网站Y提供。”之后依赖的合约可以在这样的数据报中验证X的正确性，前提是只信任SGX的安全性、(已发布的)TC代码，以及在指定的时间间隔内的源数据的有效性。</p>
+<p>使用智能合约的另一个关键障碍是当今的生态系统缺乏机密性：所有的区块链状态都是公开可见的，并且现有的数据馈送公开地暴露请求。TC通过支持私有数据报请求来提供机密性，在这类请求中，参数是在TC公钥中加密的，因此隐藏在区块链中。TC还支持自定义数据报请求，它通过接收加密的用户凭证来安全地处理请求者的在线资源（例如在线帐户），允许TC安全地检索访问控制的数据。</p>
+<p>智能合约是在一个敌对的环境中执行的，在这种环境中，当事人可以通过破坏他们所依赖的合约或服务来获得经济收益。因此，正式的安全至关重要。文章定义和证明TC实现了数据报的基本属性——TC忠实地从目标网站上转发了数据。此外，我们还为一个诚实的请求者提供了公平的费用，即使TC主机是恶意的，用户合同调用TC所支付的费用最多也只是TC服务的运营成本的一小部分。</p>
+<p>文章工作的其他两个贡献是介绍与展示如何实现两个关键的安全特性：Gas可持续性与可信计算基础（trusted computing base，TCB）代码最小化。因为去中心化执行代码需要花费大量资源，且存在应用层拒绝服务攻击（denial-of-service，DoS）的风险，以太坊使用Gas支付执行费用。Gas可持续性意味着一个以太坊应用不会用尽它的Gas。文章认为，区块链与SGX的结合将被证明是一种强大的、通用的方法，可以在智能合约系统中实现机密性，并将它们与离线系统连接起来。然而，这种新的安全模式引入了一种跨越不同信任模型的组件的混合TCB。文章引入了使用这种混合TCB的技术，同时最小化TCB代码的大小。</p>
+<p>文章对三种情景下的应用做了测试：</p>
+<ol>
+<li>依赖股票行情数据的金融衍生工具（现金结算看跌期权）</li>
+<li>一份依赖取消航班请求的私人数据的飞行保险合约</li>
+<li>一份销售虚拟物品和在线游戏（通过Steam市场）的合约，用于以太货币，使用自定义的数据请求来访问用户帐户。</li>
+</ol>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>这里主要介绍SGX与智能合约。</p>
+<h2 id="SGX"><a href="#SGX" class="headerlink" title="SGX"></a>SGX</h2><p>软件应用通常需涉及诸如密码、账号、财务信息、密钥和健康档案等私人信息。操作系统的任务对计算机系统实施安全策略，以避免这些机密信息无意间暴露给其他用户和应用。操作系统会阻止用户访问其他用户的文件（除非访问已获得明确许可），阻止应用访问其它应用的内存，阻止未授权用户访问操作系统资源（除非通过受到严格控制的界面进行访问）。应用通常还会采用数据加密等其它安全保护措施，以确保发送给存储器或者通过网络连接而发送的数据不会被第三方访问到——即使是在操作系统和硬件被盗用的情况下。</p>
+<p>尽管有这些措施提供保护，但大部分计算机系统仍然面临着一项重大安全隐患：虽然有很多安保措施可保护应用免受其它应用入侵，保护操作系统免受未授权用户访问，但是几乎没有一种措施可保护应用免受拥有更高权限的处理器的入侵，包括操作系统本身。获取管理权限的恶意软件可不受限制地访问所有系统资源以及运行在系统上的所有应用。复杂的恶意软件可以锁定应用的保护方案为目标进行攻击，提取密钥，甚至直接从内存提取机密数据。</p>
+<p>为对这些机密信息提供高级别的保护，同时抵御恶意软件的攻击，英特尔设计了SGX。SGX是一套CPU指令，可支持应用创建安全区：应用地址空间中受保护的区域，它可确保数据的机密性和完整性——即便有获取权限的恶意软件存在。</p>
+<p>安全区内的进程不能进行系统调用，但可以读写安全区外的内存。因此，在SGX中的隔离执行可以被看作是一个理想的模型，在这个模型中，一个进程被保证正确地执行并且具有完全的机密性，但是依赖于一个（可能具有恶意的）网络和文件系统访问的操作系统。</p>
+<p>SGX允许远程系统验证安全区中的软件，并安全地与之通信。当一个安全区被创建时，CPU会产生一个被称为<strong>评价</strong>（measurement）的初始状态的哈希散列。在安全区中的软件可以在稍后的时间请求一份报告，其中包括由该进程提供的评价和补充数据，例如公钥。该报告使用硬件保护密钥进行数字签名，以证明被测软件在SGX保护的安全区中运行。这个证明可以通过远程系统来验证。</p>
+<h2 id="智能合约"><a href="#智能合约" class="headerlink" title="智能合约"></a>智能合约</h2><p>尽管TC可以支持任意的智能合约系统，本文主要介绍其在以太坊中的用途。</p>
+<p>以太坊的智能合约被描述为一个合约帐户，它含有代码，一个货币余额，以及一个键&#x2F;值存储形式的持久存储空间。合约接受消息作为任意数量函数的输入。由合约创建者确定的这些入口点代表了合约的API。一旦创建，合约将自动执行，它会无限期地持续下去，甚至它的创建者也无法修改它的代码。合约代码是在收到来自另一个合约或非合约账户的信息时执行的，这个账户被称为钱包。因此，合约执行总是由交易发起的。合约只在被“触发”的时候执行，并且通过一系列的入口点执行，直到没有进一步的消息传递发生（或Gas用尽）。作为一个简单的抽象，智能合约可以被看作是区块链上的自治代理。</p>
+<p>以太坊有它自己的货币，叫<strong>以太</strong>（Ether）。为了防止DoS攻击，防止在合约中可能产生的无限循环，并且控制网络资源消耗，以太坊允许基于以太购买一种被称为Gas的资源来驱动合同。每个操作，包括发送数据、执行计算和存储数据，都有固定的Gas成本。交易含有GASLIMIT与GASPRICE两个参数，GASLIMIT用于函数（父）调用另一个函数（子）时，规定子函数所能使用父函数的最多Gas量。GASPRICE是交易愿意为每个单位Gas支付的最多以太数。只有当GASLIMIT与GASPRICE的乘积足够高，被系统（矿工）接受时，交易才会成功。</p>
+<h1 id="结构与安全模型"><a href="#结构与安全模型" class="headerlink" title="结构与安全模型"></a>结构与安全模型</h1><h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>Town Crier包含三个主要结构：TC合约（The TC Contract），安全区（the Enclave）与中继（the Relay）。使用TC服务的智能合约称为请求者或依赖合约（requester or relying contract）。数据源是一个启用HTTPS的线上服务器，TC利用它提供的数据来形成数据报。</p>
+<p><img src="/statics/images/20180326/architecture.png" alt="Basic Town Crier architecture" title="Basic Town Crier architecture"></p>
+<p>各结构功能如下：</p>
+<ul>
+<li>TC合约。它是一个作为TC前端的智能合约。它为依赖合约提供一个简单的API，将其请求传递给TC。</li>
+<li>安全区。文章将在SGX安全区内运行的程序代码简单地称为安全区。安全区处理执行来自区块链的请求。</li>
+<li>中继。安全区缺少直接的网络连接。因此，中继代表安全区来处理双向网络流量。具体来说，中继提供从安全区到三种不同类型实体的网络连接：区块链（TC合约到安全区的数据中继）、客户端（运行一个支持HTTPS的服务器处理链外请求）、数据源。</li>
+</ul>
+<h2 id="安全模型"><a href="#安全模型" class="headerlink" title="安全模型"></a>安全模型</h2><p>文章作出如下假设：</p>
+<ul>
+<li>TC合约。它在区块链上全局可见，且其源码对客户端公开，因此可假设TC合约诚实运行。</li>
+<li>数据源。假设客户端信任TC数据报中的信息，且数据稳定，在请求者指定的时间间隔T中，生成的数据报是一致的。</li>
+<li>安全区。三个假设：安全区诚实运行、安全区生成的私钥仅为安全区所知、安全区有内部准确的时钟。</li>
+<li>区块链通信。交易和消息可验证，被完整保护（因为它们是由发送方数字签名的），但不是机密的。</li>
+<li>网络通信。中继（以及TC服务器的其他不受信任的组件）可以被篡改或延迟通信的进出。因此，认为中继被控制网络的敌手所控制。</li>
+</ul>
+<h2 id="数据流"><a href="#数据流" class="headerlink" title="数据流"></a>数据流</h2><p>系统数据流如下图所示。</p>
+<p><img src="/statics/images/20180326/data_flow.png" alt="Data flows" title="Data flows"></p>
+<p>数据报的生命周期可以简要分为以下四步：</p>
+<ul>
+<li>初始请求。依赖合约向TC合约发送数据报请求。</li>
+<li>监视与中继。中继对TC合约保持监视，将所有传入的数据报请求转交给安全区。</li>
+<li>安全地获取馈送。为了处理指定的请求，安全区通过HTTPS联系数据源，并获取请求的数据报。它通过中继向TC合约转发数据报。</li>
+<li>返回数据报。TC合约将数据报交给依赖合约。</li>
+</ul>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>本篇文章内容复杂，涉及细节较多，但作为CCS会议论文，深度和权威性是可以保证的。如果对区块链的底层开发有兴趣，可以深入学习。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/" rel="prev" title="一种基于区块链的软件许可验证方法">
+                  <i class="fa fa-chevron-left"></i> 一种基于区块链的软件许可验证方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/04/15/Filecoin/" rel="next" title="Filecoin简介">
+                  Filecoin简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

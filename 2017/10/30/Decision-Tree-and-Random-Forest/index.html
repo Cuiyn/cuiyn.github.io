@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="决策树与随机森林简介">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20171030/example-for-desition-tree.png">
+<meta property="article:published_time" content="2017-10-30T02:09:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="机器学习">
+<meta property="article:tag" content="Batman">
+<meta property="article:tag" content="分类器">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20171030/example-for-desition-tree.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/","path":"2017/10/30/Decision-Tree-and-Random-Forest/","title":"决策树与随机森林简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>决策树与随机森林简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%B3%E7%AD%96%E6%A0%91"><span class="nav-number">1.</span> <span class="nav-text">决策树</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.</span> <span class="nav-text">建立方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ID3%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.1.</span> <span class="nav-text">ID3算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C4-5%E7%AE%97%E6%B3%95"><span class="nav-number">1.2.2.</span> <span class="nav-text">C4.5算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%AF%E5%BA%A6%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">纯度计算方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%AA%E6%9E%9D%E5%A4%84%E7%90%86"><span class="nav-number">1.3.</span> <span class="nav-text">剪枝处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%A3%AE%E6%9E%97"><span class="nav-number">2.</span> <span class="nav-text">随机森林</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bagging"><span class="nav-number">2.1.</span> <span class="nav-text">Bagging</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E6%A3%AE%E6%9E%97%E7%AE%80%E4%BB%8B"><span class="nav-number">2.2.</span> <span class="nav-text">随机森林简介</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">3.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/30/Decision-Tree-and-Random-Forest/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="决策树与随机森林简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          决策树与随机森林简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-30 10:09:00" itemprop="dateCreated datePublished" datetime="2017-10-30T10:09:00+08:00">2017-10-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在数据挖掘与机器学习中，决策树是一种常用的预测模型，树中每个节点表示某个对象，而每个分叉路径则代表某个可能的属性值；随机森林是一个包含多个决策树的分类器，并且其输出的类别是由个别树输出的类别的众数而定。本篇博文按照由浅入深的顺序，依次整理介绍这两种模型相关联的知识。</p>
+<span id="more"></span>
+
+<h1 id="决策树"><a href="#决策树" class="headerlink" title="决策树"></a>决策树</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>决策树是一种常用的分类方法。每个决策或事件都可能引出两个或多个事件，导致不同的结果（即分成不同的类别），把这种决策分支画成图形很像一棵树的枝干，故称决策树。当希望针对给定训练数据集进行学习（即<strong>监督学习</strong>），以对其它数据进行分类时，可以使用决策树。</p>
+<p>一个决策树包含一个根节点、若干内部节点与若干叶节点。根节点是分类的起点，叶节点对应具体的决策结果，从根节点到叶节点的路径对应了一个判断序列。下图给出了一个决策树及其对应的数据集。</p>
+<p><img src="/statics/images/20171030/example-for-desition-tree.png" alt="决策树示意图" title="决策树示意图"></p>
+<p>数据集给出了某个信用评价机构对用户是否欺骗的调查，其中涉及还贷情况、婚姻情况、税后收入等，其中税后收入为连续变量，其它为离散变量。根据这些数据集进行训练，可得右侧的决策树。</p>
+<h2 id="建立方法"><a href="#建立方法" class="headerlink" title="建立方法"></a>建立方法</h2><p>根据上图可以发现，决策树的所有非叶节点相当于判断属性。如图中的决策树首先判断用户的婚姻状况，若用户已婚，则判断其不会进行欺骗行为，否则进行下一步，判断用户是否能按时还贷，等等。建立决策树的过程，即为选择<strong>最佳判断属性</strong>的过程。我们希望决策树的分支节点进行划分后，各类样本尽可能属于同一类别，即使分类之后的“纯度”最大化。</p>
+<h3 id="ID3算法"><a href="#ID3算法" class="headerlink" title="ID3算法"></a>ID3算法</h3><p>香农的信息论告诉我们，<strong>信息熵</strong>（information entropy）可以用来描述信源的不确定度。在ID3决策树学习算法中，就使用了这个概念。设当前样本集$D$共有$n$个属性，第$k$个分类属性中，样本所占比例为$p_k$（可看作属性$k$出现的概率），则信息熵可以表示为：</p>
+<p>$$Ent(D)&#x3D;-\sum_{k&#x3D;1}^{n} p_k \log_{2}p_k$$</p>
+<p>假设某属性$s$有$V$个可能的取值，则针对属性$s$对样本进行分类时，会产生$V$个分支节点，其中第$v$个分支表示样本集$D$中所有取值为$s^v$的样本，记作$D^v$。根据上式可以计算出$D^v$的信息熵$Ent(D^v)$。再根据不同分支点所含有的样本数量不同，对分支节点加权$\frac{|D^v|}{|D|}$，于是可得针对属性$s$对样本集$D$进行分类的<strong>信息增益</strong>（information gain）：</p>
+<p>$$Gain(D, s)&#x3D;Ent(D)-\sum_{v&#x3D;1}^{V} \frac{|D^v|}{|D|} Ent(D^v)$$</p>
+<p>信息增益越大，则说明分类后的信息量越大，划分后各类别的“纯度”越大。因此可以使用信息增益作为确定最佳判断属性的依据。</p>
+<h3 id="C4-5算法"><a href="#C4-5算法" class="headerlink" title="C4.5算法"></a>C4.5算法</h3><p>ID3算法采用的信息增益看上去十分完美，但其中也存在一个问题。我们再来考虑文章开始介绍的信用评价例子。若使用ID3算法对其构建决策树，则针对用户的税后收入进行分类，各类别的纯度最大。这是因为，此时ID3算法将10个样本数据划分为10类，得到的是一个深度浅、庞大而不够客观的决策树。ID3算法天然地偏向分支多的属性，而这往往不是我们想要的。C4.5算法针对这个问题，提出了<strong>信息增益率</strong>的概念。</p>
+<p>信息增益率是用前面的信息增益$Gain(D, s)$和分裂度$Split(D, s)$来共同定义的。其中分裂度用来衡量属性分裂数据的广度和均匀，且有</p>
+<p>$$Split(D, s)&#x3D;-\sum_v \frac{|D^v|}{|D|} \log_{2} \frac{|D^v|}{|D|}$$</p>
+<p>信息增益率为：</p>
+<p>$$GainRadio(D, s)&#x3D;\frac{Gain(D, s)}{Split(D, s)}$$</p>
+<p>信息增益率实际上对增益进行了归一化，这样就避免了指标偏向分支多的属性的倾向。同理，增益率也可以用来克服连续值属性倾向。</p>
+<h3 id="纯度计算方法"><a href="#纯度计算方法" class="headerlink" title="纯度计算方法"></a>纯度计算方法</h3><p>其它计算纯度的方法还有：</p>
+<ul>
+<li><p>Gini系数。假设某属性$s$有$0,1,\ldots v$共$V$个可能的取值，则有$Gini(v)&#x3D;1-\sum_v [p(\frac{v}{V})]^2$。反映了随机抽取两个样本，其类别标记不一样的概率。Gini系数越小，则纯度越高。在CART算法中应用。</p>
+</li>
+<li><p>错误率。假设某属性$s$有$0,1,\ldots v$共$V$个可能的取值，则有$Error(v)&#x3D;1-max_v p(\frac{v}{V})$。错误率越小，则纯度越高。</p>
+</li>
+</ul>
+<h2 id="剪枝处理"><a href="#剪枝处理" class="headerlink" title="剪枝处理"></a>剪枝处理</h2><p>训练出来的决策树，往往会存在过度拟合现象：决策树过于针对训练的数据，专门针对训练集创建出来的分支，其熵值可能会比真实情况有所降低。因此需要对决策树进行剪枝。</p>
+<p>剪枝包括预先剪枝和后剪枝两种。</p>
+<ul>
+<li><p>预先剪枝是在树的生长过程中设定一个指标，当达到该指标时就停止生长，这样做容易产生“视界局限”，一旦停止分支，使得节点N成为叶节点，就断绝了其后继节点进行“好”的分支操作的任何可能性。</p>
+</li>
+<li><p>后剪枝中树首先要充分生长，直到叶节点都有最小的不纯度值为止，因而可以克服“视界局限”。然后对所有相邻的成对叶节点考虑是否消去它们，如果消去能引起令人满意的不纯度增长，那么执行消去，并令它们的公共父节点成为新的叶节点。</p>
+</li>
+</ul>
+<h1 id="随机森林"><a href="#随机森林" class="headerlink" title="随机森林"></a>随机森林</h1><p>随机森林，就是通过集成学习的思想将多棵决策树树集成的一种算法，它的基本单元是决策树，本质是属于机器学习的分支-集成学习方法。</p>
+<h2 id="Bagging"><a href="#Bagging" class="headerlink" title="Bagging"></a>Bagging</h2><p>随机森林是Bagging的一个扩展变体，这里首先介绍一下Bagging方法。</p>
+<p>Bagging（Bootstrap AGGregatING）是并行式集成学习方法最著名的代表。给定包含$m$个样本的数据集，我们先随机取出一个样本放入采样集中，再把该样本放回初始数据集，使得下次采样时该样本仍有可能被选中，这样，经过$m$次随机采样操作，我们得到含$m$个样本的采样集，初始训练集中有的样本在采样集里多次出现，有的则从未出现。</p>
+<p>样本在$m$次采样中始终不被采到的概率为$(1-\frac{1}{m})^m$，取极限有：</p>
+<p>$${\lim_{m \to +\infty}(1-\frac{1}{m})^m}&#x3D;e \approx 0.368$$</p>
+<p>由上式可知，初始训练集中约有63.2%的样本出现在采样集中。照这样，我们可采样出$T$个含$m$个训练样本的采样集，然后基于每个采样集训练出一个基学习器，再将这些基学习器进行结合。这就是Bagging的基本流程。</p>
+<p>进行分类任务时，Bagging通常对各基学习器的结果使用简单投票法，当票数相同时，可以随机选择一个，也可以进一步考察学习器投票的置信度来确定最终分类结果。</p>
+<h2 id="随机森林简介"><a href="#随机森林简介" class="headerlink" title="随机森林简介"></a>随机森林简介</h2><p>一个随机森林由N棵决策树组成，每棵决策树都是一个基学习器，那么对于一个输入样本，N棵树会有N个分类结果。而随机森林集成了所有的分类投票结果，将投票次数最多的类别指定为最终的输出，这就是一种最简单的Bagging思想。</p>
+<p>与Bagging不同的是，随机森林在决策树的训练过程中，引入了随机属性选择：对每个节点，先从该节点的属性集合中随机选择一个包含$k$个属性的子集，然后再从子集中选择一个最优属性进行划分。这里若$k&#x3D;d$，则与传统决策树构建思路相同，一般推荐取$k&#x3D;\log_2 d$。</p>
+<p>随机森林简单、容易实现、计算开销小。令人惊奇的是，它在很多现实任务中展现出强大的性能，被誉为“代表集成学习技术水平的方法”。可以看出，随机森林对Bagging只做了小改动，但是与Bagging中基学习器的“多样性”仅通过样本扰动（通过对初始训练集采样）而来不同，随机森林中基学习器的多样性不仅来自样本扰动，还来自属性扰动，这就使得最终集成的泛化性能可通过个体学习器之间差异度的增加而进一步提升。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><ul>
+<li>机器学习. 周志华. 北京: 清华大学出版社</li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%86%B3%E7%AD%96%E6%A0%91">决策树 - 维基百科</a>.</li>
+<li><a target="_blank" rel="noopener" href="https://wizardforcel.gitbooks.io/dm-algo-top10/">数据挖掘十大算法详解</a>.</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
+              <a href="/tags/Batman/" rel="tag"># Batman</a>
+              <a href="/tags/%E5%88%86%E7%B1%BB%E5%99%A8/" rel="tag"># 分类器</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/25/Simulated-annealing/" rel="prev" title="模拟退火算法简介">
+                  <i class="fa fa-chevron-left"></i> 模拟退火算法简介
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/11/01/Bayes-Classifier/" rel="next" title="贝叶斯分类器简介">
+                  贝叶斯分类器简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

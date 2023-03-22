@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="今天介绍的这篇论文来自2016年的CCS会议，题目是《All Your DNS Records Point to Us: Understanding the Security Threats of Dangling DNS Records》，其DOI信息在这里。 这篇文章主要以工作量及工作的公益性见长，难度在CCS会议论文中算不上高，只要有基本的DNS相关知识就可以读懂。这篇文章也是我正式进入研究">
+<meta property="og:type" content="article">
+<meta property="og:title" content="悬空DNS记录带来的安全威胁">
+<meta property="og:url" content="http://cuiyn.github.io/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="今天介绍的这篇论文来自2016年的CCS会议，题目是《All Your DNS Records Point to Us: Understanding the Security Threats of Dangling DNS Records》，其DOI信息在这里。 这篇文章主要以工作量及工作的公益性见长，难度在CCS会议论文中算不上高，只要有基本的DNS相关知识就可以读懂。这篇文章也是我正式进入研究">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-10-15T17:12:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="网络安全">
+<meta property="article:tag" content="DNS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/","path":"2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/","title":"悬空DNS记录带来的安全威胁"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>悬空DNS记录带来的安全威胁 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E6%89%8B%E6%AE%B5"><span class="nav-number">3.</span> <span class="nav-text">攻击手段</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%93%E5%92%8C%E6%89%8B%E6%AE%B5"><span class="nav-number">5.</span> <span class="nav-text">缓和手段</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/10/16/the-Security-Threats-of-Dangling-DNS-Records/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="悬空DNS记录带来的安全威胁 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          悬空DNS记录带来的安全威胁
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-10-16 01:12:00" itemprop="dateCreated datePublished" datetime="2017-10-16T01:12:00+08:00">2017-10-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>今天介绍的这篇论文来自2016年的CCS会议，题目是《All Your DNS Records Point to Us: Understanding the Security Threats of Dangling DNS Records》，其DOI信息在<a target="_blank" rel="noopener" href="http://doi.acm.org/10.1145/2976749.2978387">这里</a>。</p>
+<p>这篇文章主要以工作量及工作的公益性见长，难度在CCS会议论文中算不上高，只要有基本的DNS相关知识就可以读懂。这篇文章也是我正式进入研究生阶段阅读的第一篇论文，同时其反映的问题也是我在配置VPS与域名时经常忽视的，所以感觉十分熟悉。下面介绍论文内容。</p>
+<span id="more"></span>
+
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>若一条DNS记录指向的资源无效，但这条记录又没有从DNS中删除，则我们称其为悬空DNS记录（dangling DNS record，文中简称为Dare）。本文阐述其带来的安全威胁。文中的工作表明，Dare可以很容易地被攻击者利用，以进行域名劫持。特别地，论文确定了攻击者可以利用的三种攻击向量。通过调查Alexa的前10000位域名与52个<code>edu</code>区域，可以发现467个可以被利用的Dare，说明它是真实而普遍的威胁。通过利用这些Dare，攻击者可以获得这些域名（或子域名）的完全控制权，甚至可以将这些域名去证书授权中心（Certificate Authority，CA）注册。很明显，这一可能性存在的潜在原因是缺乏对DNS记录所指向的资源的真实性检查。文章随后提到了三种有效减轻Dare威胁的防御机制。</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>域名系统作为互联网最重要的组成部分之一，不仅提供了重要的命名服务，而且提供了访问Internet服务的基本信任节点。因此，其也常常被攻击者青睐。然而，对于DNS服务器和DNS记录点之间的链接的认证，却很少有人关注。</p>
+<p>DNS记录主要由一个元组构成：<code>&lt;name, TTL, class, type, data&gt;</code>。它本质上是一个指针，其中，<code>data</code>字段指向持有<code>name</code>字段代指资源的主机。当与<code>name</code>字段对应的服务中止时，域名拥有者除了释放<code>data</code>字段指向的主机外，还应删除关联的DNS记录。但是在实际上，域名拥有者大多数会忘记删除DNS记录，于是就造成了悬空DNS记录。传统观念认为，Dare是安全的。但文中指出，Dare是一种真正的、普遍的威胁。根据DNS记录类型的分类，文中将Dare分为4种类型：<code>Dare-A</code>，<code>Dare-CN</code>，<code>Dare-MX</code>与<code>Dare-NS</code>。</p>
+<h1 id="攻击手段"><a href="#攻击手段" class="headerlink" title="攻击手段"></a>攻击手段</h1><p>针对这一问题，文中提出了三种攻击向量。</p>
+<ul>
+<li>利用云平台公共IP地址池随机分配的性质进行攻击。云平台越来越受到网站的欢迎。在云中，IP地址池是在用户间共享的。实际上，许多域名管理员错误地信任这些短暂的、公共分配的资源，导致各种类型的Dare产生。</li>
+<li>利用废弃第三方服务进行攻击。现在的网站广泛使用第三方服务。为了与这些服务更加一体化，域名拥有者需要在授权DNS（aDNS）服务器中增加一条<code>A</code>记录或<code>CNAME</code>记录，并在其第三方服务账号中声明对域名的所有权。所有成功声明所有权的第三方服务账号，都可以控制这个域名的内容。令人惊讶的是，大多数第三方服务不会验证声明所有权的请求。</li>
+<li>由于域名会过期，简单地在DNS的<code>data</code>字段中寻找过期的域名。</li>
+</ul>
+<h1 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h1><p>文章针对4种类型的Dare作了广泛的分析，包括横跨7年的Alexa前一百万域名，与2700个<code>edu</code>域、1700个<code>gov</code>域中Alexa包括的前一万域名。对于第一种攻击向量，文章作者开发了一个叫做<code>IPScouter</code>的工具，以在云空间中压榨更多的IP地址。对于第二种攻击向量，文中测试了9个常用的第三方服务。对于第三种，文章反复核对了<code>WHOIS</code>数据与域名注册商，以识别过期域名。</p>
+<p>最终共发现了791个确认的Dare与5982个可能的Dare。更令人担心的是，在335个高价值的域，包含<code>edu</code>、<code>gov</code>与Alexa前一万，也发现了Dare。通过利用这些Dare，攻击者可以进行多样的欺骗活动，包括垃圾邮件、网络钓鱼与Cookie劫持。通过自动而免费的证书认证中心（Certificate Authoritiy，CA），例如<code>Let&#39;s Encrypt</code>，攻击者甚至可以对子域名认证并伪造一个HTTPS网站。</p>
+<h1 id="缓和手段"><a href="#缓和手段" class="headerlink" title="缓和手段"></a>缓和手段</h1><p>文中认为，Dare产生不安全的根本原因在于缺少对DNS记录指向内容的真实性检查。因此，提出三种DNS服务器与第三方服务可以采取的减轻不安全Dare的手段。</p>
+<ul>
+<li>首先设计一种机制，令aDNS服务器可以验证<code>A</code>记录指向资源的真实性。</li>
+<li>在第三方服务环境下，建议打破悬空的<code>CNAME</code>记录的解析链，为服务的每个用户采用一个更安全的独立名称空间。</li>
+<li>最后，提议aDNS服务器应该定期检查DNS记录点的域的到期时间。</li>
+</ul>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>以上就是这篇论文提及的大致内容。可以看到，从提出攻击向量模型到分析，工作量是相当大的。且文中有一节内容专门提及道德注意事项，说明其在工作过程中没有进行攻击，并提醒相关组织对这一问题进行防御。这些都是在平时的研究中应当注意的问题。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag"># 网络安全</a>
+              <a href="/tags/DNS/" rel="tag"># DNS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/12/DoS-Attacks-on-Your-Memory-in-the-Cloud/" rel="prev" title="基于DoS对云虚拟机内存的攻击方法">
+                  <i class="fa fa-chevron-left"></i> 基于DoS对云虚拟机内存的攻击方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/18/Neural-Network/" rel="next" title="神经网络简介">
+                  神经网络简介 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

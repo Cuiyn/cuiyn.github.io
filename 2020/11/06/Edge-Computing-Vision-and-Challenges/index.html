@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文介绍2016年 IEEE Internet of Things Journal 期刊的一篇文章，题目是《Edge Computing: Vision and Challenges》，DOI信息在这里。 本文是一篇边缘计算的综述性文章，提出了边缘计算的定义，举例说明其优势，并对边缘计算带来的机遇与挑战作出分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="边缘计算：愿景与挑战">
+<meta property="og:url" content="http://cuiyn.github.io/2020/11/06/Edge-Computing-Vision-and-Challenges/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文介绍2016年 IEEE Internet of Things Journal 期刊的一篇文章，题目是《Edge Computing: Vision and Challenges》，DOI信息在这里。 本文是一篇边缘计算的综述性文章，提出了边缘计算的定义，举例说明其优势，并对边缘计算带来的机遇与挑战作出分析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201106/cloud-computing-paradigm.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201106/edge-computing-paradigm.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201106/edgeOS.png">
+<meta property="og:image" content="http://cuiyn.github.io/statics/images/20201106/naming-mechanism.png">
+<meta property="article:published_time" content="2020-11-06T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="边缘计算">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://cuiyn.github.io/statics/images/20201106/cloud-computing-paradigm.png">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2020/11/06/Edge-Computing-Vision-and-Challenges/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2020/11/06/Edge-Computing-Vision-and-Challenges/","path":"2020/11/06/Edge-Computing-Vision-and-Challenges/","title":"边缘计算：愿景与挑战"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>边缘计算：愿景与挑战 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97"><span class="nav-number">3.</span> <span class="nav-text">什么是边缘计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97"><span class="nav-number">3.1.</span> <span class="nav-text">为什么需要边缘计算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%91%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%8E%A8%E5%8A%A8"><span class="nav-number">3.1.1.</span> <span class="nav-text">云服务的推动</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E8%81%94%E7%BD%91%E7%9A%84%E6%8B%89%E5%8A%A8"><span class="nav-number">3.2.</span> <span class="nav-text">物联网的拉动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B1%E6%95%B0%E6%8D%AE%E6%B6%88%E8%B4%B9%E8%80%85%E5%88%B0%E7%94%9F%E4%BA%A7%E8%80%85%E7%9A%84%E8%BD%AC%E5%8F%98"><span class="nav-number">3.3.</span> <span class="nav-text">由数据消费者到生产者的转变</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97-1"><span class="nav-number">4.</span> <span class="nav-text">什么是边缘计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="nav-number">5.</span> <span class="nav-text">边缘计算的优势</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6"><span class="nav-number">6.</span> <span class="nav-text">案例研究</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%91%E5%8D%B8%E8%BD%BD"><span class="nav-number">6.1.</span> <span class="nav-text">云卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E5%88%86%E6%9E%90"><span class="nav-number">6.2.</span> <span class="nav-text">视频分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%BA%E8%83%BD%E5%AE%B6%E5%B1%85"><span class="nav-number">6.3.</span> <span class="nav-text">智能家居</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%BA%E6%85%A7%E5%9F%8E%E5%B8%82"><span class="nav-number">6.4.</span> <span class="nav-text">智慧城市</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%B9%E7%BC%98%E5%8D%8F%E4%BD%9C"><span class="nav-number">6.5.</span> <span class="nav-text">边缘协作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%BA%E9%81%87%E4%B8%8E%E6%8C%91%E6%88%98"><span class="nav-number">7.</span> <span class="nav-text">机遇与挑战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E7%BC%96%E7%A8%8B%E6%80%A7"><span class="nav-number">7.1.</span> <span class="nav-text">可编程性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E5%90%8D"><span class="nav-number">7.2.</span> <span class="nav-text">命名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8A%BD%E8%B1%A1"><span class="nav-number">7.3.</span> <span class="nav-text">数据抽象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="nav-number">7.4.</span> <span class="nav-text">服务管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E7%A7%81%E4%B8%8E%E5%AE%89%E5%85%A8"><span class="nav-number">7.5.</span> <span class="nav-text">隐私与安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%8C%87%E6%A0%87"><span class="nav-number">7.6.</span> <span class="nav-text">优化指标</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%B6%E8%BF%9F"><span class="nav-number">7.6.1.</span> <span class="nav-text">延迟</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%A6%E5%AE%BD"><span class="nav-number">7.6.2.</span> <span class="nav-text">带宽</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%83%BD%E8%80%97"><span class="nav-number">7.6.3.</span> <span class="nav-text">能耗</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%90%E6%9C%AC%E5%BC%80%E9%94%80"><span class="nav-number">7.6.4.</span> <span class="nav-text">成本开销</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2020/11/06/Edge-Computing-Vision-and-Challenges/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="边缘计算：愿景与挑战 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          边缘计算：愿景与挑战
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-11-06 12:00:00" itemprop="dateCreated datePublished" datetime="2020-11-06T12:00:00+08:00">2020-11-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文介绍2016年 <em>IEEE Internet of Things Journal</em> 期刊的一篇文章，题目是《Edge Computing: Vision and Challenges》，DOI信息在<a target="_blank" rel="noopener" href="https://doi.org/10.1109/JIOT.2016.2579198">这里</a>。</p>
+<p>本文是一篇边缘计算的综述性文章，提出了边缘计算的定义，举例说明其优势，并对边缘计算带来的机遇与挑战作出分析。</p>
+<span id="more"></span>
+
+<h2 id="概览"><a href="#概览" class="headerlink" title="概览"></a>概览</h2><p>物联网 （IoT） 的扩散与丰富的云服务推动了一种在网络边缘处理数据的计算模式──边缘计算。边缘计算有可能解决响应时间要求、电池寿命限制、带宽成本节约以及数据安全和隐私等问题。在文章中，作者首先介绍了边缘计算的定义，然后通过几个案例，从云卸载 （offloading） 到智能家居和城市，以及协同边缘，将边缘计算的概念具体化。最后，作者提出了边缘计算领域的几个挑战和机遇，希望本文能得到社会各界的关注，并启发更多相关研究。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>从2005年推出开始，云计算极大地改变了我们生活、工作与学习的方式。例如软件即服务 （software as a service, SaaS） 实例， Google App、Twitter、Facebook 与 Flickr 在人们的日常生活中应用广泛。此外，为支持云服务而开发的可扩展基础设施以及处理引擎也在极大地影响着业务的运行方式。例如， Google 文件系统 、MapReduce、Apache Hadoop、Apache Spark， 等等。</p>
+<p>物联网于 1999 年被首次提出，为解决供应链管理问题。之后，“不借助于人的干预，让计算机感知信息”的概念被广泛地应用到其他领域，如医疗、家庭、环境、交通等。现在，随着物联网的发展，我们将来到后云时代 （post-cloud era），在这个时代，将有大量浸淫在我们日常生活中的事物所产生的优质数据，也会有大量的应用程序部署在边缘消耗这些数据。据思科全球云指数估计，到2019年，人、机、物产生的数据将达到 500 ZB ，然而，届时全球数据中心 IP 流量将只达到10.4 ZB 。在 2019 年，将有 45% 由物联网创造的数据在接近网络或网络边缘进行存储、处理、分析和行动。思科互联网业务解决方案组预测，在 2020 年，将有 500 亿个物体连接入互联网。有些物联网应用程序可能需要很短的响应时间，有些可能涉及私人数据，有些可能会产生大量数据，对网络来说可能是一个沉重的负荷。云计算的效率不足以支持这些应用程序。</p>
+<p>由云服务的推动与物联网的拉动，作者构想，网络边缘由数据消费者逐渐转变为数据生产者+数据消费者。在本文中，作者提出边缘计算的概念。文章从分析为什么需要边缘计算开始，然后给出边缘计算的定义和愿景。本文介绍了云卸载、智能家居和城市以及协同边缘等几个案例，进一步详细解释了边缘计算，随后介绍了在编程能力、命名、数据抽象、服务管理、隐私和安全以及优化指标等方面的一些挑战和机遇，这些都是值得未来研究和探讨的。</p>
+<h2 id="什么是边缘计算"><a href="#什么是边缘计算" class="headerlink" title="什么是边缘计算"></a>什么是边缘计算</h2><p>数据越来越多地在网络边缘产生，因此，在网络边缘也同时处理数据会提高效率。在本节中，作者列举了几条边缘计算在一些计算服务上比云计算更高效的原因，然后给出了我们对边缘计算的定义和理解。</p>
+<h3 id="为什么需要边缘计算"><a href="#为什么需要边缘计算" class="headerlink" title="为什么需要边缘计算"></a>为什么需要边缘计算</h3><h4 id="云服务的推动"><a href="#云服务的推动" class="headerlink" title="云服务的推动"></a>云服务的推动</h4><p>把所有的计算任务放在云端，已经被证明是一种高效的数据处理方式，因为云端的计算能力强于边缘事物的能力。但是，与快速发展的数据处理速度相比，网络的带宽已经停滞不前。随着边缘数据生成量的提升，数据传输的速度逐渐成为基于云的计算模式的瓶颈。例如，一架波音 787 每秒生成 5 GB 数据，但是从飞机到卫星或者基站的带宽不够用于数据传输。另一个例子是自动交通工具，一辆汽车每秒产生 1 GB 数据，并且它需要实时的数据处理，以作出正确的决定。如果所有数据都需要上传至云端处理，会导致响应时间过长。更不必说，在一个区域内支持大量车辆的能力，将使目前的网络带宽和可靠性受到挑战。在这种情况下，数据需要在边缘进行处理，以缩短响应时间，提高处理效率，减少网络压力。</p>
+<h3 id="物联网的拉动"><a href="#物联网的拉动" class="headerlink" title="物联网的拉动"></a>物联网的拉动</h3><p>几乎所有电子设备都将会成为物联网的一部分，并同时担任数据生产者与数据消费者的角色，例如空气质量传感器、LED 灯棒、街灯甚至与互联网连接的微波炉。可以推断，几年后，网络边缘的事物数量将发展到数十亿以上。因此，它们产生的原始数据 （raw data） 将是巨大的，使得传统的云计算的效率不足以处理所有这些数据。这意味着大多数由物联网产生的数据不会被传输到云端，而会直接在网络边缘被消费。</p>
+<p>下图示意了传统的云计算结构。数据生产者产生原始数据，并将其上传至云端；数据消费者向云端发送请求以获取数据。但是，这种结构不适用于物联网。</p>
+<ul>
+<li>首先，边缘的数据量过大，将导致巨大、不必要的带宽和计算资源占用。</li>
+<li>其次，隐私保护要求将对物联网中的云计算构成障碍。</li>
+<li>最后，物联网中的终端节点大多能源紧张，无线通信模块通常非常耗能，因此将一些计算任务卸载到边缘可以更加节能。</li>
+</ul>
+<p><img src="/statics/images/20201106/cloud-computing-paradigm.png" alt="云计算结构范例图" title="云计算结构范例图"></p>
+<h3 id="由数据消费者到生产者的转变"><a href="#由数据消费者到生产者的转变" class="headerlink" title="由数据消费者到生产者的转变"></a>由数据消费者到生产者的转变</h3><p>在云计算范例中，终端设备通常扮演数据消费者的角色，例如，在智能手机上观看 YouTube 视频。但是，如今人们同时在他们的智能设备上生产数据。例如，人们拍照或录制视频并上传至诸如 YouTube、Facebook、Twitter 与 Instagram 的云服务已经十分普遍。此外，每 1 分钟， YouTube 用户上传 72 小时新视频内容； Facebook 用户分享近 250 万条内容； Twitter 用户发推特近 30 万次；Instagram 用户发布近 22 万条新照片。然而，图像或视频剪辑可能相当大，它会占用大量的带宽上传。在这种情况下，视频片段应该在上传到云端之前，先在边缘将其拆解并调整到合适的分辨率。另一个例子是可穿戴健康设备。由于网络边缘的物品所收集的物理数据通常是私密的，所以在边缘处理数据比将原始数据上传到云端更能保护用户隐私。</p>
+<h2 id="什么是边缘计算-1"><a href="#什么是边缘计算-1" class="headerlink" title="什么是边缘计算"></a>什么是边缘计算</h2><p>边缘计算是指允许在网络边缘进行计算的使能技术，下行数据以云服务为代表，上行数据以物联网服务为代表。在这里，文章将“边缘”定义为数据源和云数据中心之间路径上的任何计算和网络资源。例如，智能手机是可穿戴设备与云之间的边缘，智能家居中的网关是家中物品与云之间的边缘，微数据中心与微云 （cloudlet） 是移动设备与云之间的边缘。边缘计算的原理是计算应该发生在数据源的附近。边缘计算与雾计算是可以互换的，但边缘计算更侧重于物的方面，而雾计算更侧重于基础设施方面。作者设想边缘计算能够对社会产生与云计算一样大的影响。</p>
+<p>下图展示了边缘计算中的双向计算流。在边缘计算模式中，物品不仅是数据消费者，同时也扮演着数据生产者的角色，在边缘，物品不仅可以向云端请求服务和内容，还可以向云端执行计算任务。边缘可以进行计算卸载、数据存储、缓存和处理，也可以将请求和交付服务从云端分发到用户。由于网络中的这些工作，边缘本身也需要精心设计，在可靠性、安全性、隐私保护等服务上有效地满足要求。</p>
+<p><img src="/statics/images/20201106/edge-computing-paradigm.png" alt="边缘计算结构范例图" title="边缘计算结构范例图"></p>
+<h2 id="边缘计算的优势"><a href="#边缘计算的优势" class="headerlink" title="边缘计算的优势"></a>边缘计算的优势</h2><p>在边缘计算中，我们希望把计算放在数据源的附近。与传统的基于云的计算模式相比，有若干个好处。文章使用几个来自社区的早期结果来证明潜在的好处。例如，有研究人员建立了一个概念验证平台来运行人脸识别应用程序，通过将计算从云端转移到边缘，响应时间从 900 毫秒减少到 169 毫秒。研究人员利用微云卸载计算任务，用于可穿戴式认知辅助，结果表明，响应时间的改善在 80～200ms 之间,能耗也可以降低 30%-40% 。</p>
+<h2 id="案例研究"><a href="#案例研究" class="headerlink" title="案例研究"></a>案例研究</h2><h3 id="云卸载"><a href="#云卸载" class="headerlink" title="云卸载"></a>云卸载</h3><p>在云计算范例中，大部分计算都发生在云端，这意味着数据和请求都在集中的云端处理。然而，这样的计算模式可能会出现较长的延迟（如过长的尾延迟），从而削弱了用户体验。众多研究已经从移动云环境下的能量-性能权衡角度探讨了云卸载问题。在边缘计算中，边缘有一定的计算资源，这就提供了一个从云端卸载部分工作负载的机会。</p>
+<p>在传统的 CDN 网络中，只有数据被边缘服务器缓存。这是基于内容提供商在互联网上提供数据，过去几十年都是如此。在物联网中，数据是在边缘产生和消费的。因此，在边缘计算范式中，不仅是数据，而且对数据应用的操作也应该在边缘进行缓存。</p>
+<p>一个可能受益于边缘计算的应用程序是在线购物服务。顾客可能频繁进行购物车操作。默认情况下，所有对于购物车的改变均会在云端进行，之后新的购物车视图会在顾客设备上更新。这个过程可能会消耗较长时间，取决于网速和服务器的负载。对于移动设备，由于相对更少的带宽，这个时间可能更长。在此场景下，如果将购物车更新从云服务器卸载到边缘节点，延迟将大幅降低。用户的购物车数据与相关操作（例如，添加、修改、删除一件物品）均可在边缘节点缓存。新的购物车视图可以在用户请求到达边缘节点后立即生成。当然，边缘节点的数据也需要与服务器同步，这个过程可在后台完成。</p>
+<p>另一个问题涉及到当用户由一个边缘移到另一个时的多边缘协作。一个简单的解决方法是，使用户能够到达的所有边缘全部缓存数据，这样会使边缘之间的同步问题增多。这些问题会在今后的研究中成为挑战。在底层，我们可以通过降低延迟来提高交互服务质量。类似的应用还包括以下几个方面。</p>
+<ol>
+<li>导航应用可以将局部区域的导航或搜索服务转移到边缘，这种情况下只涉及到几个地图块。</li>
+<li>可以在边缘节点进行内容过滤或聚合，以减少需要传输的数据量。</li>
+<li>视觉辅助娱乐游戏、增强现实、互联健康等实时应用程序，可以通过边缘节点做出快速响应。</li>
+</ol>
+<p>因此，通过利用边缘计算，可以显著改善时间敏感型应用的延迟和用户体验。</p>
+<h3 id="视频分析"><a href="#视频分析" class="headerlink" title="视频分析"></a>视频分析</h3><p>手机和网络摄像机的普及使得视频分析成为一项新兴技术。云计算由于数据传输延时长、隐私问题，已经不适合需要视频分析的应用程序。这里文章举出一个在城市中寻找走失儿童的例子。现在，不同类型的摄像头被广泛部署在城市区域和每一辆车上。当儿童走失后，他很有可能被摄像头捕捉到。但是，由于隐私问题或者流量成本的原因，摄像头的数据通常不会上传到云端，这就给广域摄像头数据的利用带来了极大的困难。即使云端可以访问数据，但上传和搜索大量的数据可能需要很长时间，这对于搜索失踪儿童来说是不可容忍的。</p>
+<p>在边缘计算范式下，可以从云端生成搜索儿童的请求，并推送给目标区域的所有物品。每一个物品，例如智能手机，都可以执行这个请求，并搜索其本地的摄像数据，只将搜索结果报告云端。在这种模式下，可以利用每件物品的数据和计算能力，与单独的云计算相比，可以更快地得到结果。</p>
+<h3 id="智能家居"><a href="#智能家居" class="headerlink" title="智能家居"></a>智能家居</h3><p>物联网会使家居环境受益。目前已经开发出一些产品，并在市场上销售，如智能灯、智能电视、机器人吸尘器等。然而，对于智能家居来说，仅仅在现有的电器设备上增加一个 Wi-Fi 模块，并将其连接到云端是不够的。在智能家居环境中，除了连接设备外，还应该将廉价的无线传感器和控制器部署到房间、管道，甚至地板、墙壁上。这些物品会产生大量数据，从数据传输压力与隐私保护的角度，这些数据应该大部分在家中被消费。这个特点使云服务不适用于智能家居。不过，边缘计算被认为是构建智能家居的最佳选择：通过边缘网关在家庭中运行专门的边缘操作系统 （edgeOS） ，可以在家庭中方便地连接和管理物品，数据可以在本地处理，以释放互联网带宽的负担，服务也可以部署在 edgeOS 上，以便更好地管理和交付。</p>
+<p>下图展示了智能家居环境下 edgeOS 的变体结构。 EdgeOS 需要通过 Wi-Fi 、 BlueTooth 、 ZigBee 或蜂窝网络等多种通信方式收集来自移动设备和各种物品的数据。不同来源的数据需要在数据抽象层进行融合和处理。数据抽象层之上是服务管理层。这一层将支持包括差异化、可扩展性、隔离性和可靠性在内的要求。命名机制被所有层级都需要，然而具有不同的要求。因此，以跨层的方式描述命名模块。</p>
+<p><img src="/statics/images/20201106/edgeOS.png" alt="智能家居环境中的 edgeOS 结构图" title="智能家居环境中的 edgeOS 结构图"></p>
+<h3 id="智慧城市"><a href="#智慧城市" class="headerlink" title="智慧城市"></a>智慧城市</h3><p>边缘计算范式可以从单个家庭灵活扩展到社区甚至城市规模。边缘计算宣称，计算应该发生在尽可能接近数据源的地方。通过这种设计，一个请求可以从计算模型的顶端产生，并在边缘进行实际处理。考虑到以下特点，边缘计算可以成为智慧城市的理想平台。</p>
+<ol>
+<li>大数据量。到 2019 年，一个 100 万人口的城市，每天将产生 180 PB 的数据，由公共安全、卫生、公共事业和交通等贡献。建立集中式的云数据中心来处理所有的数据是不现实的，因为流量负载过重。在这种情况下，边缘计算通过在网络边缘处理数据，可以成为一个有效的解决方案。</li>
+<li>低延迟。对于需要可预测和低延迟的应用程序，如应急健康服务或公共安全，边缘计算也是一个合适的范式，因为它可以节省数据传输时间，并简化网络结构。决策和诊断可以从网络边缘进行，也可以从网络边缘分发，这比在中央云端收集信息和做出决策更有效率。</li>
+<li>位置敏感。对于基于地理的应用程序，如交通和公共事业管理，边缘计算由于位置敏感而优于云计算。在边缘计算中，数据可以根据地理位置进行收集和处理，而无需传输到云端。</li>
+</ol>
+<h3 id="边缘协作"><a href="#边缘协作" class="headerlink" title="边缘协作"></a>边缘协作</h3><p>云计算已经成为学术界和工业界处理大数据的事实上的计算平台。云计算背后的一个关键承诺是，数据应该已经被云端持有或正在被传输到云端，并最终将在云端进行处理。然而，在许多情况下，由于隐私问题和数据传输的巨大成本，利益相关者所拥有的数据很少被分享给对方。因此，多个利益相关者之间的合作机会有限。边缘作为连接云和具有数据处理能力的终端用户的小型数据中心，也可以成为逻辑上的连接概念的一部分。“边缘协作”的提出，能够将多个利益相关者的边缘连接起来，尽管他们的物理位置和网络结构都是分布在地理上的。这些类似点对点 （ad hoc） 的连接边缘为利益相关者提供了共享和合作数据的机会。</p>
+<p>文中以流感暴发下的医疗关联 （connected healthcare） 为例，说明边缘协作的潜在优势。患者涌向医院，医院总结并分享这次流感暴发的信息，如平均花费、症状与患者数量等。患者一般情况下会遵循指导前去药店买药。也可能患者并没有服从处方的指示，这种情况下，医院应该承担使病人再次入院的责任。通过医疗关联，药店可以向医院提供患者的付款记录，从而极大地促进了医疗责任制。</p>
+<p>同时，药店利用医院提供的医疗关联服务，检索流感爆发的人群。一个明显的优势是，药店有足够的库存，可以获得更多的利润。在药品采购的背后，药店可以利用药企提供的数据，检索出所有药品仓库的位置、价格和库存，同时向物流公司发送运输价格查询请求。然后，药店就可以根据检索到的信息，根据总成本优化问题来制定订单计划。医药公司也会收到来自药店的流感药物订单。此时，医药公司可以重新安排生产计划，重新平衡仓库的库存。同时，防控中心能够监测大范围内流感人口的增加，因此可以向相关地区的居民发出流感警报。此外，还可以采取进一步的行动来防止流感的爆发。</p>
+<p>流感爆发后，保险公司要根据保单为患者埋单。保险公司可以分析在流感爆发期间，患流感的人的比例，这个比例和治疗流感的费用是调整下一年保单价格的重要因素。这个比例和治疗流感的费用是调整下一年度保单价格的重要因素。此外，如果患者愿意分享，保险公司还可以根据其电子医疗记录 （electronic medical record，EMR） 提供个性化的医疗政策。</p>
+<p>通过这个简单的案例，能够发现，大多数参与者可以从协作优势中获益，降低运营成本，提高盈利能力。然而，其中一些机构，如案例中的医院，可能只是一个的医疗社区的贡献者，因为他们是这个社区的主要信息收集者。</p>
+<h2 id="机遇与挑战"><a href="#机遇与挑战" class="headerlink" title="机遇与挑战"></a>机遇与挑战</h2><p>在本节中，文章详细总结现有挑战，并提出值得进一步研究的潜在解决方案和机遇，包括可编程性、命名、数据抽象、服务管理、隐私与安全以及优化指标。</p>
+<h3 id="可编程性"><a href="#可编程性" class="headerlink" title="可编程性"></a>可编程性</h3><p>在云计算中，用户编写代码，并将其部署在云上。云提供商决定计算在云上进行的位置。云服务对用户是透明的，这也是其优点之一。但是，在边缘计算中，计算从云端卸载，边缘节点很可能是异构平台。在这种情况下，这些节点的运行时 （runtime） 各不相同，程序员要编写一个部署在边缘计算范式中的应用程序，面临巨大的困难。</p>
+<p>为处理边缘计算中的可编程性问题，文章提出计算流 （computing stream） 这一概念。计算流被定义为沿数据传播路径应用于数据的一系列函数或计算。这里的函数或计算可能是一个应用程序的一部分或全部功能，计算可以发生在路径的任何地方，只要应用程序决定了计算在哪里进行。计算流 （stream)  是软件定义的流 （flow)  ，这样的数据可以在数据生成设备、边缘节点和云环境上以分布式和高效的方式进行处理。按照边缘计算的定义，很多计算可以在边缘完成，而不是中心云。在这种情况下，计算流可以帮助用户确定在边缘发生计算后，应该做哪些功能计算以及数据如何传播。通过部署计算流，数据的计算尽可能接近数据源，可以降低数据传输成本。在计算流中，函数可以被重新分配，连同函数的数据和状态也应该被重新分配。此外，边缘计算范式中的协作问题（如同步化、数据状态迁移等）也必须跨多层解决。</p>
+<h3 id="命名"><a href="#命名" class="headerlink" title="命名"></a>命名</h3><p>在边缘计算中，一个重要的假设是，物品的数量是巨大的。在边缘节点的顶端，有很多应用程序在运行，每个应用程序都有自己的结构，关于如何提供服务。与所有的计算机系统类似，边缘计算中的命名方案对于编程、寻址、物品识别和数据通信都非常重要。然而，针对边缘计算范式的高效命名机制尚未建立和标准化。边缘从业人员通常需要学习各种通信和网络协议，以便与系统中的异构事物进行通信，边缘计算的命名方案需要处理物品的移动性、高动态的网络拓扑、隐私和安全保护，以及针对大量不可靠物品的扩展能力。</p>
+<p>传统的命名机制如 DNS 或 URI 可以很好地满足当前网络所需。但是，它们不够灵活，无法为动态边缘网络提供服务，因为有时边缘的大部分物品可能是高度移动的，而且资源有限。此外，对于网络边缘一些资源受限的物品，考虑到其复杂性和开销，基于IP的命名方案可能过于重量而无法支持。</p>
+<p>一些新的命名机制可以用于边缘计算：</p>
+<ul>
+<li>NDN (named data networking) 为以内容数据为中心的网络提供了一个分层结构化的命名服务，它对服务管理友好，对边缘网络提供了良好的扩展性。但它需要额外的代理，以适应其他通信协议如 BlueTooth 或 ZigBee 。与NDN相关的另一个问题是安全性，因为很难与服务提供商隔离物品硬件信息。</li>
+<li>MobileFirst 可以将名称和网络地址分开，对于具有高度移动性的边缘业务非常有效。但是， MobileFirst 的命名需要使用全局唯一标识（GUID），这在例如家庭环境等网络边缘的相对固定信息聚合业务中则不需要。 MobileFirst 在边缘的另一个缺点是，由于 GUID 对用户不友好，所以服务管理困难。</li>
+</ul>
+<p>对于诸如家庭环境这样相对较小、较固定的边缘，令 edgeOS 对每个物品分配网络地址是一个可行的解决方案。在同一个系统中，每个物品拥有一个唯一的、用户友好的名称，包含以下信息：地点 （where） 、角色 （who） 和数据描述 （what） ，例如 “kitchen.oven2.temperature3” 。之后，如下图， edgeOS 会为这个物品分配标识符与网络地址。人性化的名称对每个事物都是唯一的，它将用于服务管理、事物诊断、部件更换。对于用户和服务商来说，这种命名机制使得管理非常方便。例如，用户会从 edgeOS 收到一条消息： “Bulb 3 (what) of the ceiling light (who) in living room (where) failed” ，之后用户可以直接更换故障灯泡，不需在日志从寻找错误代码或者重新配置整个网络。此外，这个命名机制为服务提供者提供了更好的编程能力，使得服务提供者无需处理硬件信息，从而保护了数据隐私及安全。</p>
+<p><img src="/statics/images/20201106/naming-mechanism.png" alt="edgeOS 的命名机制示意图" title="edgeOS 的命名机制示意图"></p>
+<h3 id="数据抽象"><a href="#数据抽象" class="headerlink" title="数据抽象"></a>数据抽象</h3><p>在无线传感器网络和云计算范式中，数据抽象已经被充分讨论和研究。然而，在边缘计算中，这个问题变得更具挑战性。随着物联网的发展，网络中会有大量的数据产生，这里我们以智能家居环境为例。在智能家居中，几乎所有物品都会向 edgeOS 报告数据。但是，大多数处于网络边缘的物品，只是周期性的向网关报告感知数据。例如，温度计每分钟报告一次温度，但这些数据很可能一天只被真正的用户消费几次。另一个例子可能是家中的安全摄像头，持续录像并将数据发送至网关，但是这些数据只被保存在数据库中、没有人实际消费它、最后被新的数据代替。</p>
+<p>基于这个观察结果，作者设想，边缘计算中人的参与应该是最小化的，边缘节点应该消费处理所有的数据，并以主动的方式与用户交互。在这种情况下，数据应该在网关层进行预处理，如噪声&#x2F;低质量数据去除、事件检测、隐私保护等。经过处理后的数据将被发送到上层，以便将来提供服务。在这个过程中会有几个挑战：</p>
+<ul>
+<li>不同物品报告的数据有不同的格式。</li>
+<li>有时很难决定数据的抽象程度。如果抽象过多，一些应用程序可能不能获取到足够多的数据。</li>
+<li>边缘物品报告的数据有时可能不可靠。</li>
+<li>对物品的适用操作不同。由于事物的异质性，数据的表示和允许的操作都会有很大的差异性。</li>
+</ul>
+<h3 id="服务管理"><a href="#服务管理" class="headerlink" title="服务管理"></a>服务管理</h3><p>在网络边缘的服务管理方面，文章认为应该支持以下四个基本特性：差异性、可扩展性、隔离性和可靠性。</p>
+<ul>
+<li>差异性。随着 IoT 的快速发展，在网络边缘可能会有多个服务，而这些服务有着不同的优先级。例如，关键服务，如事物诊断和故障报警，应比普通服务更早处理。与健康相关的服务，如跌倒检测或心脏衰竭检测，也应比娱乐等其他服务有更高的优先级。</li>
+<li>可扩展性。例如，用户购买新物品后，方便地添加入现有服务中；物品替换后，当前服务正常运行。</li>
+<li>隔离性。在移动操作系统中，一个应用程序的崩溃可能导致整个系统重启。在 edgeOS 中，情况可能更加复杂。以灯光控制为例，当一个应用程序无响应时，用户应该仍能够控制灯光，而不需重启整个 edgeOS 。或者，用户卸载惟一控制光照的应用程序时，灯应该仍然是亮的，而不会造成连接丢失。此外，隔离性的另一个挑战是。如何将用户隐私与第三方应用程序隔离。</li>
+<li>可靠性。从服务的角度，有时在现场很难准确找出服务故障的原因。从系统的角度， edgeOS 维护整个系统的网络拓扑结构是非常重要的，系统中的每个组件都能够向 edgeOS 发送状态与诊断信息。从数据的角度，可靠性的挑战主要来自数据传感和通信部分。</li>
+</ul>
+<h3 id="隐私与安全"><a href="#隐私与安全" class="headerlink" title="隐私与安全"></a>隐私与安全</h3><p>在网络边缘，隐私和数据安全保护是最应该提供的服务。在部署了 IoT 服务的家庭中，大量的隐私数据可以从感知到的使用数据中获得。例如，从水电消费数据中，可以轻松得知家中是否有人居住。在这种情况下，如何在不损害隐私的情况下支持服务是一个挑战。在处理数据之前，可以从数据中删除一些隐私信息，比如屏蔽视频中所有的人脸。作者认为，将计算保持在数据资源的边缘，也就是在家庭中，可能是保护隐私和数据安全的一个不错的方法。为了保护网络边缘的数据安全和使用隐私，面临一些挑战如下：</p>
+<ul>
+<li>社区对隐私和安全的意识。以 WiFi 网络为例，大量的接入点没有被密码保护，或者只使用了默认管理密码。</li>
+<li>对边缘物品收集数据的所有权。把数据留在收集的边缘，让用户完全拥有数据将是保护隐私的较好方案。</li>
+<li>缺少有效的工具来保护网络边缘的数据隐私和安全。</li>
+</ul>
+<h3 id="优化指标"><a href="#优化指标" class="headerlink" title="优化指标"></a>优化指标</h3><p>在边缘计算中，不同层具有的计算能力不同，工作负载分配成为重大问题。我们需要决定哪一层处理工作负载，或者在每个部分分配多少任务。工作负载有多种分配策略，例如，将工作负载平均分配到每层，或者在每一层尽可能多的完成工作。极端的情况是在端点 （endpoint） 上完全操作或在云上完全操作。为了选择最优的分配策略，文章本节讨论了几个优化指标，包括延迟、带宽、能耗和成本开销。</p>
+<h4 id="延迟"><a href="#延迟" class="headerlink" title="延迟"></a>延迟</h4><p>延迟是评估性能的最重要指标之一，尤其是在交互应用服务中。云计算中的服务器提供了高计算能力。它们可以在较短的时间内处理复杂的工作，如图像处理、语音识别等。然而，延迟不仅由计算时间决定。漫长的广域网延迟会极大地影响实时交互密集型应用的行为。为了降低延时，工作负载最好在最近的、有足够计算能力的网络边缘完成。例如，在智慧城市的案例中，可以利用手机先处理本地照片，然后将潜在失踪儿童的信息发回云端，而不是上传所有照片。由于照片的数量和大小，在边缘进行预处理会快很多。</p>
+<p>然而，物理上最近的层不一定是一个好的选择。需要考虑资源使用信息，避免不必要的等待时间，这样才能找到一个合理的最优层。例如，如果用户正在玩游戏，由于手机的计算资源已经被占用，所以将照片上传到最近的网关或微中心会更优。</p>
+<h4 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h4><p>从延迟的角度来看，高带宽可以减少传输时间，特别是对于大量数据（如视频等）。对于短距离传输，可以建立高带宽的无线接入，将数据发送到边缘。一方面，如果能在边缘处理工作负载，与在云上工作相比，可以大大改善延迟。同时也节省了边缘和云端之间的带宽。例如，在智能家居案例中，几乎所有的数据都可以通过 Wi-Fi 或其他高速传输方式在家庭网关中处理。此外，由于传输路径较短，传输任务的可靠性也得到了提升。另一方面，虽然由于边缘不能满足计算需求，无法缩短传输距离，但至少在边缘对数据进行了预处理，上传数据的大小将大大减小。在智慧城市的情况中，上传照片前最好先进行预处理，这样可以大大减少数据量。它节省了用户的带宽，特别是当用户使用运营商的流量套餐的时候。从全局的角度来看，这两种情况下都能节省带宽，而且可以被其他边缘用来上传&#x2F;下载数据。因此，需要评估是否需要高带宽连接，以及哪种速度适合边缘。此外，为了正确确定各层的工作负载分配，需要考虑各层的计算能力和带宽使用信息，以避免竞争和延迟。</p>
+<h4 id="能耗"><a href="#能耗" class="headerlink" title="能耗"></a>能耗</h4><p>对于网络边缘的事物来说，电池是最宝贵的资源。对于端点层来说，将工作负载卸载到边缘可以被视为一种无能耗的方法。那么对于给定的工作负载，将整个工作负载（或部分工作负载）卸载到边缘而不是在本地进行计算是否节能呢？关键在于计算能耗和传输能耗之间的权衡。一般来说，我们首先需要考虑工作负载的功率特性。它是计算密集型的吗？它在本地运行会使用多少资源？除网络信号强度之外，数据大小与可用带宽同样会影响传输能耗。只有在传输开销比本地计算小的情况下，我们才倾向使用边缘计算。然而，如果我们关心整个边缘计算过程，而不是只关注端点，那么总能耗应该是每个使用层的能耗成本的累积。与端点层类似，每层的能耗可以估计为本地计算成本加上传输成本。在这种情况下，最佳工作负载分配策略可能会发生变化。例如，本地数据中心层很忙，所以工作负载不断上传到上层。与端点计算相比，多跳传输可能会大幅增加开销，造成更多的能耗。</p>
+<h4 id="成本开销"><a href="#成本开销" class="headerlink" title="成本开销"></a>成本开销</h4><p>从服务提供商的角度来看，例如YouTube、亚马逊等，边缘计算为他们提供了更少的延迟和能源消耗、潜在增加的吞吐量和改善的用户体验。因此，处理相同单位的工作量，他们可以赚取更多的钱。例如，根据大多数居民的兴趣，可以把一个流行的视频放在楼宇边缘。城市边缘可以从这个任务中解放出来，处理更复杂的工作，从而可以提高总吞吐量。服务提供商的投资是建设和维护各层事物的成本。为了充分利用各层的本地数据，服务商可以根据数据位置向用户收费。这需要开发新的成本模式，以保证服务商的利润以及用户的接受度。</p>
+<p>工作量分配不是一件容易的事，各项指标之间密切关联。例如，由于能源的限制，工作负载需要在城市数据中心层完成。与楼宇服务器层相比，能源的限制不可避免地影响了延迟。对于不同的工作负载，应赋予指标优先级（或权重），从而选择合理的分配策略。此外，成本分析需要在运行时完成，同时也要考虑并发工作负载的干扰和资源使用情况。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E8%BE%B9%E7%BC%98%E8%AE%A1%E7%AE%97/" rel="tag"># 边缘计算</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/08/31/Deep-learning-for-effective-Android-malware-detection-using-API-call-graph-embeddings/" rel="prev" title="基于 API 调用图嵌入与深度学习的 Android 恶意软件检测">
+                  <i class="fa fa-chevron-left"></i> 基于 API 调用图嵌入与深度学习的 Android 恶意软件检测
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/19/COCME-Content-Oriented-Caching-on-the-Mobile-Edge-for-Wireless-Communications/" rel="next" title="COCME：针对无线网络通信面向内容的移动边缘缓存">
+                  COCME：针对无线网络通信面向内容的移动边缘缓存 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本次整理一篇来自2015年ACSC会议的论文，主要内容是使用区块链解决软件许可验证问题，其信息在这里。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一种基于区块链的软件许可验证方法">
+<meta property="og:url" content="http://cuiyn.github.io/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本次整理一篇来自2015年ACSC会议的论文，主要内容是使用区块链解决软件许可验证问题，其信息在这里。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-03-11T16:57:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="区块链">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/","path":"2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/","title":"一种基于区块链的软件许可验证方法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>一种基于区块链的软件许可验证方法 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">内容简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E8%AE%B8%E5%8F%AF%E9%AA%8C%E8%AF%81"><span class="nav-number">2.2.</span> <span class="nav-text">软件许可验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E8%AE%B8%E5%8F%AF%E9%AA%8C%E8%AF%81%E6%96%B9%E6%B3%95%E9%9C%80%E6%B1%82"><span class="nav-number">3.</span> <span class="nav-text">软件许可验证方法需求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96%E7%9A%84%E8%BD%AF%E4%BB%B6%E8%AE%B8%E5%8F%AF%E9%AA%8C%E8%AF%81"><span class="nav-number">4.</span> <span class="nav-text">去中心化的软件许可验证</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Master%E6%AF%94%E7%89%B9%E5%B8%81%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.1.</span> <span class="nav-text">Master比特币模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bespoke%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.</span> <span class="nav-text">Bespoke模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%97%E5%88%B0%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.3.</span> <span class="nav-text">得到解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E8%83%BD%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.</span> <span class="nav-text">可能存在的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E7%9A%84%E6%9C%BA%E9%81%87"><span class="nav-number">4.5.</span> <span class="nav-text">更多的机遇</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">5.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/03/12/A-Method-for-Software-License-Validation-Using-Blockchain/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="一种基于区块链的软件许可验证方法 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一种基于区块链的软件许可验证方法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-03-12 00:57:00" itemprop="dateCreated datePublished" datetime="2018-03-12T00:57:00+08:00">2018-03-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本次整理一篇来自2015年ACSC会议的论文，主要内容是使用区块链解决软件许可验证问题，其信息在<a href="aut.researchgateway.ac.nz/handle/10292/10328">这里</a>。</p>
+<span id="more"></span>
+
+<h1 id="内容简介"><a href="#内容简介" class="headerlink" title="内容简介"></a>内容简介</h1><p>自从19世纪70年代晚期开始，保护软件版权就成为了一个问题。软件授权的验证成为减少盗版、保护版权的主要方法。本文展示了一种全新的方法，使用密码货币式的区块链，去中心化、点对点地进行软件许可验证，以减少盗版，为所有的软件开发者提供一种保护版权的方法。</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>验证软件授权的方法主要可分为三大类：</p>
+<ul>
+<li>使用记录在纸上的密钥进行激活</li>
+<li>使用在线注册验证软件授权</li>
+<li>使用硬件设备</li>
+</ul>
+<p>小型厂商通常使用激活密钥，而像Microsoft、Adobe这样的大型厂商一般使用专有的、基于网络的软件中心化验证服务作为主要方法。</p>
+<p>由于软件日益复杂、销售渠道多样，以及技术与经济结合造成的原因，软件许可验证的复杂度逐渐增加。这篇文章利用了与比特币类似的区块链，为去中心化、点对点、公众可审计、从小型开发者到大型公司都可使用的软件许可验证提供了方法。</p>
+<p>文章首先介绍了区块链的功能，讨论去中心化点对点体系的优势。之后，概述基于区块链的软件许可验证，介绍其事务消息和流程的构造，并探讨未来的可能性及问题。</p>
+<h2 id="软件许可验证"><a href="#软件许可验证" class="headerlink" title="软件许可验证"></a>软件许可验证</h2><p>商业软件联盟（Business Software Alliance，BSA）将盗版软件定义为未经授权的复制或发行具有版权的软件，包括下载、共享、销售或安装许可软件的多个副本。互联网为盗版软件提供了便利的媒介，使参与者可以轻松下载具有版权的软件，将盗版全球化，且在法律层面难以管理。据BSA估计，在2013年，家用电脑上有43%的软件没有被正常授权，其商业价值约62.7B美元。</p>
+<p>从19世纪80年代开始，保护软件所有者版权的方法开始提出和实现。Suhler等人提出成功的软件许可验证应该是价格低廉、多系统兼容、易于实现的。在阶段初，最有效的方法由于受加密、硬件、计算能力的限制未能应用。而随着网络的发展，新的方法成为可能。Peyravian等人提出一种新型的C&#x2F;S软件许可验证方法，使用网络数据库进行软件许可验证，并检测软件安装的硬件平台特征。诸如Microsoft、Adobe这样的大型厂商已经采用了这种方法。然而，在线验证在客户管理方面需要很大的开销，维护个人信息和验证方法的安全可通过简单的方式破解，例如使用DNS重定向伪造身份验证服务器、修改代码删除软件许可验证子程序，或者可以通过复制密钥规避许可协议模型，如同一许可密钥在多个设备上安装。</p>
+<h1 id="软件许可验证方法需求"><a href="#软件许可验证方法需求" class="headerlink" title="软件许可验证方法需求"></a>软件许可验证方法需求</h1><p>Suhler等人提出成功的软件许可验证应该是价格低廉、多系统兼容、易于实现的。此外，为有效防止盗版，一个成功的软件许可验证方法应满足以下条件：</p>
+<ul>
+<li>许可机制难以复制</li>
+<li>软件授权易于验证</li>
+<li>软件许可不能重复生成</li>
+<li>验证应能防止中间人攻击</li>
+</ul>
+<p>因此，需要一种能够产生独一许可的机制，许可不能被重新生成，但是可以在任何时候轻松进行验证。像比特币这样的加密货币已经提供了软件许可验证所需的基本构件。比特币被表示为密码验证的数字签名，因此无法复制，而分散的交易功能可以防止比特币的双重支出，确保比特币的数字签名不能重复生成和使用。最后，比特币交易使用公钥加密技术加密，以防止中间人攻击。因此，为了满足软件许可验证所列出的前提，文章提出了一个加密货币区块链，以创建一种新的软件许可验证机制。</p>
+<p>有关区块链与比特币的知识，本篇博文不再介绍，可参考本博客其它文章。</p>
+<h1 id="去中心化的软件许可验证"><a href="#去中心化的软件许可验证" class="headerlink" title="去中心化的软件许可验证"></a>去中心化的软件许可验证</h1><p>下文用比特币描述一枚来自于某种密码货币的虚拟硬币。可以利用区块链的特点提供由所有最终用户拥有的软件许可。通过去中心化、点对点的区块链结构，任意软件厂家或开发者可以快速容易地为用户分配许可。去中心化的软件许可验证，其准则是使用用户持有的比特币代表其对软件拥有的权利。</p>
+<p>下面讨论两种利用比特币进行软件许可验证的方法，分别是Master比特币模型与Bespoke模型。</p>
+<h2 id="Master比特币模型"><a href="#Master比特币模型" class="headerlink" title="Master比特币模型"></a>Master比特币模型</h2><p>Master比特币模型是Fortin于2011年提出的软件许可验证的基本形式，由Lebo于2014年在一个名为“dissent”的概念项目的证明中实现，使用Namecoin作为基础区块链。在这个模型中，供应商地址&#x2F;比特币的组合代表了许可所有权，如果用户有一个显示来自特定供应商地址的比特币的交易，用户就被认为拥有该软件的所有权。Master比特币的所有权也可以在用户间转移。</p>
+<p>在Master比特币模型中，比特币的价值并不重要，重要的是来自原始Master比特币的交易历史。如果一个Master比特币售出，最大的比特币接收者是持有Master比特币的人，或者在交易链中拥有最低地址（字母数字）的拥有者。这一属性建立了比特币的不可分割的所有权，允许所有权转移。</p>
+<p>总而言之，通过使用一个特定区块链地址来表示一个特定的软件应用程序，Master比特币模型可以用来提供不可否认的证明，它是源于特定地址的比特币的所有权，从而赋予了用户软件许可的权利。但是，软件应用程序需要有能力读取区块链来为用户建立授权。</p>
+<h2 id="Bespoke模型"><a href="#Bespoke模型" class="headerlink" title="Bespoke模型"></a>Bespoke模型</h2><p>讨论Bespoke模型时，使用令牌（Token）作为数字签名，代表某个特定软件的所有权。这里不使用比特币，因为这个许可验证模型没有使用数字签名代表虚拟货币。从特定供应商地址持有特定令牌的用户地址有权获得软件许可，因此有权使用该软件。因此，供应商&#x2F;令牌组合代表了使用该软件的权利。</p>
+<p>Bespoke模型使用自定义的区块链交易规范，其中包括针对灵活的软件许可验证模式需求定制的其他字段。这将提供在现代技术环境中广泛的用户和许可模型所需要的范围。我们还可以提供几个有用的机制，添加额外的字段，使用区块链作为许可验证、许可升级、所有权转移甚至软件完整性检查的基础。这些字段作为数据存储在区块链上，使用内置的公钥&#x2F;私钥机制加密。原则上，软件供应商使用用户的公钥对被放置到字段中的数据进行加密，并使用用户的私钥对字段进行解密。用户可以通过供应商的公钥确认交易完整性签名。</p>
+<p>下面介绍文中提及的几个字段：</p>
+<ul>
+<li>令牌（Token）。令牌用于标准的许可验证机制，令牌的所有权代表权利。令牌可以用于软件许可验证操作，例如用于软件升级，或者为交易提供一个独特的属性，比如“前100个购买者”，这在将来可能具有可收集的价值。</li>
+<li>许可密钥。许可密钥比Master比特币模型更具有优势，因为许多软件应用程序在每个特性基础上激活的应用程序具有特定的特性。将许可密钥安全地保存在区块链上意味着软件供应商可以很容易地启用“功能激活”，并具有软件应用许可模型的灵活性，用户可以在一小段时间内租用软件，而不是按月购买或租用。</li>
+<li>哈希值。软件提供商可以在区块链上放置软件的哈希值。一个引导加载程序或软件自己可读取并检查升级。可以通过引导加载程序提供额外的保护，它是用于预执行软件应用程序的可执行代码的一部分，或者作为应用程序执行的组成部分使用。这样做的目的是为了进一步防止软件应用程序的逆向工程。</li>
+<li>签名字段是一个可选的附加字段，供应商使用软件MasterAddress的公钥&#x2F;私钥对签署整个交易内容。</li>
+</ul>
+<p>现有的软件验证使用数字签名来验证可下载的软件，使用数字证书以防止在下载过程中出现中间人攻击。然而，这个模型提供了对用户设备上安装的软件的持续验证，从而降低了恶意代码注入攻击的风险。</p>
+<p>如前所述，令牌用于授予所有权，但是与主比特币模型相比，Bespoke模型提供了更多的机会来使用令牌用于软件许可验证的目的。除了验证用户拥有令牌之外，它还可以用于升级软件版本或所有权转移机制。</p>
+<p>由此，已经证明使用区块链可以很容易地实现许可验证，并且通过相同的机制可以添加额外的完整性和安全性保护。此外，区块链脚本允许在交易中进行智能编程。这提供了一个新的动态级别，因为交易可以根据输入、输出、字段内容和起始地址和目标地址采取不同的操作。新的区块链协议（如以太坊），包括完整的图灵完备性功能，允许任何人以他们自己的任意规则来编写智能合约和分散的应用程序，以获得所有权、交易格式和状态转换函数。</p>
+<h2 id="得到解决的问题"><a href="#得到解决的问题" class="headerlink" title="得到解决的问题"></a>得到解决的问题</h2><p>我们可以看到，Bespoke模型克服了本文前面所强调的问题，并显著改进了Master比特币模型。然而，它确实需要开发和维护一个单独的加密货币生态系统，而Master比特币模型可以在现有的加密货币生态系统中使用和运行。虽然Master比特币方法满足了成功的软件许可验证方法的要求，并且已经证明它是可行的，但它的局限性可能会降低它的有效性。Bespoke模型克服了以下几点问题:</p>
+<ul>
+<li>每个软件许可都很难复制，因为它是由供应商和用户之间的交易来表示的，是加密的、可验证的，并存储在用户的区块链钱包中。</li>
+<li>软件许可通过区块链的“所有链”和在区块链内部的数据很容易验证。此外，使用区块链许可密钥允许供应商为特定的功能激活分发密钥，并允许在不涉及任何中间方的情况下快速和有效地重新切割密钥。</li>
+<li>软件许可不能重新生成，因为软件应用程序直接从区块链获取许可密钥，需要用户的私钥。即使在供应商的密钥生成器丢失，也没有办法在没有供应商的私钥的情况下将许可证密钥拿到区块链上。</li>
+<li>不可能使用区块链进行中间人攻击。如果没有用户的私钥，敌手就无法拦截区块链中的任何数据，也不能将DNS或IP流量重定向到敌手的自定义服务器以提供软件验证。</li>
+</ul>
+<p>除了软件许可验证方法之外，还有其它优势，例如软件供应商为他们的软件应用程序提供完整性和保护。此外，区块链点对点架构意味着软件许可验证没有单一的中心故障点。许可验证器可以在世界任何地方运行，并且既可以在非营利性的基础上运行，也可以在适当的情况下运行在其他商业模式上。供应商将运行特定的软件来管理许可创建过程、与区块链的交互，但不需要维护他们自己的专用许可验证基础设施，和承担相关的开销。</p>
+<p>提出的软件许可验证模型为小型开发人员提供了一个机会，让他们可以通过大型软件供应商来保护他们的软件的版权，并防止软件盗版，同时有一个灵活的机制来授权他们的软件。</p>
+<h2 id="可能存在的问题"><a href="#可能存在的问题" class="headerlink" title="可能存在的问题"></a>可能存在的问题</h2><p>为了使Bespoke模型工作，用户需要为其钱包提供某种形式的身份验证，以便访问私钥，使软件程序能够完成其验证功能。这是一个与“用户需要访问他们的区块链钱包以任何加密货币进行任何交易”类似的过程，所以操作是很平常的。但是，如果我们要实现真正的用户迁移，用户可以登录到任何已安装的应用程序，那么钱包将需要一些可移植性。公开私钥是不可取的，因此钱包需要是一个应用程序，并且有能力在区块链上解密数据，并通过API接口将其呈现给软件应用程序。或者，用户可以通过身份验证或OAuth授权服务提供商（如Facebook或谷歌）来证明其身份，并允许授权的API请求到用户钱包。</p>
+<p>其他问题是数据丢失的安全威胁模型，或者如果用户失去了对钱包和用户凭证的控制，或者供应商系统被泄露，系统就会受到损害。多签名授权已经为这些问题提供了可能的解决方案，类似于要求双方（或更多）签署。这可能会在软件许可验证方法上增加额外的开销，但是它也可以显著降低妥协或所有权损失的风险。</p>
+<p>同时，这篇论文有许多局限性。区块链依赖于加密货币生态系统中的其他参与者来创建和验证交易。然而，文章并没有探索区块链生态系统或商业模式，因为在区块链生态系统的结果中，存在着各种各样的利益相关者，他们可能会感知到不同的含义，或者有既得利益。这些考虑超出了本文的范围。</p>
+<h2 id="更多的机遇"><a href="#更多的机遇" class="headerlink" title="更多的机遇"></a>更多的机遇</h2><p>本文讨论了单个用户获得软件应用程序的单一许可、以及单个用户在其钱包和区块链上拥有多个表示软件应用程序的地址的情况。然而，在多用户的企业环境中，还存在一些额外的挑战，比如不能永久分配给员工许可，这些许可必须在组织内转移。例如，离开该组织的工作人员不得在其个人区块链钱包中持有软件许可。</p>
+<p>在Bespoke模型中，每个授权许可都需要一个属于组织的唯一地址来发送令牌，地址数量定义组织可用的令牌数量。因此，一个拥有100名用户的组织将在一个专门为该组织服务的钱包中拥有100个地址。许可证需要分配给组织内的用户，并被组织内的用户撤销。此外，用户需要使用企业登录凭证进行身份验证，最好使用单点登录方式从该组织的钱包中获取许可证。这需要在内部为区块链软件许可证验证提供某种形式的身份验证服务，以便将功能集成到一个服务中，如LDAP或Active Directory，以便进行单点登录。在多用户环境中，需要一个组织级别的区块链许可验证应用程序来实现一个成功的多用户软件许可验证。</p>
+<p>此外，区块链许可验证方法提供了一个管理非人类操作设备许可证的机会。随着物联网的发展，这些设备将需要以合法方式自动更新软件和验证软件的机制。例如，拥有10000个联网设备、但只支付2000个设备的软件维护费的用户，只会拥有更新2000个设备的许可密钥。这很容易在点对点的分布式软件许可验证生态系统中实现，并且很难使用任何其他类型的流程来管理。</p>
+<p>Perkins于2014年指出，物品身份（Identity of Things）是物联网日益增长的结果。也就是说，设备和数据与某人或某些物品的关系需要识别，而与这些需求相关的资产和用户需要被管理。许可验证方法满足这一的需求，本质上定义为令牌&#x2F;源对象，通过区块链地址提供各方的身份，并通过交易历史记录各方之间的活动类型。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>本文作为一篇2015年的文章，虽有些老气，但其中却穿插了许多新问题，如智能合约与结尾提及的物联网等，值得认真学习。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/03/06/Blockchain-Technology/" rel="prev" title="区块链技术简介">
+                  <i class="fa fa-chevron-left"></i> 区块链技术简介
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/" rel="next" title="一种用于智能合约的可认证数据馈送">
+                  一种用于智能合约的可认证数据馈送 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

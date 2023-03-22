@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本次分享一篇介绍区块链与智能合约及其在物联网环境下应用的论文，名字叫《Blockchains and Smart Contracts for the Internet of Things》，文章URL在这里。 文章主要内容分为三个部分：简介、区块链与智能合约、区块链与物联网的结合。下面对这三个部分进行讨论。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="物联网的区块链与智能合约">
+<meta property="og:url" content="http://cuiyn.github.io/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本次分享一篇介绍区块链与智能合约及其在物联网环境下应用的论文，名字叫《Blockchains and Smart Contracts for the Internet of Things》，文章URL在这里。 文章主要内容分为三个部分：简介、区块链与智能合约、区块链与物联网的结合。下面对这三个部分进行讨论。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-12-05T02:45:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="区块链">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/","path":"2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/","title":"物联网的区块链与智能合约"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>物联网的区块链与智能合约 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%8E%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6"><span class="nav-number">2.</span> <span class="nav-text">区块链与智能合约</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E4%BD%9C%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">区块链工作方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%97%B4%E8%BE%BE%E6%88%90%E4%B8%80%E8%87%B4"><span class="nav-number">2.2.</span> <span class="nav-text">网络间达成一致</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%8A%E8%BD%AC%E7%A7%BB%E8%99%9A%E6%8B%9F%E8%B5%84%E4%BA%A7"><span class="nav-number">2.3.</span> <span class="nav-text">在区块链上转移虚拟资产</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.4.</span> <span class="nav-text">智能合约如何工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E5%88%86%E7%B1%BB"><span class="nav-number">2.5.</span> <span class="nav-text">区块链分类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%8E%E7%89%A9%E8%81%94%E7%BD%91"><span class="nav-number">3.</span> <span class="nav-text">区块链与物联网</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="物联网的区块链与智能合约 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          物联网的区块链与智能合约
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-05 10:45:00" itemprop="dateCreated datePublished" datetime="2017-12-05T10:45:00+08:00">2017-12-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本次分享一篇介绍区块链与智能合约及其在物联网环境下应用的论文，名字叫《Blockchains and Smart Contracts for the Internet of Things》，文章URL在<a target="_blank" rel="noopener" href="http://ieeexplore.ieee.org/document/7467408/">这里</a>。</p>
+<p>文章主要内容分为三个部分：简介、区块链与智能合约、区块链与物联网的结合。下面对这三个部分进行讨论。</p>
+<span id="more"></span>
+
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>区块链近期吸引了来自广泛领域的人员，从金融到健康，再到公用事业、房地产与政府机构。原因是：区块链可以使原本仅能在安全中介环境下运行的程序，现在能在一个分布式的、不考虑中央授权的环境下，实现同样的功能。而这在以前是不可能的。</p>
+<p>区块链使得<strong>不可信</strong>网络成为可能。各方可以进行商业，即使它们没有彼此信任。不必考虑信任机制，使得各方能更快地达成一致。区块链网络中大量使用的密码学方法为网络中的各种操作提供了验证机制。智能合约是一种依附在区块链上的自执行脚本，它实现了合适的、分布式的、高度自动化的工作流。这也使得区块链对物联网领域的研究者和开发人员充满了吸引力。</p>
+<p>区块链与智能合约带来大量好处的同时，它们也有许多缺点。文章的主要工作是详细介绍区块链与智能合约的工作方式，并展示区块链可以与物联网协同工作，使读者发掘新的结合案例，并对引入区块链到自己项目进行合理的决策。</p>
+<h1 id="区块链与智能合约"><a href="#区块链与智能合约" class="headerlink" title="区块链与智能合约"></a>区块链与智能合约</h1><h2 id="区块链工作方式"><a href="#区块链工作方式" class="headerlink" title="区块链工作方式"></a>区块链工作方式</h2><p>区块链是一种分布式的、在网络成员间复制和共享的一种数据结构。它首先由比特币引入，用于解决双重消费问题（即同一笔钱用于两次消费）。由于比特币网络上的节点（所谓的“矿工”）附加了经过验证的、双方同意的交易，比特币区块链提供了具有权威性的、注明所有权的交易账本。</p>
+<p>但是区块链也可以很好的自立，不依赖于任何密码货币。让我们将区块链考虑为一个日志，它的记录被分批存入盖有时间戳的块中。每个块用它的哈希值表示，且每个块引用它前面所有块的哈希值。这样就在块与块之间建立了一个链，叫做区块链。任何可以访问这个有序的、反向链接的块的节点都可以读取它，并计算出在网络上交换的数据的状态。</p>
+<p>下面介绍区块链网络是如何运行的，以获得对区块链更好的理解。有一组节点（客户端），它们通过彼此复制保存的区块链副本，在相同的区块链上运行。一个节点通常可以为几个不同的用户提供进入网络的入口点，但是为了简单起见，这里假设每个用户通过独享的节点在网络上进行交易。这些节点按照下面的规则形成一个端到端的网络：</p>
+<ol>
+<li><p>用户使用公钥&#x2F;私钥机制对区块链进行操作。用户使用私钥对自己的交易（transaction）进行签名，使用公钥作为他们的公共地址。不对称加密实现了身份验证、完整性和不可抵赖性。每个已签名的交易都由一个用户的节点广播到它的单跳节点。</p>
+</li>
+<li><p>这些邻居节点首先在转播传入交易之前验证其有效性。无效交易会被丢弃。最终这个交易会在整个网络内传播。</p>
+</li>
+<li><p>这个在提前商定的时间间隔内，被网络收集和验证的交易，被打包成一个时间戳的候选块。这是一个叫做<strong>挖矿</strong>（mining）的过程。挖矿节点将这个块返回到网络中。对挖矿节点的选择由网络使用的共识机制决定。</p>
+</li>
+<li><p>节点验证此块是否包含有效交易，且含有之前块的哈希值如果合法，则把此块连接在保存的区块链上，否则丢弃。</p>
+</li>
+</ol>
+<p>需要注意的是，区块链网络中，实际上由一群不可信的写入者，共享一个不存在可信中间人的数据库。为避免可能产生的混乱，每个区块链客户端预先在程序代码中编写了规则，用于决定传入交易是否有效、是否应通告网络。当所有节点按上面的规则运作时，其间的区块链就是一个提供验证机制的、带有时间记录的网络活动记录。</p>
+<h2 id="网络间达成一致"><a href="#网络间达成一致" class="headerlink" title="网络间达成一致"></a>网络间达成一致</h2><p>节点间需要对交易与其排列顺序达成一致。否则，各个节点的区块链副本就会分离开，形成分叉（fork）。在分叉解决之前，各节点的视角不同，不能维护一个统一的区块链。所以，需要一个分布式的共识机制。如上节所述，使用的共识机制取决于区块链网络的类型与网络采用的攻击模型。</p>
+<p>在理想的情况下，所有验证节点都将对下一个块的交易顺序进行投票，按照大多数人的选择做出决定。但在一个任何人都可以加入的开放网络中，这将是灾难性的，因为存在女巫攻击（Sybil attack）：在对等网络中，单一节点具有多个身份标识，通过控制系统的大部分节点来削弱冗余备份的作用。也就是说，一个节点可能控制整个网络。</p>
+<p>比特币将挖矿操作“昂贵化”，以解决这个问题。在网络上冒充多个节点是不可行的，因为单一节点的算力有限。任何节点都可以获得下一节点的记账权，如果它能够找到正确的解随机数，使得其头部的SHA-256前面有一定数量的0。通过调整0的数量，可动态调整挖矿的难度。节点可以很容易地计算哈希值，但通过哈希值反推原输入是非常困难的。这个方案叫做PoW（proof-of-work，工作量证明）。</p>
+<p>此外还有PoS（proof-of-stake，权益证明），它比PoW需要的CPU资源少得多。PoS是由系统中具有最高权益而非最高算力的节点获得区块记账权。益体现为节点对特定数量货币的所有权, 称为币龄或币天数（Coin days）。币龄是特定数量的币与其最后一次交易的时间长度的乘积。</p>
+<p>然而，在私人网络中，参与者是在白名单上的，不需要昂贵的共识机制，例如PoW。这实际上消除了对挖矿的经济激励的需要，并提供了更广泛的共识协议。文中介绍了许多，不再赘述。</p>
+<h2 id="在区块链上转移虚拟资产"><a href="#在区块链上转移虚拟资产" class="headerlink" title="在区块链上转移虚拟资产"></a>在区块链上转移虚拟资产</h2><p>首先考虑银行。假设银行的（中心化）数据库存储每个用户的资产数目，我们只关心3个数据：资产类型、拥有者、数量。例如，数据库中的一个记录可能是“Alice拥有10美元”。Bob在这个银行中有一个账户，内有0美元。当Alice向Bob转移2美元时，Alice&#x2F;美元记录更新为8，Bob&#x2F;美元记录更新为2。资产的转移通过数据库中某些列的操作实现。</p>
+<p>通过使用比特币交易模型的区块链网络，可以很容易地实现数字标记化资产的转移，并以一种加密的可验证方式实现。在由一群不可信的写入者，在一个不可信环境下的数据库环境中，重新考虑上述示例。每一列数据携带同样的信息，不同点在于“拥有者”字段换成了拥有者的公钥。如果数据库显示Alice具有10个单位的资产X，则数据库存储Alice的公钥、类型为X、数量为10。当Alice向Bob转移2单位资产X时，她签署一个修改对应列的交易，将X的数量减少2单位，并创建一个新列，其中拥有者填写Bob的公钥，资产类型为X，数量为2。为实现并发性，避免多个操作导致的错误，Alice的操作实际上删除了对应的列，并建立一个新列，记录她有8单位的X资产。Bob的X资产总数可以通过统计数据库中拥有者为他的公钥、资产类型为X的所有列得出。Alice同理。</p>
+<p>区块链中引入的一些验证检查如下：</p>
+<ul>
+<li>交易提出的列存在吗？</li>
+<li>删除列的操作是否正确签名？</li>
+<li>这个列是否已经被之前的交易删除？因为一笔资产不能消费两次。</li>
+<li>交易数量是否正确？例如，如果该交易读取有10个单位的X，则尝试将2个单位X给Bob和9个单位X给Alice的尝试是失败的。即转移不应增加资产的总数量。</li>
+</ul>
+<p>注意交易可以一次处理多个列。存在的、未删除的列在比特币中叫做UTXO（unspent transaction outputs）。一个交易可以看作删除一些UTXO，同时又添加一些UTXO。</p>
+<p>一个问题是：如何将资产引入区块链？在我们知道Alice有10个单位的资产X之前，这些资产应该来自于某个地方。这由网络及其目的决定。例如在比特币中，每挖掘出一个新块，就产生新的比特币。</p>
+<h2 id="智能合约如何工作"><a href="#智能合约如何工作" class="headerlink" title="智能合约如何工作"></a>智能合约如何工作</h2><p>Nick Szabo于1994年提出智能合约概念，并将其定义为“执行合同条款的计算机交易协议”。Szabo提议将合同条约翻译为代码，将其嵌入可以自执行的实体中（如硬件与软件），以尽量减少在交易双方之间可信中间人的需要，以及恶意或偶然异常的发生。</p>
+<p>区块链环境中，智能合约是存储在区块链上的脚本。由于它们依附在链上，它们有独立的地址。通过向这个地址发起交易来触发智能合约。然后，它根据触发交易中包含的数据，独立地、按规定的方式在网络中每个节点上自动执行。这意味着，在支持智能合约的区块链中，每个节点运行一个虚拟机，区块链网络像分布式虚拟机一样运行。</p>
+<p>智能合约允许我们在链上进行通用计算。当任务是管理网络上的实体之间的数据驱动交互时，其优势得以体现。让我们以一个示例来解释。假设一个区块链网络存在三个用户Alice，Bob与Carol，有X与Y两种数字化资产被交易。Bob在网络中部署了一个智能合约，定义操作有：</p>
+<ul>
+<li>存入操作，允许他在合约中存入X；</li>
+<li>交易操作，每收到5个单位的Y，返还1个单位的X；</li>
+<li>取出操作，允许Bob取回该合约的所有资产。</li>
+</ul>
+<p>注意存入和取出操作被设置为只有Bob（使用他的key）能够调用。可以观察到以下几点：</p>
+<ul>
+<li>合约有自己的状态，对区块链上面的资产有监护权。示例中，它可以持有资产X与Y。</li>
+<li>合约使我们能够通过代码定义商业逻辑。例如，每收到5个单位的Y，返还1个单位的X。</li>
+<li>一个完美的合约应该考虑所有输入情况，例如，交易操作应该拒绝接受非5倍数单位的Y。</li>
+<li>Bob希望与他人建立的关系是由数据驱动的。</li>
+<li>智能合约由向其地址发起的消息&#x2F;交易触发。</li>
+<li>智能合约是确定的，相同输入总会产生相同输出。</li>
+<li>智能合约依存在区块链上，因此它的代码可以被参与的网络检查。</li>
+<li>由于所有与合约的交互都是通过在区块链上签名的消息进行的，所以所有的网络参与者都得到了一个加密的可验证的合约操作轨迹。</li>
+</ul>
+<p>支持比特币式交易的区块链使得不信任节点间的交易成为可能。支持智能合约的区块链更进一步，允许不信任节点间进行多步操作。交易实体能够在参加合约前检查代码并确定其结果，部署在网络上的确定性的代码，以及可验证性的过程，因为所有交易要进行数字签名。当所有可能的结果都被考虑在内时，争端的可能性就被消除了，因为参与者不会对他们所参与的可验证过程的最终结果产生分歧。</p>
+<p>智能合约和使得去中心化的自治组织成为可能，如果一个合约中的确定进程被执行，链上的实体行为可能会被修改。最简单的例子是一个智能合约通过地址调用另一个合约，执行它的主函数。地址存储在合约的可变数据库中。合约还带有一个成员名单、地址（公钥）可以投票决定其行为。规则可以包含在合约中，如果大多数选民以某种方式投票，合约将通过调用收到大多数选票的地址来修改其行为，以执行其主函数。</p>
+<h2 id="区块链分类"><a href="#区块链分类" class="headerlink" title="区块链分类"></a>区块链分类</h2><p>有许多方法可以为区块链分类。文中主要提出以下几种：</p>
+<ul>
+<li>谁能够接入网络。如果任意成员可以接入，则称为公共网络或无需许可的网络；如果存在白名单，则称为私有网络或许可网络。</li>
+<li>谁能够交易或挖矿。不一定所有参与者都被允许交易、开发智能合约或参加挖矿。一般在私有网络中做出限制。</li>
+<li>比特币式交易（UTXO模型）或智能合约（基于账户的模型）。支持UTXO的网络更适合于数字化资产的交易和追踪。支持账户的网络提供了对任意逻辑和多步操作的支持。然而，当考虑并发执行和事务吞吐量时，这种对任意逻辑的支持会带来严重的代价。在一个节点的VM将传入的消息使用智能合约处理之前，它不能说明它将如何影响合约的内部状态，或者它是否会在系统中触发另一个合约，因此它不能并行地运行一个块的所有事务。但在UTXO模型中，每一笔交易明确地说明了他的输入和输出，如果输入和输出之间没有依赖关系的话（例如，交易没有试图花去其他一笔交易在相同区块中创造的资产），那么执行顺序不影响最终结果，可以并行地处理。</li>
+</ul>
+<p>最后，作者总结了区块链的诸多创造性的优点：</p>
+<ul>
+<li>能够承受节点错误的、鲁棒性强、完全分布式的点对点网络；</li>
+<li>能够识别争端与分叉并自动解决、最终形成一个一致的、全体接受的结果的网络；</li>
+<li>活动具有透明性、可验证性与可审计性；</li>
+<li>一种不需要中心机构的、实现多类信息标注所有权的网络；</li>
+<li>一个允许不可信成员使用可预测行为互相交易的系统。</li>
+</ul>
+<h1 id="区块链与物联网"><a href="#区块链与物联网" class="headerlink" title="区块链与物联网"></a>区块链与物联网</h1><p>文中首先举例说明区块链与物联网结合的优势。例如智能手机的软件更新，传统方式是软件开发商将更新程序部署在他们的服务器上，提供用户下载。但从用户角度来看，如果多年没有更新，可能会产生怀疑。引入区块链后，软件开发商可以开发一个允许存储最新固件哈希值的智能合约，设备可以通过访问内置在客户端的智能合约地址或通过发现服务找出这个哈希值。之后，设备可以通过哈希值，向分布式点对点文件系统（例如IPFS）请求这个文件。类似应用还有文件币出租设备剩余存储空间、Slock使用智能合约招租、太阳能出售、物流等应用场景。</p>
+<p>在开发针对物联网的区块链应用时，可能会遇到一些问题。区块链在物联网设备表现与中心化的数据库持平，因为较低的交易吞吐量和较高的延时。一般来说，这种性能的缺陷是对不可信分权和弹性的代价。在区块链中，每个节点执行相同的任务，不允许执行并行任务，也就是说，我们没有分片。这种情况在运行智能合约的区块链中更为显著，因为智能合约导致了并发问题。</p>
+<p>维护区块链的隐私是一个复杂的问题。区块链上所有的交易信息是透明的，通过分析这些信息，感兴趣的团体可以进行模式识别，在各个地址之间寻找联系，最终找到它们背后的实体。设备可以对每一笔交易使用不同的公钥，或对每个交易实体使用不同的公钥，以增加模式识别的难度。在私有区块链中，建议在所有交易中不使用相同的区块链，如果其他参与者能够通过跟踪设备的活动获得竞争优势。尽量减少设备的暴露，只在需要与之协作的实体上设置区块链，并且只在需要协作的过程中使用它们。这固然增加了协调成本，但这是维护隐私的必要代价。</p>
+<p>同理，交易型的隐私也难以维持，因为每一笔交易的内容都暴露给网络中的每个节点。同态加密可能是解决此问题的一种方法。同态加密由参与贡献RSA算法的Ron Rivest、Leonard Adleman二人提出，目的是实现数据处理安全。同态加密提供了一种对加密数据进行处理的功能。也就是说，其他人可以对加密数据进行处理，但是处理过程不会泄露任何原始内容。同时，拥有密钥的用户对处理过的数据进行解密后，得到的正好是处理后的结果。</p>
+<p>另一个问题是，虽然矿工不能伪造交易或修改历史信息，但他可以阻塞一个新的、有效的交易添加到区块链中。对复杂的节点的协商一致机制的容忍是有限的；如果合谋的矿工人数违反了这个门槛，交易审查的风险就很严重。需要明智地选择挖掘集的节点，以减少它们之间相互勾结的机会。在私人网络中，应该签署合法的合同，这样就可以适当地进行处罚。</p>
+<p>智能合约的法律效力是有限的。使智能合约的技术规则具有法律效力，并对各方具有约束力，与之相关的研究正在进行。在此之前，如果不考虑整个流程的可验证性，一个交易实体会对一个智能合约操作的结果产生异议，会发生什么情况呢？增加法律执行力的一种方法是在智能合约中包含对现实世界契约的参考，反之亦然。这是一个称为“双重整合”的过程，它的工作原理如下：</p>
+<ol>
+<li>部署智能合约，记录其区块链地址与现实合约的地址；</li>
+<li>将现实合约进行哈希计算，记录哈希值，将现实合约安全存储（中心化或去中心化）；</li>
+<li>向智能合约发送包含现实合约哈希值的交易，之后合约将其存储在自己的内部数据库中。</li>
+</ol>
+<p>在发生纠纷时，可以查找智能合约中存储的哈希值，然后提供现实合约（由哈希值唯一对应），并证明在区块链上的操作与物理世界的预期结果存在关联。</p>
+<p>与此相关的是，记号化资产的实际价值问题。区块链用于交易这些记号，因为它们具有某种价值。但是，如果设备在链上拥有一个记号，如何保证在现实世界中能够赎回？在不支持智能合约的区块链中，双重整合是不能实现的。也许答案就在类似的方法中，通过将一个真实的契约进行散列，并将哈希值嵌入到正在交易记号的元数据中。</p>
+<p>完全自治化是一把双刃剑。在将智能合约部署到链上之前，应该仔细检查其逻辑；此外，还可能希望在代码中包含故障安全机制，以防止死机。正如在上文中提到的，我们可以实现这样的智能契约（或DAOs），其整体行为可能基于用户输入而变化。或者，可能有一个函数允许一个特权用户（通过他们的密钥来识别）销毁已部署的契约，并将其从区块链的分布式虚拟机中删除。然而，如果没有这些规定，那我们正在处理的是一个无法修改的系统。这本身可能不是一件坏事，但如果该合约上的某些功能写错了，任何与它的交易都不能撤销。</p>
+<p>最后，区块链网络可能还需要以下机制来补充其功能。这些功能需要去中心化，以免扭曲网络的特性:</p>
+<ul>
+<li>存储指向资源指针的DNS服务。例如Blockstack服务</li>
+<li>安全的通信与文件交换机制。</li>
+</ul>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这篇文章主要介绍了区块链的相关知识，以及区块链与物联网结合的优势及注意点。若有需要进行相关工作，可以参考这篇文章。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/" rel="prev" title="使用动态分析和属性图检测CSRF漏洞">
+                  <i class="fa fa-chevron-left"></i> 使用动态分析和属性图检测CSRF漏洞
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/01/10/RPKI%E2%80%98s-Deployment-and-Security/" rel="next" title="RPKI的部署及安全情况">
+                  RPKI的部署及安全情况 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

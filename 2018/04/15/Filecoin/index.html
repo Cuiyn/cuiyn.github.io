@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文主要介绍文件币Filecoin，包括其证明方案、数据结构、交互流程等。写作本文时参考了Filecoin的白皮书与其翻译。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Filecoin简介">
+<meta property="og:url" content="http://cuiyn.github.io/2018/04/15/Filecoin/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本文主要介绍文件币Filecoin，包括其证明方案、数据结构、交互流程等。写作本文时参考了Filecoin的白皮书与其翻译。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-15T02:39:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="区块链">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2018/04/15/Filecoin/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2018/04/15/Filecoin/","path":"2018/04/15/Filecoin/","title":"Filecoin简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Filecoin简介 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IPFS"><span class="nav-number">1.</span> <span class="nav-text">IPFS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Filecoin%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">Filecoin概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E8%AF%81%E6%98%8E%E4%B8%8E%E6%97%B6%E7%A9%BA%E8%AF%81%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">复制证明与时空证明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BB%E5%87%BB%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">攻击类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E8%AF%81%E6%98%8E"><span class="nav-number">3.2.</span> <span class="nav-text">复制证明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%B6%E7%A9%BA%E8%AF%81%E6%98%8E"><span class="nav-number">3.3.</span> <span class="nav-text">时空证明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B1%E8%AF%86%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">共识机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">4.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E7%8E%87"><span class="nav-number">4.2.</span> <span class="nav-text">功率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%97%B6%E7%A9%BA%E8%AF%81%E6%98%8E%E7%9A%84%E5%8A%9F%E7%8E%87%E6%8F%90%E4%BA%A4"><span class="nav-number">4.3.</span> <span class="nav-text">使用时空证明的功率提交</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%8A%9F%E7%8E%87%E8%BE%BE%E6%88%90%E5%85%B1%E8%AF%86"><span class="nav-number">4.4.</span> <span class="nav-text">使用功率达成共识</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6"><span class="nav-number">5.</span> <span class="nav-text">智能合约</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2018/04/15/Filecoin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Filecoin简介 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Filecoin简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-15 10:39:00" itemprop="dateCreated datePublished" datetime="2018-04-15T10:39:00+08:00">2018-04-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文主要介绍文件币Filecoin，包括其证明方案、数据结构、交互流程等。写作本文时参考了Filecoin的<a target="_blank" rel="noopener" href="https://filecoin.io/filecoin.pdf">白皮书</a>与其<a target="_blank" rel="noopener" href="http://chainx.org/paper/index/index/id/13.html">翻译</a>。</p>
+<span id="more"></span>
+
+<h1 id="IPFS"><a href="#IPFS" class="headerlink" title="IPFS"></a>IPFS</h1><p>当前互联网正处于一场革命中：集中式专有服务正在被去中心化开放服务所代替；信任式参与被可验证式计算所代替；脆弱的位置寻址被弹性的内容寻址所代替；低效率的整体式服务被点对点算法市场所代替。比特币、以太坊和其它的区块链网络已经证明了去中心化交易账本的有效性，这些公共账本处理复杂的智能合约程序、交易价值数百亿美金的加密资产。这些系统的参与者们形成去中心化的、无中心管理机构及可信第三方的网络，它提供了有效的支付服务，这是互联网开放服务的第一个实例。</p>
+<p>星际文件系统IPFS（InterPlanetary File System）是一个面向全球的、点对点的分布式版本文件系统，目标是为了补充（甚至是取代）目前统治互联网的超文本传输协议（HTTP），将所有具有相同文件系统的计算设备连接在一起。原理用基于内容的地址替代基于域名的地址，也就是用户寻找的不是某个地址而是储存在某个地方的内容，不需要验证发送者的身份，而只需要验证内容的哈希，通过这样可以让网页的速度更快、更安全、更健壮、更持久。IPFS通过对网络本身进行去中心化，已经证明了内容寻址的有效性。它提供了全球点对点网络数十亿的文件使用量，解放了孤岛数据，使网络分区重获新生，支持离线工作，能够使数字信息更持久。</p>
+<p>IPFS有如下三个特点：</p>
+<ul>
+<li>内容寻址：通过文件内容生成唯一哈希值、而不是文件保存位置来标识。相同内容的文件在系统中只会存在一份，从而节约存储空间</li>
+<li>版本化：可追溯文件修改历史</li>
+<li>点对点：使用P2P保存各种各样类型的数据</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/ipfs/papers/raw/master/ipfs-cap2pfs/ipfs-p2p-file-system.pdf">IPFS白皮书</a>为IPFS设想了几个使用场景，如数据共享、带版本的包管理器、数据库、CDN、Web等。</p>
+<h1 id="Filecoin概述"><a href="#Filecoin概述" class="headerlink" title="Filecoin概述"></a>Filecoin概述</h1><p>为使得IPFS正常运行，需要保证存储节点得到一定收益，提供合适的激励方式。Filecoin是IPFS最上面的激励层，它对去中心化数据，构建和运行分布式应用程序，以及实现智能合同都非常有用。它是一个去中心化存储网络，让云存储变成一个算法市场。这个市场运行在有着本地协议<strong>令牌</strong>（Token，这里即Filecoin）的区块链。区块链使用的证明叫做<strong>复制证明</strong>（Proof of Replication，PoRep）与<strong>时空证明</strong>（Proof of Spacetime，PoSt），其中的矿工可以通过为客户提供存储来获取Filecoin，同时客户可以通过花费Filecoin来雇佣矿工来存储或分发数据。和比特币一样，Filecoin的矿工们为了巨大的奖励而竞争式地挖掘区块，但Filecoin的挖矿效率是与存储活跃度成比例的，这直接为客户提供了有用的服务（不像比特币的挖矿仅为维护区块链的共识）。这种方式给矿工们创造了强大的激励，激励他们尽可能多的聚集存储器并且把它们出租给客户们。Filecoin协议将这些聚集的资源编织成世界上任何人都能依赖的、自我修复的存储网络。该网络通过复制和分散内容实现鲁棒性，同时自动检测和修复副本失败。</p>
+<p>Filecoin协议通过不依赖于单个协调员的独立存储提供商组成的网络，提供数据存储服务和数据检索服务。其中有三种角色：</p>
+<ul>
+<li><strong>用户</strong>为数据存储和检索支付令牌</li>
+<li><strong>存储矿工</strong>通过提供存储空间赚取令牌</li>
+<li><strong>检索矿工</strong>通过提供数据服务赚取令牌</li>
+</ul>
+<h1 id="复制证明与时空证明"><a href="#复制证明与时空证明" class="headerlink" title="复制证明与时空证明"></a>复制证明与时空证明</h1><p>在Filecoin协议中，存储供应商必须让他们的客户相信，客户所付费的数据已经被他们存储。本节主要介绍在Filecoin中所使用的“复制证明”和“时空证明”实现方案。</p>
+<h2 id="攻击类型"><a href="#攻击类型" class="headerlink" title="攻击类型"></a>攻击类型</h2><p>在Filecoin中，恶意矿工不提供或少提供存储、却不影响其获得奖励的攻击，有三种类型：</p>
+<ul>
+<li>女巫攻击（Sybil attack）。恶意矿工可能通过创建多个女巫身份假装物理存储很多副本，从中获取更多的奖励，但实际上只存储一次。</li>
+<li>外包攻击（outsourcing attacks）。恶意矿工可以快速从其他存储矿工获取数据，因此恶意矿工可能承诺存储比他们实际物理存储容量更大的数据。</li>
+<li>生成攻击（generation attacks）。恶意矿工宣称要存储大量的数据，同时他们可以使用某些方式生成这些数据。当检验者验证的时候，恶意矿工可以重新生成数据来完成存储证明。</li>
+</ul>
+<h2 id="复制证明"><a href="#复制证明" class="headerlink" title="复制证明"></a>复制证明</h2><p>防止生成攻击比较困难，它使大多数PoS方案不能用于分布式存储网络。复制证明试图解决这个问题。下面构建一个<strong>比赛</strong>（game）来测试这三种攻击，并将PoRep方案与其他PoS方案区分开来。如果一个PoS方案通过了比赛，那么它就是一个PoRep方案。</p>
+<p>敌手A与一个诚实的验证者V交互。A需要向V证明，它存储了$n$份数据D的拷贝，但A拥有的存储空间仅能存储$l$份，$n$大于$l$。A可以使用某些方式生成这些数据。A可以根据其需要生成任意女巫节点。对于$i \in {0\ldots n}$，若A能够完成每个数据的挑战$c_i$（即证明其存储有这份数据），则胜利；若有至少一个挑战失败，则A失败。</p>
+<p>确保n个D副本的独立物理存储，类似于确保存储n个不同的数据集，从中可以得到D。因此，为避免女巫攻击，可以对不同的副本使用不同的编码。接收到验证挑战时，诚实的存储者可以直接计算答案并交给验证者；但在外包攻击与生成攻击中，敌手需要先生成原始数据D，再使用其编码密钥编码，才能计算答案。因此，为避免外包攻击与生成攻击，要求编码耗时足够长，可以被验证者V分辨。PoRep使用的编码方式为块编码的加密块链模式（Cipher Block Chaining，CBC），称编码过程为<strong>封装</strong>（Seal）。</p>
+<h2 id="时空证明"><a href="#时空证明" class="headerlink" title="时空证明"></a>时空证明</h2><p>存储证明方案允许用户请求检查存储提供商当时是否已经存储了外包数据。如何使用PoS方案来证明数据在一段时间内都已经被存储了？一个自然的答案是要求用户重复（例如每分钟）对存储提供商发送请求。然而每次交互所需要的通信复杂度会成为类似Filecoin这样的系统的瓶颈，因为存储提供商被要求提交证明到区块链网络上。</p>
+<p>为解决这个问题，引入新的证明方案——时空证明，它可以让验证者检查存储提供商是否在一段时间内存储了他&#x2F;她的外包数据。这对提供商的直接要求是：</p>
+<ol>
+<li>生成顺序的存储证明（在我们的例子里是“复制证明”）来作为确定时间的一种方法</li>
+<li>组成递归执行来生成简单的证明。</li>
+</ol>
+<p>时空证明使用了一个称为证明链（proof-chain）的数据结构。证明链是一种可验证的数据结构，它将一系列的挑战和证明链接在一起。对于迭代$n$，定义$c_n$为挑战，$\pi _n$是$c_n$的证明。</p>
+<p>$C_n$是由$C_{n-1}$利用$\pi _n$扩展证明链的部分。定义验证函数$Prove$，随机数$r$，冲突避免的哈希函数$H$，则证明链形成与验证的规则是：</p>
+<ul>
+<li>$c_0\gets H(r)$</li>
+<li>$c_n\gets H(n\parallel \pi _{n-1})$</li>
+<li>$\pi _n\gets Prove(c_n)$</li>
+<li>$C_0\gets (c_0, \pi _0)$</li>
+<li>$C_n\gets (C_{n-1}, \pi _n)$</li>
+<li>${ 0, 1 } \gets VerifyChain(C_0)&#x3D;Verify(c_0,\pi _0)$</li>
+<li>${ 0, 1 } \gets VerifyChain(C_n)&#x3D;VerifyChain(C_{n-1}) &amp; Verify(c_n,\pi _n)$</li>
+</ul>
+<p>通过对证明链的验证，可以证明存储提供商在迭代$0\to n$的时间范围内，的确存储了数据D。</p>
+<h1 id="共识机制"><a href="#共识机制" class="headerlink" title="共识机制"></a>共识机制</h1><p>Filecoin矿工生成时空证明来参与共识，而不使用产生浪费的PoW。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>如果计算的输出对网络来说是有价值的，而不仅仅是为了保证区块链的安全，则认为矿工在共识协议中所作的工作是有用的。由此，许多区块链（如比特币式区块链）要求矿工解决计算难题，譬如反转哈希函数。通常情况下这些解决方案都是无用的，除了保护网络安全之外，没有其他任何价值。Primecoin重新使用矿工的计算能力来找到新的素数，以太坊要求矿工与工作证明一起执行小程序，同时证明某些数据正在归档。虽然这些尝试中的大多数都执行有用的工作，但在这些计算中浪费的工作量仍然很普遍。</p>
+<p>理想情况下，大部分网络资源应该花费在有用的工作上。一些尝试是要求矿工使用更节能的解决方案。例如，<strong>空间挖矿</strong>（Spacemint）要求矿工致力于磁盘空间而不是计算。虽然更加节能，但磁盘空间依然”浪费“，因为它们被随机数据填满了。其他的尝试是用基于权益证明的传统拜占庭协议来代替难题的解决，其中利益相关方在下一个块的投票与其在系统中所占有的货币份额成正比。</p>
+<h2 id="功率"><a href="#功率" class="headerlink" title="功率"></a>功率</h2><p>Filecoin团队提出了<strong>功率容错</strong>（Power Fault Tolerance），这是对在参与者对协议结果的影响方面重新构建拜占庭故障的抽象。每个参与者控制了网络总功率n中的一部分功率，其中f是故障节点或恶意节点所控制的功率占比。Filecoin中，<strong>功率</strong>（Power）定义如下：在时刻t，矿工$M_i$的功率$p^t_i$是$M_i$存储任务的总和。$M_i$的影响因子$I^t_i$是$M_i$在网络中总功率的占比。</p>
+<p>在Filecoin中，功率有以下属性：</p>
+<ul>
+<li>公开：网络中当前正在使用的存储总量是公开的。通过读取区块链，任何人都可以计算每个矿工的存储任务，因此任何人都可以计算出在任意时间点的每个矿工的功率和总功率。</li>
+<li>公众可验证：对于每个存储任务，矿工都需要生成时空证明，证明持续提供服务。通过读取区块链，任何人都可以验证矿工的功率声明是否正确。</li>
+<li>可变：在任意时间点，矿工都可以通过增加新扇区、补充抵押来增加新的存储。这样矿工就能变更他们能提供的功率。</li>
+</ul>
+<h2 id="使用时空证明的功率提交"><a href="#使用时空证明的功率提交" class="headerlink" title="使用时空证明的功率提交"></a>使用时空证明的功率提交</h2><p>每个∆proof区块（∆proof是系统参数），矿工们都必须向网络提交时空证明，只有网络中大多数功率认为它们是有效的，才会被添加到区块链。在每个区块中，每个<strong>全节点</strong>（full node）会更新<strong>分配表</strong>（AllocTable），添加新的存储分配、删除过期的和标记缺少证明的记录。可以通过对分配表的记录来对矿工$M_i$的功率进行计算和验证。这些可以通过两种方式来完成：</p>
+<ul>
+<li>全节点验证：如果节点拥有完整的区块链记录，则可以从创世区块开始运行网络协议直到当前区块，这个过程中验证每一个属于$M_i$的时空证明。</li>
+<li>简单存储验证：假设轻客户端可以访问广播最新区块的信任源。轻客户端可以从网络中的节点请求以下内容，以将时空证明的验证委托给网络。<ol>
+<li>$M_i$在当前分配表中的记录；</li>
+<li>该记录被包含在最新区块的状态树中的Merkle路径；</li>
+<li>从创世区块到当前区块的区块头。</li>
+</ol>
+</li>
+</ul>
+<p>功率计算的安全性来自于时空证明的安全性，时空证明保证了矿工无法对他们所分配的存储数量说谎。</p>
+<h2 id="使用功率达成共识"><a href="#使用功率达成共识" class="headerlink" title="使用功率达成共识"></a>使用功率达成共识</h2><p>Filecoin团队提出一种称为<strong>预期共识</strong>（Expected Consensus，EC）的构建，其策略是在每一轮选举一个（或多个）矿工，使得赢得选举的概率与每个矿工分配的存储成比例。</p>
+<p>预期共识的基本直觉是确定性的，不可预测的。并在每个周期内秘密选举一个小的Leader集合。每个周期内当选的Leader数量预期期望是1，但一些周期内可能有0个或者许多的Leader。Leader们通过创建新区块并广播来扩展区块链网络。在每个周期，区块链被延伸一个或多个区块。在某个无Leader的周期内，一个空区块被添加到区块链中。虽然链中的区块可以线性排序，但其数据结构是有向无环图。如果大多数的参与者都通过签署区块或扩展区块链，从而加大这个区块所属链的权重，那么这个区块就被确认了。</p>
+<p>在每个周期，每个矿工检查他们是否被选为Leader。如果满足以下条件，则在时刻t，矿工$M_i$是Leader。</p>
+<p>$$H(\langle t\parallel rand(t)\rangle _{M_i})&#x2F;2^L \le \frac{p^t_i}{\sum _j p^t_j}$$</p>
+<p>其中$rand(t)$是在时刻$t$，可以从区块链中提取出来的公开的随机变量。$p^t_i$是$M_i$的功率。对于任意的$m$，$L$是$H(m)$的大小。$H$是一种安全的加密散列函数，$\langle m \rangle _{M_i}$是$M_i$对消息$m$的签名。</p>
+<p>这种选举方案提供了三个属性：公平，保密和公开的可验证性。</p>
+<ul>
+<li>公平。每个参与者每次选举只有一次竞赛，因为签名是确定性的，而且$t$和$rand(t)$是固定的。假设H是安全的加密散列函数，为确保公平，则$H(\langle t\parallel rand(t)\rangle _{M_i})&#x2F;2^L$须是从$(0,1)$均匀选择的实数，且不等式的另一边须是矿工在网络中功率的占比，即为$\frac{p^t_i}{\sum _j p^t_j}$。注意随机值$rand(t)$在时刻$t$之前是未知的。</li>
+<li>保密。攻击者在不拥有$M_i$的密钥的情况下，计算出签名，是几乎不可能的。</li>
+<li>公开可验证。当选的Leader可以通过给出$t$、$rand(t)$与$H(\langle t\parallel rand(t)\rangle _{M_i})&#x2F;2^L$，来说服一个有效的验证者。如前所述，攻击者在不拥有密钥的情况下不能生成证明。</li>
+</ul>
+<h1 id="智能合约"><a href="#智能合约" class="headerlink" title="智能合约"></a>智能合约</h1><p>智能合约使得Filecoin的用户可以编写有状态的程序，来花费令牌向市场请求存储&#x2F;检索数据和验证存储证明。用户可以通过将交易发送到账本触发合约中的功能函数来与智能合约交互。Filecoin支持用于数据存储的合约，以及更通用的智能合约：</p>
+<ul>
+<li>文件合约： 允许用户对他们提供的存储服务进行条件编程。有几个例子值得一提：<ol>
+<li>承包矿工：客户可以提前指定矿工提供服务而不参与市场</li>
+<li>付款策略：客户可以为矿工设计不同的奖励策略，例如合约可以给矿工支付随着时间的推移越来高的费用，另一个合约可以由值得信任的oracle的通知来设置存储的价格。</li>
+<li>票务服务：合约可以允许矿工存放令牌，用于代表用户的存储&#x2F;检索的支付</li>
+<li>更复杂的操作：客户可以创建合约来运行数据更新。</li>
+</ol>
+</li>
+<li>智能合约：用户可以将程序关联到其他系统（如以太坊）中他们的交易上，它们不直接依赖存储的使用。以下的应用程序可以预见：去中心化命名服务、资产跟踪和预售平台。</li>
+</ul>
+<p>Filecoin团队计划提供<strong>桥</strong>（Bridge）以与其它系统集成。桥是旨在连接不同区块链的工具。计划支持跨链交互，以便能将Filecoin存储带入其它基于区块链的平台，同时也将其它平台的功能带入Filecoin。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/" rel="tag"># 区块链</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/03/26/An-Authenticated-Data-Feed-for-Smart-Contracts/" rel="prev" title="一种用于智能合约的可认证数据馈送">
+                  <i class="fa fa-chevron-left"></i> 一种用于智能合约的可认证数据馈送
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/05/03/Neural-Network-based-Graph-Embedding-for-Cross-Platform-Binary-Code-Similarity-Detection/" rel="next" title="基于神经网络的跨平台代码相似性检测">
+                  基于神经网络的跨平台代码相似性检测 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

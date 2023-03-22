@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"cuiyn.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本次分享一篇2017年CCS论文，题目是《Deemon: Detecting CSRF with Dynamic Analysis and Property Graphs》，其DOI链接点击这里。 这篇文章主要针对Web应用中经常出现的CSRF漏洞，使用动态分析和属性图，设计了一个自动化的检测工具。下面进行介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用动态分析和属性图检测CSRF漏洞">
+<meta property="og:url" content="http://cuiyn.github.io/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/index.html">
+<meta property="og:site_name" content="Cuiyn&#39;s Blog">
+<meta property="og:description" content="本次分享一篇2017年CCS论文，题目是《Deemon: Detecting CSRF with Dynamic Analysis and Property Graphs》，其DOI链接点击这里。 这篇文章主要针对Web应用中经常出现的CSRF漏洞，使用动态分析和属性图，设计了一个自动化的检测工具。下面进行介绍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-12-04T18:16:00.000Z">
+<meta property="article:modified_time" content="2023-03-22T14:12:31.188Z">
+<meta property="article:author" content="Cuiyn">
+<meta property="article:tag" content="论文">
+<meta property="article:tag" content="CCS">
+<meta property="article:tag" content="网络安全">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://cuiyn.github.io/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://cuiyn.github.io/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/","path":"2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/","title":"使用动态分析和属性图检测CSRF漏洞"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用动态分析和属性图检测CSRF漏洞 | Cuiyn's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Cuiyn's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0%EF%BC%88CSRF%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">跨站请求伪造（CSRF）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A3%80%E6%B5%8BaCSRF%E7%9A%84%E9%9A%BE%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">检测aCSRF的难点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E6%B5%8B%E9%9A%BE%E7%82%B9"><span class="nav-number">4.1.</span> <span class="nav-text">检测难点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E9%9A%BE%E7%82%B9"><span class="nav-number">4.2.</span> <span class="nav-text">操作难点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Deemon%E6%A6%82%E8%A7%88"><span class="nav-number">5.</span> <span class="nav-text">Deemon概览</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%80%A7"><span class="nav-number">5.1.</span> <span class="nav-text">特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F"><span class="nav-number">5.2.</span> <span class="nav-text">测量</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">结语</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cuiyn</p>
+  <div class="site-description" itemprop="description">关注计算机安全文献与计算机领域热门话题</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://cuiyn.github.io/2017/12/05/Detecting-CSRF-with-Dynamic-Analysis-and-Property-Graphs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cuiyn">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cuiyn's Blog">
+      <meta itemprop="description" content="关注计算机安全文献与计算机领域热门话题">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用动态分析和属性图检测CSRF漏洞 | Cuiyn's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用动态分析和属性图检测CSRF漏洞
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-05 02:16:00" itemprop="dateCreated datePublished" datetime="2017-12-05T02:16:00+08:00">2017-12-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-22 22:12:31" itemprop="dateModified" datetime="2023-03-22T22:12:31+08:00">2023-03-22</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本次分享一篇2017年CCS论文，题目是《Deemon: Detecting CSRF with Dynamic Analysis and Property Graphs》，其DOI链接点击<a target="_blank" rel="noopener" href="http://dl.acm.org/citation.cfm?doid=3133956.3133959">这里</a>。</p>
+<p>这篇文章主要针对Web应用中经常出现的CSRF漏洞，使用动态分析和属性图，设计了一个自动化的检测工具。下面进行介绍。</p>
+<span id="more"></span>
+
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>CSRF（跨站请求伪造，Cross-Site Request Forgery）漏洞是一种非常严重的Web漏洞。虽然针对XSS（跨站脚本攻击， Cross Site Scripting）与SQLi（SQL注入，SQL injection）的对策与检测手段已经有大量的研究，但针对CSRF的检测仍主要靠人工。</p>
+<p>本文介绍了由作者开发的工具Deemon，且据目前所知是第一个检测CSRF漏洞的安全自动检测框架。其方法基于一种新的、捕捉Web应用多个特征的模型范式，其中包括执行轨迹、数据流，与结构分层、统一的、全面的属性图。文中展示了这个范式，并演示如何使用动态跟踪的方法自动化地建立一个具体的模型。之后，对图进行遍历，可以挖掘出可能含有漏洞的操作。通过使用模型捕捉到的信息，可以自动生成、进行安全测试，来实际验证发现的CSRF问题。</p>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>没有比CSRF更能体现Web平台基本功能缺失的漏洞了。即使对不受信任网站的一个简单的访问，就可以导致受害浏览器对一个完全无关的、具有漏洞的Web应用，进行一个经过验证的、安全敏感的操作，而不引起受害者的注意或允许。为实现CSRF攻击，攻击者的网页上创建一个<strong>跨源的</strong>（cross-origin）HTTP请求就足够了。使用HTTP的img标签很容易实现。</p>
+<p>从2001年被发现以来，CSRF一直是Web应用安全风险的前三位，另两位是XSS与SQL注入攻击。但与它们相比，CSRF引起的注意可谓微不足道。大部分研究集中在主动或被动的防御机制，几乎没有为开发者与从业人员针对这类漏洞提出的高效检测技术。</p>
+<p>本文提出了Deemon，一个基于模型的安全测试框架，以检测CSRF漏洞。据作者所知，这是第一个针对CSRF漏洞的自动测试技术。Deemon自动增加web应用的执行环境，以使<strong>动态执行轨迹</strong>（dynamic execution trace）无监督地生成，例如，网络转移、服务器端执行或数据库操作。使用这些轨迹，Deemon推断出web应用的一个基于属性图的模型，模型捕获不同部分的统一表达，例如状态转移与数据流模型。通过图的遍历，Deemon识别出导致安全相关状态变化的HTTP请求，这些可能存在CSRF漏洞。最后，对增加的web应用运行时施加影响，Deemon针对真实的环境对可能的漏洞进行验证。</p>
+<h1 id="跨站请求伪造（CSRF）"><a href="#跨站请求伪造（CSRF）" class="headerlink" title="跨站请求伪造（CSRF）"></a>跨站请求伪造（CSRF）</h1><p>在CSRF攻击中，攻击者欺骗受害者的浏览器，去向一个存在漏洞的良性网站发送请求，以使一个期望的操作发生而不被受害者察觉或允许。这里“期望的操作”可以是：非法的财产转账、修改账户用户名，或者在服务器端执行特定代码。CSRF攻击主要可以分为两类：认证CSRF与登录CSRF。在认证CSRF（authenticated CSRF, aCSRF）中，一个事先建立好的用户认证<strong>会话</strong>（session）存在于受害者浏览器与目标web应用中。在注册CSRF中，上述关系不存在，但攻击者的目标是通过受害者的认证信息，使受害者登入。文章的剩余部分着重于aCSRF，因为它明显更加广泛。</p>
+<p>文中对aCSRF给出了正式的定义：</p>
+<p><strong>定义</strong> 一个web应用（如bank.com）易受到aCSRF攻击，如果它按照下面的属性接受HTTP请求：</p>
+<ul>
+<li>（P1）传入的请求导致web应用的安全状态更改。</li>
+<li>（P2）请求可以由攻击者可靠地创建。也就是说，攻击者知道请求的所有必需的参数和值。</li>
+<li>（P3）请求是在一个有效的用户身份验证上下文内处理的。</li>
+</ul>
+<p>在其它类型的攻击中，跨源攻击的使用可以不导致服务器端的状态发生变化，例如获取用户在目标网站上存储的信息。这些攻击由<strong>同源策略</strong>（same-origin policy）解决。然而同源策略并不阻止浏览器发送HTTP请求。服务器可以检查HTTP请求头部的Origin字段，以抵抗存在攻击嫌疑的跨源请求。但是这个字段不一定会在请求中出现。目前防范aCSRF的最佳方法叫做反CSRF记号（anti-CSRF token），它是由服务器生成、被客户端明确地添加进请求中的一个伪随机数。由多种方法可实现反CSRF记号，如表单中的隐藏字段、定制HTTP头等。</p>
+<h1 id="检测aCSRF的难点"><a href="#检测aCSRF的难点" class="headerlink" title="检测aCSRF的难点"></a>检测aCSRF的难点</h1><p>用于检测aCSRF脆弱性的安全测试方法面临两种截然不同的难点：检测难点与操作困难。它们都没有在安全测试中达到目前的最高水平。</p>
+<h2 id="检测难点"><a href="#检测难点" class="headerlink" title="检测难点"></a>检测难点</h2><p>检测aCSRF需要根据应用状态、角色、请求参数状态与观测到的状态转移序列做出推论。这导致了一组特定的检测难点，它们直接来自于脆弱性的独特特性。</p>
+<ul>
+<li><strong>C1：状态转移。</strong>服务器端程序实现了若干个功能，它们不全部影响应用的状态，例如在线购物的搜索商品功能。但是，其它操作会改变程序状态。例如用户修改密码的操作，服务器端使用新密码更新数据库，从此之后不再接受旧密码，也就是说状态改变了。</li>
+<li><strong>C2：安全有关状态的变化。</strong>状态变化可能由事件日志或记录用户活动轨迹导致，但它们对于安全而言是不必要的。人可以明确区分这两种情况，但没有明确指明应用逻辑的自动化工具很难区分。</li>
+<li><strong>C3：请求参数与状态转移之间的关系。</strong>对它的鉴定与aCSRF漏洞相关。例如，考虑一个携带随机安全记号（token）的请求，攻击者不能猜出这个参数的值，因此不能重新发出一个类似的请求。</li>
+</ul>
+<h2 id="操作难点"><a href="#操作难点" class="headerlink" title="操作难点"></a>操作难点</h2><ul>
+<li><strong>C4：在大型应用工作流之间的转移。</strong>动态分析技术，例如无监督的web扫描器使用深度优先或广度优先算法扫描HTML网页，但是这些方法对于现代web应用复杂的工作流来说过于简单。同样地，静态分析方法检测源代码中的模式，但没有对工作流的准确描述，静态分析方法在大型应用面前显得无力。</li>
+<li><strong>C5：无副作用测试。</strong>动态分析方法集中于迭代地检测使状态改变的HTTP请求（难点C1与C2）。但是，因为这类请求确会改变应用状态，进一步的测试往往会在一个无效状态上进行操作。例如网上购物应用，当测试提交购物车支付请求后，针对这一状态的测试就不能进行了，因为购物车已经不存在了。因此，测试方法应在无副作用环境下进行操作。</li>
+<li><strong>C6：全面、可重用的应用功能。</strong>最后一个难点是以上所有难点导致的。为检测安全相关的状态变化，我们需要结合应用的各个部分。一方面，我们有描述服务器端程序状态演进的过渡；另一方面，我们有说明数据项在层与状态之间传播的数据流。这些可以被模型（model）代替。</li>
+</ul>
+<h1 id="Deemon概览"><a href="#Deemon概览" class="headerlink" title="Deemon概览"></a>Deemon概览</h1><h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><p>Deemon解决上述问题的特性有：</p>
+<ul>
+<li>Deemon使用模型描述程序执行中捕获的状态过渡与数据流信息（难点C1、C3）。</li>
+<li>Deemon使用属性图代表上述模型。这样提供了一个统一可重用的代表方式，并可以使用带标签的边（labeld edge）精确描述模型间的关系（难点C6）。</li>
+<li>Deemon通过图遍历的方式访问属性图，来识别安全相关的状态更改（难点C2）。</li>
+<li>Deemon增大web应用的运行环境，之后复制一系列的用户操作，以观察服务器端程序的执行（难点C4）。</li>
+<li>Deemon使用虚拟化环境测试web应用。这使得为web应用制作、重现快照（snapshot）成为可能。</li>
+</ul>
+<h2 id="测量"><a href="#测量" class="headerlink" title="测量"></a>测量</h2><p>给定一个应用容器，Deemon自动安装检查程序执行的传感器。例如，对基于PHP的web应用，Deemon添加PHP解释器的Xdebug模块。进一步地，Deemon安装一个本地的HTTP代理，以拦截服务器与浏览器交换的HTTP信息。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>这篇文章示范了如何介绍一个程序作为论文主体内容。文章内容丰富，限于时间没有完全介绍，但我认为这篇文章能够根据现有问题，分点加以阐述，并针对每一点解释自己的工作是如何解决问题的，这样使得文章更加具有说服力。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BA%E6%96%87/" rel="tag"># 论文</a>
+              <a href="/tags/CCS/" rel="tag"># CCS</a>
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag"># 网络安全</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/11/30/Hijacking-Domains-Through-Their-Nameservers/" rel="prev" title="通过域名服务器攻击域名">
+                  <i class="fa fa-chevron-left"></i> 通过域名服务器攻击域名
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/12/05/Blockchains-and-Smart-Contracts-for-the-IoT/" rel="next" title="物联网的区块链与智能合约">
+                  物联网的区块链与智能合约 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cuiyn</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
